@@ -1,4 +1,4 @@
 # OpenHXServer
 
-## Лицензия
+## Р›РёС†РµРЅР·РёСЏ
 [BSD](https://choosealicense.com/licenses/bsd-2-clause/)
