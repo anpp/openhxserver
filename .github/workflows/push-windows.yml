@@ -1,0 +1,43 @@
+name: push-matrix
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} ${{ matrix.qt-version }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+        - name: "Windows latest"
+          os: windows-latest
+          arch: 'win64_msvc2022_64'
+        qt-version: ['5.15.2']
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ matrix.qt-version }}
+        install-deps: 'true'
+        host: windows
+        target: desktop
+        arch: ${{ matrix.config.arch }}
+
+    - name: Versions
+      run: |
+        qmake -v
+        qmake -query QMAKE_SPEC
+
+    - name: Build
+      run: |
+        cd sources
+        qmake "CONFIG+=debug" OpenHXServer.pro
+        make
