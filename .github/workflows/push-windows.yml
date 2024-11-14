@@ -15,7 +15,7 @@ jobs:
         config:
         - name: "Windows latest"
           os: windows-latest
-          arch: 'win64_msvc2019_64'
+          install-qt-arch: 'win64_msvc2019_64'
         qt-version: ['5.15.2']
       fail-fast: false
 
@@ -29,8 +29,13 @@ jobs:
         install-deps: 'true'
         host: windows
         target: desktop
-        arch: ${{ matrix.config.arch }}
-        dir: '${{ github.workspace }}/qt/'
+        arch: ${{ matrix.config.install-qt-arch }}
+        dir: ${{ github.workspace }}
+
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
 
     - name: Versions
       run: |
