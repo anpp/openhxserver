@@ -1,4 +1,4 @@
-name: push-matrix
+name: push-windows
 
 on:
   push:
@@ -8,14 +8,14 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.config.name }} ${{ matrix.qt-version }}
+    name: ${{ matrix.config.name }} ${{ matrix.qt-version }} ${{ matrix.config.arch }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       matrix:
         config:
         - name: "Windows latest"
           os: windows-latest
-          arch: 'win64_msvc2022_64'
+          arch: 'win64_msvc2019_64'
         qt-version: ['5.15.2']
       fail-fast: false
 
@@ -30,6 +30,7 @@ jobs:
         host: windows
         target: desktop
         arch: ${{ matrix.config.arch }}
+        dir: '${{ github.workspace }}/qt/'
 
     - name: Versions
       run: |
@@ -37,7 +38,7 @@ jobs:
         qmake -query QMAKE_SPEC
 
     - name: Build
+      working-directory: '${{ github.workspace }}/sources/'
       run: |
-        cd sources
         qmake "CONFIG+=debug" OpenHXServer.pro
         make
