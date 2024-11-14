@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/icons/pause-light.png</file>
+        <file>images/icons/play-light.png</file>
+        <file>images/icons/stop-light.png</file>
+        <file>images/icons/folder-open-light.png</file>
+        <file>images/icons/clear-light.png</file>
+        <file>images/icons/settings-light.png</file>
+        <file>images/icons/disk-light.png</file>
+        <file>images/icons/com-light.png</file>
+        <file>images/icons/dump-light.png</file>
+        <file>images/icons/log-light.png</file>
+        <file>images/icons/terminal-light.png</file>
+    </qresource>
+</RCC>
