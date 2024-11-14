@@ -25,7 +25,7 @@ public:
 
 private:
     std::unique_ptr<QSerialPort> serial_port;
-    QThread thread;
+    //QThread thread;
     int bytes_to_port = 8;
     unsigned long msDelay = 0;
     port_settings ps;
@@ -48,15 +48,15 @@ public:
 signals:
     void finished();
     void error(const QString&);
-    void readyData(QByteArray data);
+    void readyData(const QByteArray& data);
     void opened();
     void closed();
 
 public slots:            
     void s_readyRead();
-    void sendPacket(QByteArray packet, const uint delayms = 0);
-    void sendRatePacket(QByteArray rate);
-    void open(QString com_port);
+    void sendPacket(QByteArray& packet, const uint delayms = 0);
+    void sendRatePacket(const QByteArray& rate);
+    void open(const QString& com_port);
     void setPortSettings();
     void close();
     void portError(QSerialPort::SerialPortError spe);

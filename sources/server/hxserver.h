@@ -93,7 +93,7 @@ private:
     void resetState();
 
 signals:
-    void sendPacket(QByteArray packet, const uint delayms = 0) const;
+    void sendPacket(QByteArray& packet, const uint delayms = 0) const;
     void error(const QString&);
     void log(bool b_state, QString value = "");
     void port_opened(const QString&);
@@ -119,7 +119,7 @@ public slots:
     void isProcessing();
     void isPaused();
     void isError();
-    void processData(QByteArray data);
+    void processData(const QByteArray& data);
 };
 
 #endif // HXSERVER_H

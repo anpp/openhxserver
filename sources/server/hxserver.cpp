@@ -882,7 +882,7 @@ void HXServer::isError()
 }
 
 //------------------------------------------------------------------------------------------------
-void HXServer::processData(QByteArray data)
+void HXServer::processData(const QByteArray& data)
 {
     if(data.size() == 0) return;
 

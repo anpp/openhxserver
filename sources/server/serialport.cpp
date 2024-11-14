@@ -23,8 +23,8 @@ void SerialPortThread::init()
 
     serial_port = std::make_unique<QSerialPort>();
 
-    this->moveToThread(&thread);
-    serial_port->moveToThread(&thread);
+    //this->moveToThread(&thread);
+    //serial_port->moveToThread(&thread);
 
     connect(serial_port.get(), &QSerialPort::readyRead, this, &SerialPortThread::s_readyRead);    
 
@@ -75,7 +75,7 @@ void SerialPortThread::setPortSettings()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::sendPacket(QByteArray packet, const uint delayms)
+void SerialPortThread::sendPacket(QByteArray& packet, const uint delayms)
 {
     if(delayms > 0)
         delay(delayms);
@@ -94,15 +94,15 @@ void SerialPortThread::sendPacket(QByteArray packet, const uint delayms)
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::stop()
 {
-    thread.quit();
-    thread.wait();
+    //thread.quit();
+    //thread.wait();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::start()
 {
-    if(!thread.isRunning())
-        thread.start(QThread::Priority::HighestPriority);
+    //if(!thread.isRunning())
+    //    thread.start(QThread::Priority::HighestPriority);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void SerialPortThread::close()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::sendRatePacket(QByteArray rate)
+void SerialPortThread::sendRatePacket(const QByteArray& rate)
 {
     if(serial_port->write(rate) == -1)
     {
@@ -125,7 +125,7 @@ void SerialPortThread::sendRatePacket(QByteArray rate)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::open(QString com_port)
+void SerialPortThread::open(const QString& com_port)
 {
     serial_port->setPortName(com_port);
     if (!serial_port->open(QIODevice::ReadWrite)){
