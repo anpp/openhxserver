@@ -680,8 +680,6 @@ bool HXServer::writeData(byte ch)
             sendSpecialPacket1();
         }
 
-        //sendShortPacket(ServerPCTypes::PCSuccess);
-
         return false;
     default:
         break;

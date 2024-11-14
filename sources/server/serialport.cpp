@@ -82,7 +82,8 @@ void SerialPortThread::sendPacket(QByteArray packet, const uint delayms)
 
     while (packet.size() > 0)
     {
-        QThread::msleep(msDelay);
+        if(msDelay > 0)
+            QThread::msleep(msDelay);
         sendRatePacket(packet.mid(0, bytes_to_port));
         QCoreApplication::processEvents();
         packet = packet.mid(bytes_to_port);

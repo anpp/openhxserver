@@ -27,7 +27,7 @@ private:
     std::unique_ptr<QSerialPort> serial_port;
     QThread thread;
     int bytes_to_port = 8;
-    unsigned long msDelay = 10;
+    unsigned long msDelay = 0;
     port_settings ps;
 
     void init();
