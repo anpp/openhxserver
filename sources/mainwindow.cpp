@@ -191,11 +191,18 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MainWindow::dump(const QByteArray &value)
+void MainWindow::dump(const QByteArray &value, bool in)
 {
     if(dump_widget)
-        dump_widget->append(value);
+    {
+        if(in)
+            return dump_widget->add(value, Qt::darkGreen);
+        dump_widget->append(value, Qt::darkBlue);
+        dump_widget->append("");
+        dump_widget->append("");
+    }
 }
+
 
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::initWidgets()

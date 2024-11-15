@@ -15,7 +15,8 @@ public:
     explicit PortDump(QWidget *parent = nullptr);
     ~PortDump();
 
-    void append(const QByteArray& value);
+    void append(const QByteArray& value, const QColor& color = Qt::black);
+    void add(const QByteArray& value, const QColor& color = Qt::black);
 
 private:
     Ui::PortDump *ui;

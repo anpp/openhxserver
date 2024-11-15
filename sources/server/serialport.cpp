@@ -75,7 +75,7 @@ void SerialPortThread::setPortSettings()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::sendPacket(QByteArray& packet, const uint delayms)
+void SerialPortThread::sendPacket(QByteArray& packet, const uint delayms) const
 {
     if(delayms > 0)
         delay(delayms);
@@ -115,12 +115,12 @@ void SerialPortThread::close()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::sendRatePacket(const QByteArray& rate)
+void SerialPortThread::sendRatePacket(const QByteArray& rate) const
 {
     if(serial_port->write(rate) == -1)
     {
         emit error(QObject::tr("Failed to write the data to port") + ": " + serial_port->errorString());
-        stop();
+        //stop();
     }
 }
 

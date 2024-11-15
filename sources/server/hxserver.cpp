@@ -115,8 +115,8 @@ void HXServer::setupComPort()
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close, Qt::DirectConnection);
 
     connect(port.get(), &SerialPortThread::readyData, this, &HXServer::processData);
+    connect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
     connect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -165,11 +165,11 @@ void HXServer::initSM()
 
     connect(closedState.get(), &QState::entered, this, &HXServer::isClosed);
     connect(openedState.get(), &QState::entered, this, &HXServer::isOpened);
-    connect(readyState.get(), &QState::entered, this, &HXServer::isReady, Qt::QueuedConnection);
-    connect(waitingState.get(), &QState::entered, this, &HXServer::isWaiting, Qt::QueuedConnection);
-    connect(processingState.get(), &QState::entered, this, &HXServer::isProcessing, Qt::QueuedConnection);
-    connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused, Qt::QueuedConnection);
-    connect(errorState.get(), &QState::entered, this, &HXServer::isError, Qt::QueuedConnection);
+    connect(readyState.get(), &QState::entered, this, &HXServer::isReady);
+    connect(waitingState.get(), &QState::entered, this, &HXServer::isWaiting);
+    connect(processingState.get(), &QState::entered, this, &HXServer::isProcessing);
+    connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused);
+    connect(errorState.get(), &QState::entered, this, &HXServer::isError);
 
     closedState->assignProperty(sm.get(), "state", ServerStates::Closed);
     openedState->assignProperty(sm.get(), "state", ServerStates::Opened);
@@ -504,13 +504,6 @@ bool HXServer::readData(byte ch)
     case ReadWritePhases::CheckSum1:
         m_CheckSumm |= word(ch) << 8;
 
-        //sphase = ServerPhases::None;
-        //spt = ServerPacketTypes::None;
-        //rp = ReadPhases::None;
-
-        //qDebug() << packet_buffer.toHex(' ');
-        //packet_buffer.clear();
-
         if(m_CheckSumm == m_CheckedSumm)
             readDataExecute();
         else
@@ -676,7 +669,7 @@ bool HXServer::writeData(byte ch)
             writeDataExecute();
         else
         {
-            emit log(false, tr("HX: CheckSum ERROR!!!"));
+            emit log(false, tr("HX: CheckSum ERROR!"));
             sendSpecialPacket1();
         }
 
@@ -900,10 +893,21 @@ void HXServer::processData(const QByteArray& data)
                 emit ttyOut(data);
             }
         }
+    if(state() == ServerStates::Paused)
+    {
+        sendSpecialPacket1();
+        resetState();
+    }
     //qDebug() << m_PacketSize;
     //qDebug() << packet_buffer.toHex();
     //qDebug() << static_cast<int>(sphase);
 
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::sendPacketDump(QByteArray &packet, uint delayms) const
+{
+    emit dump(packet, false);
 }
 
 

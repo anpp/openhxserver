@@ -16,8 +16,15 @@ PortDump::~PortDump()
 }
 
 //--------------------------------------------------------------------------------------------
-void PortDump::append(const QByteArray &value)
+void PortDump::append(const QByteArray &value, const QColor& color)
 {
     ui->edtLog->moveCursor (QTextCursor::End);
-    ui->edtLog->insertPlainText(value.toHex(' ') + ' ');
+    ui->edtLog->append("<FONT color=" + color.name(QColor::HexRgb) + ">" + value.toHex(' ') +  + "</FONT> ");
+}
+
+//--------------------------------------------------------------------------------------------
+void PortDump::add(const QByteArray &value, const QColor& color)
+{
+    ui->edtLog->moveCursor (QTextCursor::End);
+    ui->edtLog->insertHtml("<FONT color=" + color.name(QColor::HexRgb) + ">" + value.toHex(' ')  + " </FONT> ");
 }

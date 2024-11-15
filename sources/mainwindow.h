@@ -65,7 +65,7 @@ public slots:
     void log(bool b_state, QString value = "");
     void updateHXServer();
     void stateHXChanged(HXServer::ServerStates state);
-    void dump(const QByteArray& value);
+    void dump(const QByteArray& value, bool in = true);
 };
 
 #endif // MAINWINDOW_H
