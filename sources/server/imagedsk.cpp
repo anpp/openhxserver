@@ -50,6 +50,9 @@ bool ImageDsk::valid() const
 bool ImageDsk::load()
 {
     if(m_file->isOpen()) return true;
+    //if(loaded()) return true;
+
+    m_blocks.clear();
 
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
     {
