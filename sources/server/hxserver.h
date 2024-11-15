@@ -87,10 +87,12 @@ private:
     bool getSize(byte ch);
     bool writeData(byte ch);
     void sendSpecialPacket1() const;
-    void sendShortPacket(ServerPCTypes result, ServerPCTypes type = ServerPCTypes::PCRead) const;
+    void sendShortPacket(ServerPCTypes result, ServerPCTypes type = ServerPCTypes::PCRead, byte size = 2, size_t value = 0) const;
     void readDataExecute();
     void writeDataExecute();
     void resetState();
+    void logRead();
+    void logWrite();
 
 signals:
     void sendPacket(QByteArray& packet, uint delayms = 0) const;

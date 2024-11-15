@@ -101,7 +101,7 @@ void MainWindow::initActions()
 
     m_startAction = new QAction(QIcon(":/images/icons/play-light.png"), tr("&Start"), this);
     m_actions.push_back(m_startAction);
-    //m_runAction->setShortcuts(QKeySequence::New);
+    //m_startAction->setShortcuts(QKeySequence::);
     m_startAction->setToolTip(tr("Start"));
     connect(m_startAction, &QAction::triggered, hxserver.get(), &HXServer::start);
 
@@ -173,7 +173,7 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
         break;
     case HXServer::ServerStates::Paused:
         m_startAction->setEnabled(true);
-        m_stopAction->setEnabled(false);
+        m_stopAction->setEnabled(true);
         m_pauseAction->setEnabled(false);
         actionSettings->setEnabled(false);
         break;
