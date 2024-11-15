@@ -212,12 +212,16 @@ void MainWindow::initWidgets()
     images_widget->update();
     connect(images_widget.get(), &SettingsImages::updateHX, this, &MainWindow::updateHXServer);
 
+#ifndef Q_OS_MACOS
     dockImages->setStyle(new IconDockStyle(QIcon(":/images/icons/disk-light.png"), dockImages->style()));
+#endif
     dockImages->widget()->layout()->addWidget(images_widget.get());
     m_toggleImages = dockImages->toggleViewAction();
     m_toggleImages->setShortcut(QKeySequence("F11"));
 
+#ifndef Q_OS_MACOS
     dockDump->setStyle(new IconDockStyle(QIcon(":/images/icons/dump-light.png"), dockDump->style()));
+#endif
     dump_widget = std::make_unique<PortDump>();
     dockDump->widget()->layout()->addWidget(dump_widget.get());
     m_togglePortDump = dockDump->toggleViewAction();

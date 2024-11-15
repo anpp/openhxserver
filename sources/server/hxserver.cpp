@@ -530,7 +530,7 @@ bool HXServer::readPackedData(byte ch)
 
 //------------------------------------------------------------------------------------------------
 bool HXServer::getSize(byte ch)
-{
+{    
     return true;
 }
 
@@ -712,6 +712,9 @@ void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type) const
 //------------------------------------------------------------------------------------------------
 void HXServer::readDataExecute()
 {
+    if(state() == ServerStates::Paused)
+        return sendShortPacket(ServerPCTypes::PCError);
+
     QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   ByteCount: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(false, mes);
 
@@ -771,6 +774,9 @@ void HXServer::readDataExecute()
 //------------------------------------------------------------------------------------------------
 void HXServer::writeDataExecute()
 {
+    if(state() == ServerStates::Paused)
+        return sendShortPacket(ServerPCTypes::PCError);
+
     QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   ByteCount: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(false, mes);
 
@@ -884,29 +890,22 @@ void HXServer::processData(const QByteArray& data)
     if(state() == ServerStates::Waiting && data[0] == '@')
         sendLoader();
 
-    if(state() == ServerStates::Processing)
+    if(state() == ServerStates::Processing || state() == ServerStates::Paused)
         for(auto ch: data)
         {
             if(!processByte(ch))
             {
                 resetState();
-                emit ttyOut(data);
+                if(state() != ServerStates::Paused)
+                    emit ttyOut(data);
             }
         }
-    if(state() == ServerStates::Paused)
-    {
-        sendSpecialPacket1();
-        resetState();
-    }
-    //qDebug() << m_PacketSize;
-    //qDebug() << packet_buffer.toHex();
-    //qDebug() << static_cast<int>(sphase);
-
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::sendPacketDump(QByteArray &packet, uint delayms) const
 {
+    Q_UNUSED(delayms);
     emit dump(packet, false);
 }
 
