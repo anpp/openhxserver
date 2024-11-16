@@ -101,7 +101,7 @@ void MainWindow::initActions()
 
     m_startAction = new QAction(QIcon(":/images/icons/play-light.png"), tr("&Start"), this);
     m_actions.push_back(m_startAction);
-    //m_runAction->setShortcuts(QKeySequence::New);
+    //m_startAction->setShortcuts(QKeySequence::);
     m_startAction->setToolTip(tr("Start"));
     connect(m_startAction, &QAction::triggered, hxserver.get(), &HXServer::start);
 
@@ -173,7 +173,7 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
         break;
     case HXServer::ServerStates::Paused:
         m_startAction->setEnabled(true);
-        m_stopAction->setEnabled(false);
+        m_stopAction->setEnabled(true);
         m_pauseAction->setEnabled(false);
         actionSettings->setEnabled(false);
         break;
@@ -191,11 +191,18 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MainWindow::dump(const QByteArray &value)
+void MainWindow::dump(const QByteArray &value, bool in)
 {
     if(dump_widget)
-        dump_widget->append(value);
+    {
+        if(in)
+            return dump_widget->add(value, Qt::darkGreen);
+        dump_widget->append(value, Qt::darkBlue);
+        dump_widget->append("");
+        dump_widget->append("");
+    }
 }
+
 
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::initWidgets()
@@ -205,12 +212,16 @@ void MainWindow::initWidgets()
     images_widget->update();
     connect(images_widget.get(), &SettingsImages::updateHX, this, &MainWindow::updateHXServer);
 
+#ifndef Q_OS_MACOS
     dockImages->setStyle(new IconDockStyle(QIcon(":/images/icons/disk-light.png"), dockImages->style()));
+#endif
     dockImages->widget()->layout()->addWidget(images_widget.get());
     m_toggleImages = dockImages->toggleViewAction();
     m_toggleImages->setShortcut(QKeySequence("F11"));
 
+#ifndef Q_OS_MACOS
     dockDump->setStyle(new IconDockStyle(QIcon(":/images/icons/dump-light.png"), dockDump->style()));
+#endif
     dump_widget = std::make_unique<PortDump>();
     dockDump->widget()->layout()->addWidget(dump_widget.get());
     m_togglePortDump = dockDump->toggleViewAction();

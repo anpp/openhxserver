@@ -87,17 +87,19 @@ private:
     bool getSize(byte ch);
     bool writeData(byte ch);
     void sendSpecialPacket1() const;
-    void sendShortPacket(ServerPCTypes result, ServerPCTypes type = ServerPCTypes::PCRead) const;
+    void sendShortPacket(ServerPCTypes result, ServerPCTypes type = ServerPCTypes::PCRead, byte size = 2, size_t value = 0) const;
     void readDataExecute();
     void writeDataExecute();
     void resetState();
+    void logRead();
+    void logWrite();
 
 signals:
-    void sendPacket(QByteArray& packet, const uint delayms = 0) const;
+    void sendPacket(QByteArray& packet, uint delayms = 0) const;
     void error(const QString&);
     void log(bool b_state, QString value = "");
     void port_opened(const QString&);
-    void dump(const QByteArray&);
+    void dump(const QByteArray&, bool in = true) const;
     void ttyOut(const QByteArray&);
 
     void close();
@@ -120,6 +122,7 @@ public slots:
     void isPaused();
     void isError();
     void processData(const QByteArray& data);
+    void sendPacketDump(QByteArray& packet, uint delayms = 0) const;
 };
 
 #endif // HXSERVER_H

@@ -46,16 +46,16 @@ public:
     QSerialPort& SerialPort() const { return *serial_port; } ;
 
 signals:
-    void finished();
-    void error(const QString&);
+    void finished() const;
+    void error(const QString&) const;
     void readyData(const QByteArray& data);
     void opened();
     void closed();
 
 public slots:            
     void s_readyRead();
-    void sendPacket(QByteArray& packet, const uint delayms = 0);
-    void sendRatePacket(const QByteArray& rate);
+    void sendPacket(QByteArray& packet, uint delayms = 0) const;
+    void sendRatePacket(const QByteArray& rate) const;
     void open(const QString& com_port);
     void setPortSettings();
     void close();

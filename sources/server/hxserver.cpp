@@ -115,8 +115,8 @@ void HXServer::setupComPort()
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close, Qt::DirectConnection);
 
     connect(port.get(), &SerialPortThread::readyData, this, &HXServer::processData);
+    connect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
     connect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -165,11 +165,11 @@ void HXServer::initSM()
 
     connect(closedState.get(), &QState::entered, this, &HXServer::isClosed);
     connect(openedState.get(), &QState::entered, this, &HXServer::isOpened);
-    connect(readyState.get(), &QState::entered, this, &HXServer::isReady, Qt::QueuedConnection);
-    connect(waitingState.get(), &QState::entered, this, &HXServer::isWaiting, Qt::QueuedConnection);
-    connect(processingState.get(), &QState::entered, this, &HXServer::isProcessing, Qt::QueuedConnection);
-    connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused, Qt::QueuedConnection);
-    connect(errorState.get(), &QState::entered, this, &HXServer::isError, Qt::QueuedConnection);
+    connect(readyState.get(), &QState::entered, this, &HXServer::isReady);
+    connect(waitingState.get(), &QState::entered, this, &HXServer::isWaiting);
+    connect(processingState.get(), &QState::entered, this, &HXServer::isProcessing);
+    connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused);
+    connect(errorState.get(), &QState::entered, this, &HXServer::isError);
 
     closedState->assignProperty(sm.get(), "state", ServerStates::Closed);
     openedState->assignProperty(sm.get(), "state", ServerStates::Opened);
@@ -296,7 +296,7 @@ bool HXServer::processByte(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
 
         if(ServerPCTypes::PCCommad == static_cast<ServerPCTypes>(ch))
@@ -318,7 +318,7 @@ bool HXServer::processByte(byte ch)
             if(!(--m_PacketSize))
             {
                 spt = ServerPCTypes::UnkPacket;
-                return true;
+                return false;
             }
 
             if(ServerPCTypes::PCRead == static_cast<ServerPCTypes>(ch))
@@ -352,7 +352,7 @@ bool HXServer::processByte(byte ch)
             if(!(--m_PacketSize))
             {
                 spt = ServerPCTypes::UnkPacket;
-                return true;
+                return false;
             }
 
             if(ServerPCTypes::PCWrite == static_cast<ServerPCTypes>(ch))
@@ -377,7 +377,7 @@ bool HXServer::processByte(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
 
         if(01 == ch)
@@ -416,7 +416,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_unit = ch;
         rp = ReadWritePhases::BlockNumber0;
@@ -428,7 +428,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block = ch;
         rp = ReadWritePhases::BlockNumber1;
@@ -440,7 +440,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 8;
         rp = ReadWritePhases::BlockNumber2;
@@ -452,7 +452,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 16;
         rp = ReadWritePhases::BlockNumber3;
@@ -464,7 +464,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 24;
         rp = ReadWritePhases::Bytes0;
@@ -476,7 +476,7 @@ bool HXServer::readData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_bytes = ch;
         rp = ReadWritePhases::Bytes1;
@@ -494,7 +494,7 @@ bool HXServer::readData(byte ch)
         }
 
         spt = ServerPCTypes::UnkPacket;
-        return true;
+        return false;
 
     case ReadWritePhases::CheckSum0:
         m_CheckSumm = ch;
@@ -504,18 +504,12 @@ bool HXServer::readData(byte ch)
     case ReadWritePhases::CheckSum1:
         m_CheckSumm |= word(ch) << 8;
 
-        //sphase = ServerPhases::None;
-        //spt = ServerPacketTypes::None;
-        //rp = ReadPhases::None;
-
-        //qDebug() << packet_buffer.toHex(' ');
-        //packet_buffer.clear();
-
         if(m_CheckSumm == m_CheckedSumm)
             readDataExecute();
         else
         {
-            emit log(false, tr("HX: CheckSum ERROR!"));
+            logRead();
+            emit log(false, tr("HX: Read command checkSum ERROR!"));
             sendSpecialPacket1();
         }
 
@@ -538,6 +532,49 @@ bool HXServer::readPackedData(byte ch)
 //------------------------------------------------------------------------------------------------
 bool HXServer::getSize(byte ch)
 {
+    packet_buffer.push_back(ch);
+
+    switch(wp){
+    case ReadWritePhases::None:
+        m_CheckedSumm += ch;
+
+        if(!(--m_PacketSize))
+        {
+            m_unit = ch;
+            wp = ReadWritePhases::CheckSum0;
+            return true;
+        }
+        spt = ServerPCTypes::UnkPacket;
+        return false;
+
+    case ReadWritePhases::CheckSum0:
+        m_CheckSumm = ch;
+        wp = ReadWritePhases::CheckSum1;
+        return true;
+
+    case ReadWritePhases::CheckSum1:
+        m_CheckSumm |= word(ch) << 8;
+
+        if(m_CheckSumm == m_CheckedSumm)
+        {
+            size_t num_blocks = m_images->at(m_unit).size();
+            QString mes = QString(tr("HX: SIZE :  Unit: %1  |   Blocks: %2 ").arg(QString::number(m_unit), QString::number(num_blocks)));
+            emit log(false, mes);
+
+            sendShortPacket(ServerPCTypes::PCGetSize, ServerPCTypes::PCRead, 6, num_blocks);
+        }
+        else
+        {
+            emit log(false, tr("HX: GetSize command checkSum ERROR!"));
+            sendSpecialPacket1();
+        }
+
+        return false;
+
+    default:
+        break;
+    }
+
     return true;
 }
 
@@ -553,7 +590,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_unit = ch;
         wp = ReadWritePhases::BlockNumber0;
@@ -565,7 +602,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block = ch;
         wp = ReadWritePhases::BlockNumber1;
@@ -577,7 +614,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 8;
         wp = ReadWritePhases::BlockNumber2;
@@ -589,7 +626,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 16;
         wp = ReadWritePhases::BlockNumber3;
@@ -601,7 +638,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_block |= word(ch) << 24;
         wp = ReadWritePhases::Bytes0;
@@ -613,7 +650,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_bytes = ch;
         wp = ReadWritePhases::Bytes1;
@@ -625,7 +662,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         m_bytes |= (word)ch << 8;
 
@@ -660,7 +697,7 @@ bool HXServer::writeData(byte ch)
         if(!(--m_PacketSize))
         {
             spt = ServerPCTypes::UnkPacket;
-            return true;
+            return false;
         }
         return true;
 
@@ -676,7 +713,8 @@ bool HXServer::writeData(byte ch)
             writeDataExecute();
         else
         {
-            emit log(false, tr("HX: CheckSum ERROR!!!"));
+            logWrite();
+            emit log(false, tr("HX: Write command checkSum ERROR!"));
             sendSpecialPacket1();
         }
 
@@ -698,18 +736,37 @@ void HXServer::sendSpecialPacket1() const
 }
 
 //------------------------------------------------------------------------------------------------
-void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type) const
+void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type, byte size, size_t value) const
 {
     word check_sum;
     buffer_to_com.clear();
     buffer_to_com.push_back(static_cast<char>(ServerPCTypes::ShortPacket));
-    buffer_to_com.push_back(static_cast<char>(2));
+    buffer_to_com.push_back(static_cast<char>(size));
     check_sum = static_cast<unsigned char>(type);
     buffer_to_com.push_back(static_cast<unsigned char>(type));
 
     check_sum += static_cast<unsigned char>(result);
     buffer_to_com.push_back(static_cast<unsigned char>(result));
 
+    if(size > 2)
+    {
+        byte ch = static_cast<byte>(value);
+        check_sum += ch;
+        buffer_to_com.push_back(ch);
+
+        ch = static_cast<byte>(value >> 8);
+        check_sum += ch;
+        buffer_to_com.push_back(ch);
+
+        ch = static_cast<byte>(value >> 16);
+        check_sum += ch;
+        buffer_to_com.push_back(ch);
+
+        ch = static_cast<byte>(value >> 24);
+        check_sum += ch;
+        buffer_to_com.push_back(ch);
+
+    }
     buffer_to_com.push_back(static_cast<char>(check_sum));
     buffer_to_com.push_back(static_cast<char>(check_sum >> 8));
 
@@ -719,8 +776,10 @@ void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type) const
 //------------------------------------------------------------------------------------------------
 void HXServer::readDataExecute()
 {
-    QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   ByteCount: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
-    emit log(false, mes);
+    if(state() == ServerStates::Paused)
+        return sendShortPacket(ServerPCTypes::PCError);
+
+    logRead();
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
@@ -778,8 +837,10 @@ void HXServer::readDataExecute()
 //------------------------------------------------------------------------------------------------
 void HXServer::writeDataExecute()
 {
-    QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   ByteCount: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
-    emit log(false, mes);
+    if(state() == ServerStates::Paused)
+        return sendShortPacket(ServerPCTypes::PCError);
+
+    logWrite();
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
@@ -810,6 +871,20 @@ void HXServer::resetState()
     wp = ReadWritePhases::None;
     m_PacketSize = 0;
     packet_buffer.clear();
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::logRead()
+{
+    QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    emit log(false, mes);
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::logWrite()
+{
+    QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    emit log(false, mes);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -891,19 +966,23 @@ void HXServer::processData(const QByteArray& data)
     if(state() == ServerStates::Waiting && data[0] == '@')
         sendLoader();
 
-    if(state() == ServerStates::Processing)
+    if(state() == ServerStates::Processing || state() == ServerStates::Paused)
         for(auto ch: data)
         {
             if(!processByte(ch))
             {
                 resetState();
-                emit ttyOut(data);
+                if(state() != ServerStates::Paused)
+                    emit ttyOut(data);
             }
         }
-    //qDebug() << m_PacketSize;
-    //qDebug() << packet_buffer.toHex();
-    //qDebug() << static_cast<int>(sphase);
+}
 
+//------------------------------------------------------------------------------------------------
+void HXServer::sendPacketDump(QByteArray &packet, uint delayms) const
+{
+    Q_UNUSED(delayms);
+    emit dump(packet, false);
 }
 
 
