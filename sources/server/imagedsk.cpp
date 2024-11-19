@@ -33,6 +33,7 @@ void ImageDsk::setFileName(const QString &filename)
     m_shortfilename = "<not exists>";
     if(QFile(m_filename).exists())
     {
+        m_blocks.clear();
         m_file = std::make_unique<QFile>(m_filename);
         m_shortfilename = QFileInfo(*m_file).fileName();
     }
@@ -90,6 +91,7 @@ bool ImageDsk::openFile()
 
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
     {
+        m_first_block.reset();
         m_first_block = std::make_shared<QByteArray>();
         *m_first_block = m_file->read(DskConsts::BLOCK_SIZE);
         if(m_first_block->size() == DskConsts::BLOCK_SIZE)
