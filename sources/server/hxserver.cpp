@@ -797,7 +797,7 @@ void HXServer::readDataExecute()
     word rest = m_bytes % ImageDsk::DskConsts::BLOCK_SIZE;
 
     buffer_to_com.clear();
-    buffer_to_com.push_back(static_cast<char>(static_cast<char>(ServerPCTypes::LongPacket)));
+    buffer_to_com.push_back(static_cast<char>(ServerPCTypes::LongPacket));
 
     size_t nSize = m_bytes + 2;
 
@@ -860,6 +860,12 @@ void HXServer::writeDataExecute()
         return sendShortPacket(ServerPCTypes::PCError);
     if(ImageDsk::DskErrors::DEEOF == dskerr)
         return sendShortPacket(ServerPCTypes::PCEof);
+    if(ImageDsk::DskErrors::DEFileError == dskerr)
+    {
+        emit log(false, tr("Error write to file!"));
+        return sendShortPacket(ServerPCTypes::PCEof);
+    }
+
 }
 
 //------------------------------------------------------------------------------------------------

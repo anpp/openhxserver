@@ -16,10 +16,11 @@ class ImageDsk
     std::vector<std::shared_ptr<QByteArray>> m_blocks;
     size_t m_start_offset = 0;
     QByteArray m_zero_array;
+    std::shared_ptr<QByteArray> m_first_block;
 
 public:
     enum DskConsts: int {BLOCK_SIZE = 512, BLOCK_OFFSET_0 = 0, BLOCK_OFFSET_128 = 128, BLOCK_OFFSET_256 = 256};
-    enum class DskErrors: int {DESuccess = 0, DEEOF, DEError};
+    enum class DskErrors: int {DESuccess = 0, DEEOF, DEError, DEFileError};
 
     explicit ImageDsk(const QString& filename = "");
     ~ImageDsk();
@@ -31,6 +32,7 @@ public:
     bool empty() const { return m_shortfilename.isEmpty(); }
     bool load();
     void release();
+    bool openFile();
     size_t size() const { return m_blocks.size(); }
     QByteArray& blockAt(size_t index);
     bool loaded() const;
