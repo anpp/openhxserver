@@ -75,18 +75,20 @@ void SerialPortThread::setPortSettings()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::sendPacket(QByteArray& packet, const uint delayms) const
+void SerialPortThread::sendPacket(const QByteArray& packet, const uint delayms) const
 {
     if(delayms > 0)
         delay(delayms);
 
-    while (packet.size() > 0)
+    int psize = packet.size();
+    while (psize > 0)
     {
         if(msDelay > 0)
             QThread::msleep(msDelay);
-        sendRatePacket(packet.mid(0, bytes_to_port));
+
+        sendRatePacket(packet.mid(packet.size() - psize, bytes_to_port));
         QCoreApplication::processEvents();
-        packet = packet.mid(bytes_to_port);
+        psize -= bytes_to_port;
     }
     emit finished();
 }

@@ -54,7 +54,7 @@ signals:
 
 public slots:            
     void s_readyRead();
-    void sendPacket(QByteArray& packet, uint delayms = 0) const;
+    void sendPacket(const QByteArray& packet, uint delayms = 0) const;
     void sendRatePacket(const QByteArray& rate) const;
     void open(const QString& com_port);
     void setPortSettings();
