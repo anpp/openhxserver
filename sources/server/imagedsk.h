@@ -2,28 +2,33 @@
 #ifndef IMAGEDSK_H
 #define IMAGEDSK_H
 
+#include <QObject>
 #include <QString>
 #include <memory>
 #include <vector>
 
 class QFile;
+class QFileSystemWatcher;
 
-class ImageDsk
+class ImageDsk: public QObject
 {
+    Q_OBJECT
+
     std::unique_ptr<QFile> m_file;
+    std::unique_ptr<QFileSystemWatcher> m_watcher;
     QString m_filename = "";
     QString m_shortfilename = "";
-    std::vector<std::shared_ptr<QByteArray>> m_blocks;
+    std::vector<std::unique_ptr<QByteArray>> m_blocks;
     size_t m_start_offset = 0;
     QByteArray m_zero_array;
-    std::shared_ptr<QByteArray> m_first_block;
+    std::unique_ptr<QByteArray> m_first_block;
     bool m_need_reload = false;
 
 public:
     enum DskConsts: int {BLOCK_SIZE = 512, BLOCK_OFFSET_0 = 0, BLOCK_OFFSET_128 = 128, BLOCK_OFFSET_256 = 256};
     enum class DskErrors: int {DESuccess = 0, DEEOF, DEError, DEFileError};
 
-    explicit ImageDsk(const QString& filename = "");
+    explicit ImageDsk(const QString& filename = "", QObject *parent = nullptr);
     ~ImageDsk();
 
     void setFileName(const QString& filename);
@@ -41,6 +46,10 @@ public:
     bool needLoad() const { return m_need_reload || !loaded(); }
 
     ImageDsk& operator=(const ImageDsk& right) noexcept;
+
+public slots:
+    void fileChanged(const QString &path);
+    void fileClosed();
 };
 
 #endif // IMAGEDSK_H
