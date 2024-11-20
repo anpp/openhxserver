@@ -143,16 +143,12 @@ ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
             m_file->close();
             return DskErrors::DEFileError;
         }
+        m_file->write(data);
+
         for(int i = 0; i < n_blocks; ++i)
-        {
-            *m_blocks.at(i + block) = data.mid(i * ImageDsk::DskConsts::BLOCK_SIZE, ImageDsk::DskConsts::BLOCK_SIZE);
-            m_file->write(*m_blocks.at(i + block));
-        }
+            *m_blocks.at(i + block) = data.mid(i * ImageDsk::DskConsts::BLOCK_SIZE, ImageDsk::DskConsts::BLOCK_SIZE);            
         if(rest)
-        {
             *m_blocks.at(block + n_blocks) = data.mid(n_blocks * ImageDsk::DskConsts::BLOCK_SIZE, rest) + m_blocks.at(block + n_blocks)->mid(rest);
-            m_file->write(*m_blocks.at(block + n_blocks));
-        }
 
     m_file->close();
     return DskErrors::DESuccess;
