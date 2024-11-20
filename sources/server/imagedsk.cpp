@@ -124,7 +124,7 @@ bool ImageDsk::openFile()
 }
 
 //-------------------------------------------------------------------------------------------------------
-QByteArray &ImageDsk::blockAt(size_t index)
+const QByteArray &ImageDsk::blockAt(size_t index) const
 {
     if(index < 0 || index >= size() || !loaded())
         return m_zero_array;

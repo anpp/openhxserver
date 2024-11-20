@@ -40,7 +40,7 @@ public:
     void release();
     bool openFile();
     size_t size() const { return m_blocks.size(); }
-    QByteArray& blockAt(size_t index);
+    const QByteArray& blockAt(size_t index) const;
     bool loaded() const;
     DskErrors write(size_t block, const QByteArray& data);
     bool needLoad() const { return m_need_reload || !loaded(); }

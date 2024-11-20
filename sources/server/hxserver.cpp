@@ -1012,7 +1012,7 @@ void HXServer::processData(const QByteArray& data)
 }
 
 //------------------------------------------------------------------------------------------------
-void HXServer::sendPacketDump(QByteArray &packet, uint delayms) const
+void HXServer::sendPacketDump(const QByteArray &packet, uint delayms) const
 {
     Q_UNUSED(delayms);
     emit dump(packet, false);

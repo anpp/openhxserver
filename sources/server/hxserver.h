@@ -98,7 +98,7 @@ private:
     void releaseAllImages();
 
 signals:
-    void sendPacket(QByteArray& packet, uint delayms = 0) const;
+    void sendPacket(const QByteArray& packet, uint delayms = 0) const;
     void error(const QString&);
     void log(const QString& value, const QColor& color = Qt::black, bool b_state = false);
     void port_opened(const QString&);
@@ -125,7 +125,7 @@ public slots:
     void isPaused();
     void isError();
     void processData(const QByteArray& data);
-    void sendPacketDump(QByteArray& packet, uint delayms = 0) const;
+    void sendPacketDump(const QByteArray& packet, uint delayms = 0) const;
 };
 
 #endif // HXSERVER_H
