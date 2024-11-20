@@ -9,6 +9,7 @@
 #include <QFinalState>
 #include <QFile>
 #include <QFileInfo>
+#include <QColor>
 
 #include <QDebug>
 
@@ -216,7 +217,7 @@ void HXServer::sendLoader()
         QByteArray loader = f.read(f.size());
         emit sendPacket(loader);
         emit dump("", false);
-        emit log(false, tr("Sending file: ") + m_loader);
+        emit log(tr("Sending file: ") + m_loader, Qt::black);
     }
     else
     {
@@ -510,7 +511,7 @@ bool HXServer::readData(byte ch)
         else
         {
             logRead();
-            emit log(false, tr("HX: Read command checkSum ERROR!"));
+            emit log(tr("HX: Read command checkSum ERROR!"), Qt::red);
             sendSpecialPacket1();
         }
 
@@ -560,13 +561,13 @@ bool HXServer::getSize(byte ch)
         {
             size_t num_blocks = m_images->at(m_unit).size();
             QString mes = QString(tr("HX: SIZE :  Unit: %1  |   Blocks: %2 ").arg(QString::number(m_unit), QString::number(num_blocks)));
-            emit log(false, mes);
+            emit log(mes);
 
             sendShortPacket(ServerPCTypes::PCGetSize, ServerPCTypes::PCRead, 6, num_blocks);
         }
         else
         {
-            emit log(false, tr("HX: GetSize command checkSum ERROR!"));
+            emit log(tr("HX: GetSize command checkSum ERROR!"), Qt::red);
             sendSpecialPacket1();
         }
 
@@ -715,7 +716,7 @@ bool HXServer::writeData(byte ch)
         else
         {
             logWrite();
-            emit log(false, tr("HX: Write command checkSum ERROR!"));
+            emit log(tr("HX: Write command checkSum ERROR!"), Qt::red);
             sendSpecialPacket1();
         }
 
@@ -867,7 +868,7 @@ void HXServer::writeDataExecute()
         return sendShortPacket(ServerPCTypes::PCEof);
     if(ImageDsk::DskErrors::DEFileError == dskerr)
     {
-        emit log(false, tr("Error write to file!"));
+        emit log(tr("Error write to file!"), Qt::red);
         return sendShortPacket(ServerPCTypes::PCEof);
     }
     emit dump("", false);
@@ -888,14 +889,14 @@ void HXServer::resetState()
 void HXServer::logRead()
 {
     QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
-    emit log(false, mes);
+    emit log(mes, Qt::darkBlue);
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::logWrite()
 {
     QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
-    emit log(false, mes);
+    emit log(mes, Qt::darkGreen);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -904,9 +905,9 @@ void HXServer::loadImage(byte index)
     if(m_images->at(index).needLoad())
     {
         if(!m_images->at(index).loaded())
-            emit log(false, tr("Loading file ") + m_images->at(index).fileName());
+            emit log(tr("Loading file ") + m_images->at(index).fileName());
         else
-            emit log(false, tr("Reloading file ") + m_images->at(index).fileName());
+            emit log(tr("Reloading file ") + m_images->at(index).fileName());
 
         m_images->at(index).load();
     }
@@ -928,7 +929,7 @@ void HXServer::setError(const QString &value)
 //------------------------------------------------------------------------------------------------
 void HXServer::isClosed()
 {
-    emit log(true);
+    emit log("", Qt::black, true);
 
     emit stateChanged(state());
 }
@@ -936,7 +937,7 @@ void HXServer::isClosed()
 //------------------------------------------------------------------------------------------------
 void HXServer::isOpened()
 {
-    emit log(true, m_PortName);
+    emit log(m_PortName, Qt::black, true);
     emit port_opened(m_PortName);
 
     emit stateChanged(state());
@@ -947,7 +948,7 @@ void HXServer::isOpened()
 void HXServer::isReady()
 {
     releaseAllImages();
-    emit log(true, tr(" (press Start)"));
+    emit log(tr(" (press Start)"), Qt::black, true);
 
     emit stateChanged(state());
 }
@@ -956,7 +957,7 @@ void HXServer::isReady()
 void HXServer::isWaiting()
 {
     connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
-    emit log(true);
+    emit log("", Qt::black, true);
 
     emit stateChanged(state());
 }
@@ -965,7 +966,7 @@ void HXServer::isWaiting()
 void HXServer::isProcessing()
 {    
     disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
-    emit log(true);
+    emit log("", Qt::black, true);
 
     emit stateChanged(state());
 }
@@ -973,7 +974,7 @@ void HXServer::isProcessing()
 //------------------------------------------------------------------------------------------------
 void HXServer::isPaused()
 {
-    emit log(true);
+    emit log("", Qt::black, true);
 
     emit stateChanged(state());
 }
@@ -981,9 +982,9 @@ void HXServer::isPaused()
 //------------------------------------------------------------------------------------------------
 void HXServer::isError()
 {
-    emit log(true);
+    emit log("", Qt::red, true);
     if(!m_ErrorMessage.isEmpty())
-        emit log(state(), m_ErrorMessage);
+        emit log(m_ErrorMessage, Qt::red);
 
     emit stateChanged(state());
 }

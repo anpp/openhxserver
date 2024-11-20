@@ -62,7 +62,7 @@ public slots:
     void settings_edit();
     void apply_settings();
     void port_opened(const QString& portName);
-    void log(bool b_state, QString value = "");
+    void log(const QString& value, const QColor& color, bool b_state = false);
     void updateHXServer();
     void stateHXChanged(HXServer::ServerStates state);
     void dump(const QByteArray& value, bool in = true);

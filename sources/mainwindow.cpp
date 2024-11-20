@@ -263,7 +263,7 @@ void MainWindow::port_opened(const QString &portName)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MainWindow::log(bool b_state, QString value)
+void MainWindow::log(const QString& value, const QColor& color, bool b_state)
 {
     QString message;
     QString date_color = "#0000ff";
@@ -272,6 +272,8 @@ void MainWindow::log(bool b_state, QString value)
         message = value;
     else
         message = hxserver->nameState() + " " + value;
+
+    message = "<FONT color=" + color.name(QColor::HexRgb) + ">" + message + "</FONT>";
 
     message = "<FONT color=" + date_color + ">" + "[" + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") + "]</FONT> " + message;
     teLog->append(message);

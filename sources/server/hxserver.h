@@ -3,6 +3,7 @@
 #define HXSERVER_H
 
 #include <QObject>
+#include <QColor>
 #include <memory>
 
 class SerialPortThread;
@@ -99,7 +100,7 @@ private:
 signals:
     void sendPacket(QByteArray& packet, uint delayms = 0) const;
     void error(const QString&);
-    void log(bool b_state, QString value = "");
+    void log(const QString& value, const QColor& color = Qt::black, bool b_state = false);
     void port_opened(const QString&);
     void dump(const QByteArray&, bool in = true) const;
     void ttyOut(const QByteArray&);
