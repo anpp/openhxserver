@@ -51,7 +51,8 @@ bool ImageDsk::valid() const
 bool ImageDsk::load()
 {
     if(m_file->isOpen()) return true;
-    //if(loaded()) return true;
+
+    if(!needLoad()) return true;
 
     m_blocks.clear();
 
@@ -72,6 +73,7 @@ bool ImageDsk::load()
             m_blocks.push_back(std::make_shared<QByteArray>(m_file->read(DskConsts::BLOCK_SIZE)));
 
         m_file->close();
+        m_need_reload = false;
         return true;
     }
     return false;
@@ -82,6 +84,7 @@ void ImageDsk::release()
 {
     if(m_file)
         m_file->close();
+    m_blocks.clear();
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -119,7 +122,7 @@ QByteArray &ImageDsk::blockAt(size_t index)
 //-------------------------------------------------------------------------------------------------------
 bool ImageDsk::loaded() const
 {
-    return size() > 0;
+    return (size() > 0);
 }
 
 //-------------------------------------------------------------------------------------------------------

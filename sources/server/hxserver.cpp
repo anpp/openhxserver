@@ -215,6 +215,7 @@ void HXServer::sendLoader()
     {
         QByteArray loader = f.read(f.size());
         emit sendPacket(loader);
+        emit dump("", false);
         emit log(false, tr("Sending file: ") + m_loader);
     }
     else
@@ -771,6 +772,7 @@ void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type, byte si
     buffer_to_com.push_back(static_cast<char>(check_sum >> 8));
 
     emit sendPacket(buffer_to_com);
+    emit dump("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -779,13 +781,11 @@ void HXServer::readDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
+    loadImage(m_unit);
     logRead();
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
-
-    if(!m_images->at(m_unit).loaded())
-        m_images->at(m_unit).load();
 
     word checksum = 0;
     byte ch;
@@ -812,18 +812,24 @@ void HXServer::readDataExecute()
     checksum += ch;
     buffer_to_com.push_back(ch);
 
+    emit sendPacket(buffer_to_com);
+    buffer_to_com.clear();
     for(size_t i = m_block ; i < m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE ; ++i)
     {
-        buffer_to_com.append(m_images->at(m_unit).blockAt(i));
+        //buffer_to_com.append(m_images->at(m_unit).blockAt(i));
         for(byte b: m_images->at(m_unit).blockAt(i))
             checksum += static_cast<byte>(b);
+        emit sendPacket(m_images->at(m_unit).blockAt(i)); //ссылки на блоки передаются, чтоб избежать лишнего копирования
     }
-    if(rest)
+    if(rest) //блок или остаток меньше размера блока - копируем.
     {
         QByteArray rest_bytes = m_images->at(m_unit).blockAt(m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE).mid(0, rest);
         buffer_to_com.append(rest_bytes);
         for(byte b: rest_bytes)
             checksum += static_cast<byte>(b);
+
+        emit sendPacket(buffer_to_com);
+        buffer_to_com.clear();
     }
 
     ch = checksum;
@@ -832,6 +838,7 @@ void HXServer::readDataExecute()
     buffer_to_com.push_back(ch);
 
     emit sendPacket(buffer_to_com);
+    emit dump("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -840,13 +847,11 @@ void HXServer::writeDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
+    loadImage(m_unit);
     logWrite();
 
     if(!m_images->at(m_unit).valid())
-        return sendShortPacket(ServerPCTypes::PCError);
-
-    if(!m_images->at(m_unit).loaded())
-        m_images->at(m_unit).load();
+        return sendShortPacket(ServerPCTypes::PCError);    
 
     size_t num_blocks = m_images->at(m_unit).size();
     if(m_block >= num_blocks)
@@ -865,7 +870,7 @@ void HXServer::writeDataExecute()
         emit log(false, tr("Error write to file!"));
         return sendShortPacket(ServerPCTypes::PCEof);
     }
-
+    emit dump("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -891,6 +896,27 @@ void HXServer::logWrite()
 {
     QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(false, mes);
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::loadImage(byte index)
+{
+    if(m_images->at(index).needLoad())
+    {
+        if(!m_images->at(index).loaded())
+            emit log(false, tr("Loading file ") + m_images->at(index).fileName());
+        else
+            emit log(false, tr("Reloading file ") + m_images->at(index).fileName());
+
+        m_images->at(index).load();
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::releaseAllImages()
+{
+    for(const auto& image: m_images->data())
+        image->release();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -920,6 +946,7 @@ void HXServer::isOpened()
 //------------------------------------------------------------------------------------------------
 void HXServer::isReady()
 {
+    releaseAllImages();
     emit log(true, tr(" (press Start)"));
 
     emit stateChanged(state());
@@ -936,8 +963,7 @@ void HXServer::isWaiting()
 
 //------------------------------------------------------------------------------------------------
 void HXServer::isProcessing()
-{
-    m_images->at(m_boot_hx).load();
+{    
     disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
     emit log(true);
 
@@ -989,6 +1015,7 @@ void HXServer::sendPacketDump(QByteArray &packet, uint delayms) const
 {
     Q_UNUSED(delayms);
     emit dump(packet, false);
+    emit dump("", false);
 }
 
 

@@ -198,8 +198,6 @@ void MainWindow::dump(const QByteArray &value, bool in)
         if(in)
             return dump_widget->add(value, Qt::darkGreen);
         dump_widget->append(value, Qt::darkBlue);
-        dump_widget->append("");
-        dump_widget->append("");
     }
 }
 

@@ -93,6 +93,8 @@ private:
     void resetState();
     void logRead();
     void logWrite();
+    void loadImage(byte index);
+    void releaseAllImages();
 
 signals:
     void sendPacket(QByteArray& packet, uint delayms = 0) const;

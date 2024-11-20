@@ -17,6 +17,7 @@ class ImageDsk
     size_t m_start_offset = 0;
     QByteArray m_zero_array;
     std::shared_ptr<QByteArray> m_first_block;
+    bool m_need_reload = false;
 
 public:
     enum DskConsts: int {BLOCK_SIZE = 512, BLOCK_OFFSET_0 = 0, BLOCK_OFFSET_128 = 128, BLOCK_OFFSET_256 = 256};
@@ -37,6 +38,7 @@ public:
     QByteArray& blockAt(size_t index);
     bool loaded() const;
     DskErrors write(size_t block, const QByteArray& data);
+    bool needLoad() const { return m_need_reload || !loaded(); }
 
     ImageDsk& operator=(const ImageDsk& right) noexcept;
 };

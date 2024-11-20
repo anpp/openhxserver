@@ -20,6 +20,7 @@ public:
 
 private:
     Ui::PortDump *ui;
+
 };
 
 #endif // PORT_DUMP_H
