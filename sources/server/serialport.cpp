@@ -208,8 +208,7 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::s_readyRead()
 {
-    QByteArray data = this->serial_port->readAll();
-    emit readyData(data);
+    emit readyData(this->serial_port->readAll());
 }
 
 

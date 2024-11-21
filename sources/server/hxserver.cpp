@@ -909,7 +909,7 @@ void HXServer::loadImage(byte index)
         else
             emit log(tr("Reloading file ") + m_images->at(index).fileName());
 
-        m_images->at(index).load();
+        m_images->loadImage(index);
     }
 }
 

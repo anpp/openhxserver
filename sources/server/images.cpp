@@ -91,6 +91,16 @@ QStringList Images::listImageNames() const
 }
 
 //----------------------------------------------------------------------------------------------------
+void Images::loadImage(size_t index)
+{
+    auto it = std::find_if(data().begin(), data().end(), [&] (const auto& image) {return image->fileName() == data().at(index)->fileName() && !image->needLoad(); });
+    if(it != data().end())
+        *data().at(index) = *(it->get());
+    else
+        data().at(index)->load();
+}
+
+//----------------------------------------------------------------------------------------------------
 Images &Images::operator=(const Images &right) noexcept
 {
     if (this == &right)

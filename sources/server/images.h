@@ -32,6 +32,7 @@ public:
     ImageDsk& at(size_t index) const;
     const QString& prefix() const { return HXPrefix; }
     QStringList listImageNames() const;
+    void loadImage(size_t index);
 
     Images& operator=(const Images& right) noexcept;
 private:

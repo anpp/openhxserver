@@ -18,10 +18,10 @@ class ImageDsk: public QObject
     std::unique_ptr<QFileSystemWatcher> m_watcher;
     QString m_filename = "";
     QString m_shortfilename = "";
-    std::vector<std::unique_ptr<QByteArray>> m_blocks;
+    std::vector<std::shared_ptr<QByteArray>> m_blocks;
     size_t m_start_offset = 0;
     QByteArray m_zero_array;
-    std::unique_ptr<QByteArray> m_first_block;
+    std::shared_ptr<QByteArray> m_first_block;
     bool m_need_reload = false;
 
 public:

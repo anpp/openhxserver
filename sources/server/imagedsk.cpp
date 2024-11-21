@@ -75,7 +75,7 @@ bool ImageDsk::load()
             m_file->seek(m_start_offset);
 
         for(size_t i = next_block; i < num_blocks; ++i)
-            m_blocks.push_back(std::make_unique<QByteArray>(m_file->read(DskConsts::BLOCK_SIZE)));
+            m_blocks.push_back(std::make_shared<QByteArray>(m_file->read(DskConsts::BLOCK_SIZE)));
 
         m_file->close();
         m_need_reload = false;        
@@ -107,7 +107,7 @@ bool ImageDsk::openFile()
         m_watcher->disconnect();
 
         m_first_block.reset();
-        m_first_block = std::make_unique<QByteArray>();
+        m_first_block = std::make_shared<QByteArray>();
         *m_first_block = m_file->read(DskConsts::BLOCK_SIZE);
         if(m_first_block->size() == DskConsts::BLOCK_SIZE)
         {
@@ -177,6 +177,8 @@ ImageDsk &ImageDsk::operator=(const ImageDsk &right) noexcept
         return *this;
 
     setFileName(right.m_filename);
+    m_blocks = right.m_blocks;
+    m_need_reload = right.m_need_reload;
     return *this;
 }
 
