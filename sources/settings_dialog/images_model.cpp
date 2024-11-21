@@ -3,6 +3,8 @@
 #include "../server/images.h"
 #include "../server/imagedsk.h"
 
+#include <QFont>
+
 //-----------------------------------------------------------------------------------------------------------------
 QVariant ImagesModel::data(const QModelIndex &index, int role) const
 {
@@ -10,6 +12,20 @@ QVariant ImagesModel::data(const QModelIndex &index, int role) const
     {
         if(Qt::EditRole == role || Qt::DisplayRole == role)
             return value(index.row(), index.column(), role);
+        if(role == Qt::FontRole)
+            switch(index.column())
+            {
+            case static_cast<int>(ImagesModel_defs::ImageName):
+                if(m_data.at(index.row()).needReload())
+                {
+                    QFont font;
+                    font.setBold(true);
+                    return font;
+                }
+            default:
+                return QVariant();
+            }
+
     }
     return QVariant();
 }

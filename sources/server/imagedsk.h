@@ -8,14 +8,12 @@
 #include <vector>
 
 class QFile;
-class QFileSystemWatcher;
 
 class ImageDsk: public QObject
 {
     Q_OBJECT
 
     std::unique_ptr<QFile> m_file;
-    std::unique_ptr<QFileSystemWatcher> m_watcher;
     QString m_filename = "";
     QString m_shortfilename = "";
     std::vector<std::shared_ptr<QByteArray>> m_blocks;
@@ -38,14 +36,23 @@ public:
     bool empty() const { return m_shortfilename.isEmpty(); }
     bool load();
     void release();
+    void attach();
+    void detach();
     bool openFile();
     size_t size() const { return m_blocks.size(); }
     const QByteArray& blockAt(size_t index) const;
     bool loaded() const;
     DskErrors write(size_t block, const QByteArray& data);
     bool needLoad() const { return m_need_reload || !loaded(); }
+    bool needReload() const { return m_need_reload && loaded(); }
+    void setNeedReload(bool value);
 
     ImageDsk& operator=(const ImageDsk& right) noexcept;
+
+signals:
+    void addFileName(const QString&);
+    void delFileName(const QString&);
+    void update();
 
 public slots:
     void fileChanged(const QString &path);

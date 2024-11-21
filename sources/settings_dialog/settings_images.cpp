@@ -32,6 +32,7 @@ SettingsImages::SettingsImages(Images& images_data, QWidget *parent) :
     connect(m_openLoaderAction, &QAction::triggered, this, &SettingsImages::openFileBin);
 
     connect(m_model.get(), &ImagesModel::selected_file, this, &SettingsImages::selected_image_file);
+    connect(&images_data, &Images::update, this, &SettingsImages::updateWidget);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ void SettingsImages::update()
     if(Settings::instance())
         setLoader(Settings::instance()->getSetting("loader", kindset::misc).toString());
 
-    emit m_model->dataChanged(QModelIndex(), QModelIndex());
+    updateWidget();
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -134,5 +135,11 @@ void SettingsImages::selected_image_file(const QString &filename)
 
     if(m_save_immediate)
         saveImages();
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+void SettingsImages::updateWidget() const
+{
+     emit m_model->dataChanged(QModelIndex(), QModelIndex());
 }
 

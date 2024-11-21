@@ -9,6 +9,7 @@
 
 class ImageDsk;
 class QSettings;
+class QFileSystemWatcher;
 
 typedef std::vector<std::unique_ptr<ImageDsk>> t_vectorDsk;
 
@@ -19,6 +20,7 @@ class Images : public QObject
     enum Images_defs: int {Size = 8};
 
     std::unique_ptr<ImageDsk> default_image;
+    std::unique_ptr<QFileSystemWatcher> m_watcher;
     QString HXPrefix = "HX";
 public:
     explicit Images(QObject *parent = nullptr);
@@ -42,6 +44,12 @@ private:
 
 
 signals:
+    void update();
+
+public slots:
+    void fileChanged(const QString &path);
+    void addFileName(const QString &path );
+    void delFileName(const QString &path);
 
 };
 

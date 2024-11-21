@@ -3,14 +3,13 @@
 
 #include <QFile>
 #include <QFileInfo>
-#include <QFileSystemWatcher>
+
 #include <QDebug>
 
 //-------------------------------------------------------------------------------------------------------
 ImageDsk::ImageDsk(const QString& filename, QObject *parent)
     : QObject{parent}
 {
-    m_watcher = std::make_unique<QFileSystemWatcher>();
     m_zero_array.reserve(DskConsts::BLOCK_SIZE);
     setFileName(filename);
 }
@@ -27,21 +26,15 @@ void ImageDsk::setFileName(const QString &filename)
     if(m_filename == filename) return;
     release();
 
-    m_filename = filename;
-    if(m_filename.isEmpty() || "" == m_filename)
+    detach();
+    if(filename.isEmpty() || "" == filename)
     {
         m_shortfilename = "";
-        m_file.reset();        
+        m_filename = "";
         return;
     }
-
-    m_shortfilename = "<not exists>";
-    if(QFile(m_filename).exists())
-    {
-        m_file = std::make_unique<QFile>(m_filename);
-        connect(m_file.get(), &QFile::aboutToClose, this, &ImageDsk::fileClosed);
-        m_shortfilename = QFileInfo(*m_file).fileName();        
-    }    
+    m_filename = filename;
+    attach();
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -78,7 +71,8 @@ bool ImageDsk::load()
             m_blocks.push_back(std::make_shared<QByteArray>(m_file->read(DskConsts::BLOCK_SIZE)));
 
         m_file->close();
-        m_need_reload = false;        
+        m_need_reload = false;
+        emit update();
         return true;
     }
     return false;
@@ -90,9 +84,28 @@ void ImageDsk::release()
     if(m_file && m_file->isOpen())
         m_file->close();
     m_blocks.clear();
-    if(!m_watcher->files().isEmpty())
-        m_watcher->removePaths(m_watcher->files());
     m_need_reload = false;
+}
+
+//-------------------------------------------------------------------------------------------------------
+void ImageDsk::attach()
+{
+    if(QFile(m_filename).exists())
+    {
+        m_file = std::make_unique<QFile>(m_filename);
+        connect(m_file.get(), &QFile::aboutToClose, this, &ImageDsk::fileClosed);
+        m_shortfilename = QFileInfo(*m_file).fileName();
+        emit addFileName(m_filename);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------
+void ImageDsk::detach()
+{
+    m_shortfilename = "<ejected>";
+    m_file.reset();
+    if(!m_filename.isEmpty())
+        emit delFileName(m_filename);
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -102,9 +115,7 @@ bool ImageDsk::openFile()
 
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
     {
-        if(!m_watcher->files().isEmpty())
-            m_watcher->removePaths(m_watcher->files());
-        m_watcher->disconnect();
+        emit delFileName(m_filename); //открытый файл не отслеживать на изменения
 
         m_first_block.reset();
         m_first_block = std::make_shared<QByteArray>();
@@ -171,6 +182,14 @@ ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
 }
 
 //-------------------------------------------------------------------------------------------------------
+void ImageDsk::setNeedReload(bool value)
+{
+    if(loaded())
+        m_need_reload = value;
+    emit update();
+}
+
+//-------------------------------------------------------------------------------------------------------
 ImageDsk &ImageDsk::operator=(const ImageDsk &right) noexcept
 {
     if (this == &right)
@@ -179,6 +198,7 @@ ImageDsk &ImageDsk::operator=(const ImageDsk &right) noexcept
     setFileName(right.m_filename);
     m_blocks = right.m_blocks;
     m_need_reload = right.m_need_reload;
+    emit update();
     return *this;
 }
 
@@ -192,7 +212,6 @@ void ImageDsk::fileChanged(const QString &path)
 //-------------------------------------------------------------------------------------------------------
 void ImageDsk::fileClosed()
 {
-    m_watcher->addPath(m_filename);
-    connect(m_watcher.get(),  &QFileSystemWatcher::fileChanged, this, &ImageDsk::fileChanged, Qt::DirectConnection);
+    emit addFileName(m_filename); //закрытый файл отслеживается
 }
 

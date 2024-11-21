@@ -45,6 +45,7 @@ signals:
 public slots:
     void openFileBin();
     void selected_image_file(const QString& filename);
+    void updateWidget() const;
 };
 
 #endif // SETTINGS_IMAGES_H

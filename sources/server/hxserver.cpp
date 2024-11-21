@@ -825,12 +825,9 @@ void HXServer::readDataExecute()
     if(rest) //блок или остаток меньше размера блока - копируем.
     {
         QByteArray rest_bytes = m_images->at(m_unit).blockAt(m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE).mid(0, rest);
-        buffer_to_com.append(rest_bytes);
+        emit sendPacket(rest_bytes);
         for(byte b: rest_bytes)
             checksum += static_cast<byte>(b);
-
-        emit sendPacket(buffer_to_com);
-        buffer_to_com.clear();
     }
 
     ch = checksum;

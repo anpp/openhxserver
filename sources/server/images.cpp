@@ -4,6 +4,8 @@
 #include "../settings.h"
 
 #include <QFile>
+#include <QFileInfo>
+#include <QFileSystemWatcher>
 
 const static std::string_view  sImages = "/DskImages";
 
@@ -14,10 +16,17 @@ Images::Images(QObject *parent)
     qsettings = std::make_unique<QSettings>(Settings::instance()->qSettings().organizationName(),
                                             Settings::instance()->qSettings().applicationName());
 
-    for(size_t i = 0; i < Images_defs::Size; ++i)
-        m_data.push_back(std::make_unique<ImageDsk>());
-
     default_image = std::make_unique<ImageDsk>();
+    m_watcher = std::make_unique<QFileSystemWatcher>();
+
+    for(size_t i = 0; i < Images_defs::Size; ++i)
+    {
+        m_data.push_back(std::make_unique<ImageDsk>());
+        connect(m_data.at(i).get(), &ImageDsk::addFileName, this, &Images::addFileName);
+        connect(m_data.at(i).get(), &ImageDsk::delFileName, this, &Images::delFileName);
+        connect(m_data.at(i).get(), &ImageDsk::update, this, &Images::update);
+    }
+    connect(m_watcher.get(),  &QFileSystemWatcher::fileChanged, this, &Images::fileChanged);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -113,5 +122,37 @@ Images &Images::operator=(const Images &right) noexcept
     }
 
     return *this;
+}
+
+//----------------------------------------------------------------------------------------------------
+void Images::fileChanged(const QString &path)
+{
+    if(QFile(path).exists())
+    {
+        for(auto& image: m_data)
+        {
+            if(image->valid() && image->fileName() == path)
+                image->setNeedReload(true);
+        }
+    }
+    else
+    {
+        for(auto& image: m_data)
+            if(image->fileName() == path)
+                image->detach();
+    }
+    emit update();
+}
+
+//----------------------------------------------------------------------------------------------------
+void Images::addFileName(const QString &path)
+{
+    m_watcher->addPath(path);
+}
+
+//----------------------------------------------------------------------------------------------------
+void Images::delFileName(const QString &path)
+{
+    m_watcher->removePath(path);
 }
 
