@@ -48,8 +48,6 @@ bool ImageDsk::valid() const
 //-------------------------------------------------------------------------------------------------------
 bool ImageDsk::load()
 {
-    if(m_file->isOpen()) return true;
-
     if(!needLoad()) return true;
 
     m_blocks.clear();
@@ -88,15 +86,18 @@ void ImageDsk::release()
 }
 
 //-------------------------------------------------------------------------------------------------------
-void ImageDsk::attach()
+bool ImageDsk::attach()
 {
-    if(QFile(m_filename).exists())
+    bool exists = QFile(m_filename).exists();
+    if(exists)
     {
         m_file = std::make_unique<QFile>(m_filename);
         connect(m_file.get(), &QFile::aboutToClose, this, &ImageDsk::fileClosed);
         m_shortfilename = QFileInfo(*m_file).fileName();
         emit addFileName(m_filename);
     }
+    emit update();
+    return exists;
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -106,11 +107,13 @@ void ImageDsk::detach()
     m_file.reset();
     if(!m_filename.isEmpty())
         emit delFileName(m_filename);
+    emit update();
 }
 
 //-------------------------------------------------------------------------------------------------------
 bool ImageDsk::openFile()
 {
+    if(!m_file) return false;
     if(m_file->isOpen()) return true;
 
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)

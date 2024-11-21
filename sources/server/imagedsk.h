@@ -36,7 +36,7 @@ public:
     bool empty() const { return m_shortfilename.isEmpty(); }
     bool load();
     void release();
-    void attach();
+    bool attach();
     void detach();
     bool openFile();
     size_t size() const { return m_blocks.size(); }

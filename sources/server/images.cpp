@@ -131,8 +131,8 @@ void Images::fileChanged(const QString &path)
     {
         for(auto& image: m_data)
         {
-            if(image->valid() && image->fileName() == path)
-                image->setNeedReload(true);
+            if(image->fileName() == path && image->valid())
+                    image->setNeedReload(true);
         }
     }
     else

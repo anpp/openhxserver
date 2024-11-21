@@ -899,6 +899,17 @@ void HXServer::logWrite()
 //------------------------------------------------------------------------------------------------
 void HXServer::loadImage(byte index)
 {
+    if(!m_images->at(index).valid())
+    {
+        if(m_images->at(index).attach())
+            m_images->at(index).setNeedReload(true);
+        else
+        {
+            emit log(tr("File is not exists: ") + m_images->at(index).fileName(), Qt::red);
+            return;
+        }
+    }
+
     if(m_images->at(index).needLoad())
     {
         if(!m_images->at(index).loaded())
