@@ -66,6 +66,7 @@ void SettingsEditor::setup()
     tw.setTabsClosable(false);
     tw.setDocumentMode(false);
     tw.setMovable(false);
+    tw.setDocumentMode(true);
 
     layout->addWidget(&tw);
     layout->addWidget(&buttonBox);
