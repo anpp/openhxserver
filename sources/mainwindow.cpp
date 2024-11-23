@@ -187,7 +187,7 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
     default:
         break;
     }
-    images_widget->setEnabled(actionSettings->isEnabled());
+    images_widget->setEnabled(actionSettings->isEnabled() || state == HXServer::ServerStates::Paused);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -141,7 +141,7 @@ void Images::fileChanged(const QString &path)
             if(image->fileName() == path)
                 image->detach();
     }
-    emit update();
+    //emit update();
 }
 
 //----------------------------------------------------------------------------------------------------

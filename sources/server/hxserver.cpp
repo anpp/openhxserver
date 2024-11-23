@@ -782,8 +782,8 @@ void HXServer::readDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
-    loadImage(m_unit);
     logRead();
+    loadImage(m_unit);    
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
@@ -817,7 +817,6 @@ void HXServer::readDataExecute()
     buffer_to_com.clear();
     for(size_t i = m_block ; i < m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE ; ++i)
     {
-        //buffer_to_com.append(m_images->at(m_unit).blockAt(i));
         for(byte b: m_images->at(m_unit).blockAt(i))
             checksum += static_cast<byte>(b);
         emit sendPacket(m_images->at(m_unit).blockAt(i)); //ссылки на блоки передаются, чтоб избежать лишнего копирования
@@ -845,8 +844,8 @@ void HXServer::writeDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
-    loadImage(m_unit);
     logWrite();
+    loadImage(m_unit);    
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);    
