@@ -421,10 +421,10 @@ bool HXServer::readData(byte ch)
             return false;
         }
         m_unit = ch;
-        rp = ReadWritePhases::BlockNumber0;
+        rp = ReadWritePhases::BlockNumber;
         return true;
 
-    case ReadWritePhases::BlockNumber0:
+    case ReadWritePhases::BlockNumber:
         m_CheckedSumm += ch;
 
         if(!(--m_PacketSize))
@@ -432,84 +432,37 @@ bool HXServer::readData(byte ch)
             spt = ServerPCTypes::UnkPacket;
             return false;
         }
-        m_block = ch;
-        rp = ReadWritePhases::BlockNumber1;
-        return true;
 
-    case ReadWritePhases::BlockNumber1:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
+        m_block |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes == 4)
         {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
+            m_numBytes = 0;
+            rp = ReadWritePhases::Bytes;
         }
-        m_block |= word(ch) << 8;
-        rp = ReadWritePhases::BlockNumber2;
         return true;
 
-    case ReadWritePhases::BlockNumber2:
+    case ReadWritePhases::Bytes:
         m_CheckedSumm += ch;
+        m_bytes |= word(ch) << ((m_numBytes++) * 8);
 
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_block |= word(ch) << 16;
-        rp = ReadWritePhases::BlockNumber3;
-        return true;
-
-    case ReadWritePhases::BlockNumber3:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_block |= word(ch) << 24;
-        rp = ReadWritePhases::Bytes0;
-        return true;
-
-    case ReadWritePhases::Bytes0:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_bytes = ch;
-        rp = ReadWritePhases::Bytes1;
-        return true;
-
-    case ReadWritePhases::Bytes1:
-        m_CheckedSumm += ch;
-
-        m_bytes |= word(ch) << 8;
-
-        if(!(--m_PacketSize))
+        if(m_numBytes == 2)
         {// Конец пакета команды. Осталось принять контрольную сумму.
-            rp = ReadWritePhases::CheckSum0;
+            m_numBytes = 0;
+            rp = ReadWritePhases::CheckSum;
             return true;
         }
-
-        spt = ServerPCTypes::UnkPacket;
-        return false;
-
-    case ReadWritePhases::CheckSum0:
-        m_CheckSumm = ch;
-        rp = ReadWritePhases::CheckSum1;
         return true;
 
-    case ReadWritePhases::CheckSum1:
-        m_CheckSumm |= word(ch) << 8;
+    case ReadWritePhases::CheckSum:
+        m_CheckSumm |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes < 2)
+            return true;
 
         if(m_CheckSumm == m_CheckedSumm)
             readDataExecute();
         else
         {
+            qDebug() << m_CheckSumm << " " << m_CheckedSumm;
             logRead();
             emit log(tr("HX: Read command checkSum ERROR!"), Qt::red);
             sendSpecialPacket1();
@@ -543,19 +496,16 @@ bool HXServer::getSize(byte ch)
         if(!(--m_PacketSize))
         {
             m_unit = ch;
-            wp = ReadWritePhases::CheckSum0;
+            wp = ReadWritePhases::CheckSum;
             return true;
         }
         spt = ServerPCTypes::UnkPacket;
         return false;
 
-    case ReadWritePhases::CheckSum0:
-        m_CheckSumm = ch;
-        wp = ReadWritePhases::CheckSum1;
-        return true;
-
-    case ReadWritePhases::CheckSum1:
-        m_CheckSumm |= word(ch) << 8;
+    case ReadWritePhases::CheckSum:
+        m_CheckSumm |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes < 2)
+            return true;
 
         if(m_CheckSumm == m_CheckedSumm)
         {
@@ -595,10 +545,10 @@ bool HXServer::writeData(byte ch)
             return false;
         }
         m_unit = ch;
-        wp = ReadWritePhases::BlockNumber0;
+        wp = ReadWritePhases::BlockNumber;
         return true;
 
-    case ReadWritePhases::BlockNumber0:
+    case ReadWritePhases::BlockNumber:
         m_CheckedSumm += ch;
 
         if(!(--m_PacketSize))
@@ -606,11 +556,16 @@ bool HXServer::writeData(byte ch)
             spt = ServerPCTypes::UnkPacket;
             return false;
         }
-        m_block = ch;
-        wp = ReadWritePhases::BlockNumber1;
+
+        m_block |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes == 4)
+        {
+            m_numBytes = 0;
+            wp = ReadWritePhases::Bytes;
+        }
         return true;
 
-    case ReadWritePhases::BlockNumber1:
+    case ReadWritePhases::Bytes:
         m_CheckedSumm += ch;
 
         if(!(--m_PacketSize))
@@ -618,67 +573,19 @@ bool HXServer::writeData(byte ch)
             spt = ServerPCTypes::UnkPacket;
             return false;
         }
-        m_block |= word(ch) << 8;
-        wp = ReadWritePhases::BlockNumber2;
-        return true;
 
-    case ReadWritePhases::BlockNumber2:
-        m_CheckedSumm += ch;
+        m_bytes |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes < 2)
+            return true;
 
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_block |= word(ch) << 16;
-        wp = ReadWritePhases::BlockNumber3;
-        return true;
-
-    case ReadWritePhases::BlockNumber3:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_block |= word(ch) << 24;
-        wp = ReadWritePhases::Bytes0;
-        return true;
-
-    case ReadWritePhases::Bytes0:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_bytes = ch;
-        wp = ReadWritePhases::Bytes1;
-        return true;
-
-    case ReadWritePhases::Bytes1:
-        m_CheckedSumm += ch;
-
-        if(!(--m_PacketSize))
-        {
-            spt = ServerPCTypes::UnkPacket;
-            return false;
-        }
-        m_bytes |= (word)ch << 8;
-
+        m_numBytes = 0;
         m_readbytes = m_bytes;
 
         buffer_from_com.clear();
         if(m_bytes)
-        {
             wp = ReadWritePhases::ReadBytes;
-        }
         else
-        {
-            wp = ReadWritePhases::CheckSum0;
-        }
+            wp = ReadWritePhases::CheckSum;
 
         return true;
 
@@ -688,7 +595,7 @@ bool HXServer::writeData(byte ch)
 
         if(!(--m_readbytes))
         {
-            wp = ReadWritePhases::CheckSum0;
+            wp = ReadWritePhases::CheckSum;
             if(!(--m_PacketSize))
             {
                 spt = ServerPCTypes::BadPacket;
@@ -703,13 +610,10 @@ bool HXServer::writeData(byte ch)
         }
         return true;
 
-    case ReadWritePhases::CheckSum0:
-        m_CheckSumm = ch;
-        wp = ReadWritePhases::CheckSum1;
-        return true;
-
-    case ReadWritePhases::CheckSum1:
-        m_CheckSumm |= word(ch) << 8;
+    case ReadWritePhases::CheckSum:
+        m_CheckSumm |= word(ch) << ((m_numBytes++) * 8);
+        if(m_numBytes < 2)
+            return true;
 
         if(m_CheckSumm == m_CheckedSumm)
             writeDataExecute();
@@ -878,6 +782,10 @@ void HXServer::resetState()
     rp = ReadWritePhases::None;
     wp = ReadWritePhases::None;
     m_PacketSize = 0;
+    m_numBytes = 0;
+    m_CheckSumm = 0;
+    m_block = 0;
+    m_bytes = 0;
     packet_buffer.clear();
 }
 

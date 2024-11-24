@@ -206,13 +206,6 @@ ImageDsk &ImageDsk::operator=(const ImageDsk &right) noexcept
 }
 
 //-------------------------------------------------------------------------------------------------------
-void ImageDsk::fileChanged(const QString &path)
-{
-    Q_UNUSED(path);
-    m_need_reload = true;
-}
-
-//-------------------------------------------------------------------------------------------------------
 void ImageDsk::fileClosed()
 {
     emit addFileName(m_filename); //закрытый файл отслеживается

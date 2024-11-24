@@ -55,7 +55,6 @@ signals:
     void update();
 
 public slots:
-    void fileChanged(const QString &path);
     void fileClosed();
 };
 
