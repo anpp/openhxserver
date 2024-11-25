@@ -35,6 +35,7 @@ HXServer::HXServer(QObject *parent)
 
     m_images = std::make_unique<Images>();
     m_images->load();
+    connect(m_images.get(), &Images::update, this, &HXServer::update);
 
     sm = std::make_unique<QStateMachine>();
 
@@ -207,7 +208,7 @@ void HXServer::sendLoader()
     }
     else
     {
-        emit error(tr("File does not exist: ") + m_loader);
+        emit error(tr("File is not exist: ") + m_loader);
         return;
     }
 
@@ -462,7 +463,6 @@ bool HXServer::readData(byte ch)
             readDataExecute();
         else
         {
-            qDebug() << m_CheckSumm << " " << m_CheckedSumm;
             logRead();
             emit log(tr("HX: Read command checkSum ERROR!"), Qt::red);
             sendSpecialPacket1();
@@ -583,13 +583,13 @@ bool HXServer::writeData(byte ch)
 
         buffer_from_com.clear();
         if(m_bytes)
-            wp = ReadWritePhases::ReadBytes;
+            wp = ReadWritePhases::GetBytes;
         else
             wp = ReadWritePhases::CheckSum;
 
         return true;
 
-    case ReadWritePhases::ReadBytes:
+    case ReadWritePhases::GetBytes:
         m_CheckedSumm += ch;
         buffer_from_com.push_back(ch);
 
@@ -812,7 +812,10 @@ void HXServer::loadImage(byte index)
             m_images->at(index).setNeedReload(true);
         else
         {
-            emit log(tr("File is not exists: ") + m_images->at(index).fileName(), Qt::red);
+            if(m_images->at(index).fileName().isEmpty())
+                emit log(tr("Device is empty: ") + m_images->prefix() + QString::number(index), Qt::red);
+            else
+                emit log(tr("File is not exists: ") + m_images->at(index).fileName(), Qt::red);
             return;
         }
     }
@@ -932,6 +935,12 @@ void HXServer::sendPacketDump(const QByteArray &packet, uint delayms) const
     Q_UNUSED(delayms);
     emit dump(packet, false);
     emit dump("", false);
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::update()
+{
+    checkReady();
 }
 
 

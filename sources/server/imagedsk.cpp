@@ -23,7 +23,7 @@ ImageDsk::~ImageDsk()
 //-------------------------------------------------------------------------------------------------------
 void ImageDsk::setFileName(const QString &filename)
 {
-    if(m_filename == filename) return;
+    if(m_filename == filename && valid()) return;
     release();
 
     detach();

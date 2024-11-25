@@ -22,7 +22,7 @@ class HXServer : public QObject
     enum class ServerPhases: int {None = -1, SOH, PacketHaveByteSize, PacketHaveSize, PacketIsCommand, CommandRead, CommandPackedRead, CommandGetSize, UnkComand, CommandWrite};
     enum class ServerPCTypes: unsigned char {None = 0, ShortPacket = 253, LongPacket = 254, LongPacketWith = 1, BadPacket, UnkPacket, UnpackedData = 'D',
                                               PCCommad = 'C', PCRead = 'R', PCPackedRead = 'r', PCEof = 'F', PCGetSize = 's', PCWrite = 'W', PCError = 'E', PCSuccess = 'Y'};
-    enum class ReadWritePhases: int {None = -1, BlockNumber, Bytes, CheckSum, ReadBytes};
+    enum class ReadWritePhases: int {None = -1, BlockNumber, Bytes, CheckSum, GetBytes};
 
 public:
     enum ServerStates: int {Unk = -1, Closed = 0, Opened = 1, Ready = 2, Waiting = 3, Processing = 4, Paused = 5, Error = 6};
@@ -127,6 +127,7 @@ public slots:
     void isError();
     void processData(const QByteArray& data);
     void sendPacketDump(const QByteArray& packet, uint delayms = 0) const;
+    void update();
 };
 
 #endif // HXSERVER_H
