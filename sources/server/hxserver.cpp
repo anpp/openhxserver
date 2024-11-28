@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QColor>
+#include <QDateTime>
 
 #include <QDebug>
 
@@ -215,7 +216,18 @@ void HXServer::sendLoader()
     QFile f(m_loader);
     if(f.open(QIODevice::ReadOnly | QFile::ExistingOnly))
     {
+        int year = QDateTime::currentDateTime().date().year();
+        int month = QDateTime::currentDateTime().date().month();
+        int day = QDateTime::currentDateTime().date().day();
         QByteArray loader = f.read(f.size());
+
+        //время - 19:16:21
+        loader[504] = 0x34;
+        loader[505] = 0x00;
+        loader[506] = 0xfe;
+        loader[507] = 0xe5;
+        loader[508] = year - 2004 | day << 5;
+        loader[509] = ((day >> 3 & 0x3)  | month << 2) | 0x40;
         emit sendPacket(loader);
         emit dump("", false);
         emit log(tr("Sending file: ") + m_loader, Qt::black);
