@@ -221,20 +221,23 @@ void HXServer::sendLoader()
         int day = QDateTime::currentDateTime().date().day();
         QByteArray loader = f.read(f.size());
 
-        //время - 19:16:21
-        loader[504] = 0x34;
-        loader[505] = 0x00;
-        loader[506] = 0xfe;
-        loader[507] = 0xe5;
-        loader[508] = year - 2004 | day << 5;
-        loader[509] = ((day >> 3 & 0x3)  | month << 2) | 0x40;
+        if(loader.size() >= 512)
+        {
+            //время - 19:16:21
+            loader[504] = 0x34;
+            loader[505] = 0x00;
+            loader[506] = 0xfe;
+            loader[507] = 0xe5;
+            loader[508] = ((year - 1972) & 0x1f) | day << 5;
+            loader[509] = ((day >> 3 & 0x3) | month << 2) | (((year - 1972) & 0x60) << 1);
+        }
         emit sendPacket(loader);
         emit dump("", false);
         emit log(tr("Sending file: ") + m_loader, Qt::black);
     }
     else
     {
-        emit error(f.errorString() + tr(" Error - cannot write file: ") + m_loader + (owner.isEmpty() ? "" : tr(". File owner is ") + owner));
+        emit error(f.errorString() + tr(" Error - cannot read file: ") + m_loader + (owner.isEmpty() ? "" : tr(". File owner is ") + owner));
         return;
     }
 
