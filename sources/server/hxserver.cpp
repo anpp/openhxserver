@@ -219,15 +219,15 @@ void HXServer::sendLoader()
         int year = QDateTime::currentDateTime().date().year();
         int month = QDateTime::currentDateTime().date().month();
         int day = QDateTime::currentDateTime().date().day();
+        uint32_t time = (QDateTime::currentDateTime().time().hour() * 3600 + QDateTime::currentDateTime().time().minute() * 60 + QDateTime::currentDateTime().time().second()) * 50;
         QByteArray loader = f.read(f.size());
 
         if(loader.size() >= 512)
         {
-            //время - 19:16:21
-            loader[504] = 0x34;
-            loader[505] = 0x00;
-            loader[506] = 0xfe;
-            loader[507] = 0xe5;
+            loader[504] = (time >> 16) & 0xFF;
+            loader[505] = (time >> 24) & 0xFF;
+            loader[506] = time & 0xFF;;
+            loader[507] = (time >> 8) & 0xFF;
             loader[508] = ((year - 1972) & 0x1f) | day << 5;
             loader[509] = ((day >> 3 & 0x3) | month << 2) | (((year - 1972) & 0x60) << 1);
         }
