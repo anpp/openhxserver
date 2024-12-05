@@ -214,7 +214,11 @@ void HXServer::sendLoader()
     }
 
     QFile f(m_loader);
+#if QT_VERSION <= QT_VERSION_CHECK(5, 6, 3)
+    if(f.open(QIODevice::ReadOnly))
+#else
     if(f.open(QIODevice::ReadOnly | QFile::ExistingOnly))
+#endif
     {
         int year = QDateTime::currentDateTime().date().year();
         int month = QDateTime::currentDateTime().date().month();

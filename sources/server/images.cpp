@@ -7,8 +7,6 @@
 #include <QFileInfo>
 #include <QFileSystemWatcher>
 
-const static std::string_view  sImages = "/DskImages";
-
 //----------------------------------------------------------------------------------------------------
 Images::Images(QObject *parent)
     : QObject{parent}
@@ -38,7 +36,7 @@ Images::~Images()
 //----------------------------------------------------------------------------------------------------
 void Images::load()
 {
-    qsettings->beginGroup(QString::fromStdString(std::string(sImages)));
+    qsettings->beginGroup(sImages);
     size_t i = 0;
     for(auto& k: qsettings->allKeys())
     {
@@ -56,7 +54,7 @@ void Images::load()
 void Images::save() const
 {
     std::map<QString, QString> raw;
-    qsettings->beginGroup(QString::fromStdString(std::string(sImages)));
+    qsettings->beginGroup(sImages);
 
     size_t i = 0;
     for(const auto& item: m_data)

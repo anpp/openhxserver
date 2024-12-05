@@ -22,6 +22,7 @@ class Images : public QObject
     std::unique_ptr<ImageDsk> default_image;
     std::unique_ptr<QFileSystemWatcher> m_watcher;
     QString HXPrefix = "HX";
+    QString sImages = "/DskImages";
 public:
     explicit Images(QObject *parent = nullptr);
     ~Images();

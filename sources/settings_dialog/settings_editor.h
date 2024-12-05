@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QDialogButtonBox>
+#include <memory>
 
 
 class SettingsCOMPort;

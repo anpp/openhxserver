@@ -116,7 +116,11 @@ bool ImageDsk::openFile()
     if(!m_file) return false;
     if(m_file->isOpen()) return true;
 
+#if QT_VERSION <= QT_VERSION_CHECK(5, 6, 3)
+    if(m_file->open(QIODevice::ReadWrite) && m_file->size() >= DskConsts::BLOCK_SIZE)
+#else
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
+#endif
     {
         emit delFileName(m_filename); //открытый файл не отслеживать на изменения
 

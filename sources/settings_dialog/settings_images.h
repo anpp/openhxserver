@@ -2,6 +2,7 @@
 #define SETTINGS_IMAGES_H
 
 #include <QWidget>
+#include <memory>
 
 namespace Ui {
 class SettingsImages;
