@@ -118,6 +118,7 @@ void HXServer::setupComPort()
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close, Qt::DirectConnection);
 
     connect(port.get(), &SerialPortThread::readyData, this, &HXServer::processData);
+
     connect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
     connect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
 }
@@ -131,6 +132,9 @@ void HXServer::removeComPort()
     serialport_transition_error_disconnected = nullptr;
 
     disconnect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close);
+
+    disconnect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
+    disconnect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
 
     if(port)
     {
