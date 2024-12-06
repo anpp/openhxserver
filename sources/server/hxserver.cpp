@@ -62,7 +62,7 @@ HXServer::~HXServer()
 //------------------------------------------------------------------------------------------------
 void HXServer::setPortName(const QString &PortName)
 {
-    if(PortName == m_PortName) return;
+    if(PortName == m_PortName && port->SerialPort().isOpen()) return;
 
     m_PortName = PortName;
 
@@ -115,6 +115,8 @@ void HXServer::setupComPort()
     connect(port.get(), &SerialPortThread::error, this, &HXServer::error);
     connect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
     connect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
+    connect(port.get(), &SerialPortThread::baudRateChanged, this, &HXServer::baudRateChanged);
+
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close, Qt::DirectConnection);
 
     connect(port.get(), &SerialPortThread::readyData, this, &HXServer::processData);

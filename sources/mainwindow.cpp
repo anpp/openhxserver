@@ -62,10 +62,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(hxserver.get(), &HXServer::log, this, &MainWindow::log);
     connect(hxserver.get(), &HXServer::stateChanged, this, &MainWindow::stateHXChanged);
     connect(hxserver.get(), &HXServer::dump, this, &MainWindow::dump);
+    connect(hxserver.get(), &HXServer::baudRateChanged, this, &MainWindow::baudRateChanged);
 
     m_PortLabel.setText(m_port_label);
+    m_baudRateLabel.setText(m_baudRate_label);
     m_StateLabel.setText(m_state_label);
     statusbar->addWidget(&m_PortLabel);
+    statusbar->addWidget(&m_baudRateLabel);
     statusbar->addWidget(&m_StateLabel);
 
     initWidgets();
@@ -199,6 +202,12 @@ void MainWindow::dump(const QByteArray &value, bool in)
             return dump_widget->add(value, Qt::darkGreen);
         dump_widget->append(value, Qt::darkBlue);
     }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MainWindow::baudRateChanged(quint32 baudRate)
+{
+    m_baudRateLabel.setText(m_baudRate_label + QString::number(baudRate));
 }
 
 

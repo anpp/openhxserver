@@ -26,7 +26,8 @@ void SerialPortThread::init()
     //this->moveToThread(&thread);
     //serial_port->moveToThread(&thread);
 
-    connect(serial_port.get(), &QSerialPort::readyRead, this, &SerialPortThread::s_readyRead);    
+    connect(serial_port.get(), &QSerialPort::readyRead, this, &SerialPortThread::s_readyRead);
+    connect(serial_port.get(), &QSerialPort::baudRateChanged, this, &SerialPortThread::baudRateChange);
 
 #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
@@ -72,6 +73,9 @@ void SerialPortThread::setPortSettings()
     serial_port->setParity(ps.parity);
     serial_port->setStopBits(ps.stopBits);
     serial_port->setFlowControl(ps.flowControl);
+
+
+    serial_port->clear();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -203,6 +207,13 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
             break;
         }
     }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void SerialPortThread::baudRateChange(quint32 baudRate, QSerialPort::Directions directions)
+{
+    Q_UNUSED(directions);
+    emit baudRateChanged(baudRate);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
