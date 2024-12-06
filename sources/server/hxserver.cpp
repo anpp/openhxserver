@@ -62,7 +62,8 @@ HXServer::~HXServer()
 //------------------------------------------------------------------------------------------------
 void HXServer::setPortName(const QString &PortName)
 {
-    if(PortName == m_PortName && port->SerialPort().isOpen()) return;
+    if(port)
+        if(PortName == m_PortName && port->SerialPort().isOpen()) return;
 
     m_PortName = PortName;
 

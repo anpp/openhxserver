@@ -51,6 +51,7 @@ void SerialPortThread::delay(const unsigned long ms) const
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::setPortSettings()
 {
+    serial_port->setBaudRate(0); //для первоначального срабатывания сигнала baudRateChanged
     //default settings
     ps.baudRate = QSerialPort::Baud9600;
     ps.dataBits = QSerialPort::Data8;
@@ -74,8 +75,8 @@ void SerialPortThread::setPortSettings()
     serial_port->setStopBits(ps.stopBits);
     serial_port->setFlowControl(ps.flowControl);
 
-
-    serial_port->clear();
+    if(serial_port->isOpen())
+        serial_port->clear();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
