@@ -941,7 +941,10 @@ void HXServer::processData(const QByteArray& data)
     emit dump(data);
 
     if(state() == ServerStates::Waiting && data[0] == '@')
+    {
+        QThread::msleep(100);
         sendLoader();
+    }
 
     if(state() == ServerStates::Processing || state() == ServerStates::Paused)
         for(auto ch: data)
