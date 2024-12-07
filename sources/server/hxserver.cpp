@@ -875,6 +875,7 @@ void HXServer::isClosed()
 {
     emit log("", Qt::black, true);
 
+    emit baudRateChanged(0);
     emit stateChanged(state());
 }
 

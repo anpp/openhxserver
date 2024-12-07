@@ -22,6 +22,7 @@ QVariant ImagesModel::data(const QModelIndex &index, int role) const
                     font.setBold(true);
                     return font;
                 }
+                return QVariant();
             default:
                 return QVariant();
             }

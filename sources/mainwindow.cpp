@@ -207,7 +207,7 @@ void MainWindow::dump(const QByteArray &value, bool in)
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::baudRateChanged(quint32 baudRate)
 {
-    m_baudRateLabel.setText(m_baudRate_label + QString::number(baudRate));
+    m_baudRateLabel.setText(m_baudRate_label + (baudRate ? QString::number(baudRate) : ""));
 }
 
 

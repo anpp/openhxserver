@@ -50,8 +50,7 @@ void SerialPortThread::delay(const unsigned long ms) const
 
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::setPortSettings()
-{
-    emit baudRateChanged(QSerialPort::Baud9600); //для первоначального срабатывания сигнала baudRateChanged
+{    
     //default settings
     ps.baudRate = QSerialPort::Baud9600;
     ps.dataBits = QSerialPort::Data8;
@@ -118,7 +117,7 @@ void SerialPortThread::close()
     stop();
     if(serial_port->isOpen())
         serial_port->close();
-    emit closed();
+    emit closed();    
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -141,6 +140,7 @@ void SerialPortThread::open(const QString& com_port)
     }
 
     emit opened();
+    emit baudRateChanged(serial_port->baudRate());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -214,7 +214,8 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
 void SerialPortThread::baudRateChange(quint32 baudRate, QSerialPort::Directions directions)
 {
     Q_UNUSED(directions);
-    emit baudRateChanged(baudRate);
+    if(serial_port->isOpen())
+        emit baudRateChanged(baudRate);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
