@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget *parent)
     initWidgets();
     initActions();
 
-    //QTimer::singleShot(10, this, [&]() {settings->loadSettingsScreen(); });
-    QTimer::singleShot(10, this, [&]() {updateHXServer(); });
+    QCoreApplication::processEvents();
+    updateHXServer();
 }
 
 

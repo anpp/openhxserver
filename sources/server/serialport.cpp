@@ -118,6 +118,8 @@ void SerialPortThread::close()
     stop();
     if(serial_port->isOpen())
         serial_port->close();
+
+    QCoreApplication::processEvents();
     emit closed();    
 }
 
