@@ -69,6 +69,8 @@ void HXServer::setPortName(const QString &PortName)
 
     if(!sm->isRunning()) return;
 
+    if(m_PortName.isEmpty()) return;
+
     if(port)
         removeComPort();
 
