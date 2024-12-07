@@ -51,7 +51,8 @@ signals:
     void readyData(const QByteArray& data);
     void opened();
     void closed();
-    void baudRateChanged(quint32 baudRate);
+    void portBaudRateChanged(quint32 baudRate);
+    void portFlowControlChanged(const QString& flowControl);
 
 public slots:            
     void s_readyRead();
@@ -61,7 +62,8 @@ public slots:
     void setPortSettings();
     void close();
     void portError(QSerialPort::SerialPortError spe);
-    void baudRateChange(quint32 baudRate, QSerialPort::Directions directions);
+    void baudRateChanged(quint32 baudRate, QSerialPort::Directions directions);
+    void flowControlChanged(QSerialPort::FlowControl flowControl);
 };
 
 #endif // SERIALPORT_H

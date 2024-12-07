@@ -116,6 +116,7 @@ signals:
     void stop();
     void stateChanged(ServerStates);
     void baudRateChanged(quint32 baudRate);
+    void flowControlChanged(const QString& flowControl);
 
 public slots:
     void setError(const QString& value);

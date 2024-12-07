@@ -59,16 +59,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     hxserver = std::make_unique<HXServer>(this);
     connect(hxserver.get(), &HXServer::port_opened, this, &MainWindow::port_opened);
-    connect(hxserver.get(), &HXServer::log, this, &MainWindow::log);
-    connect(hxserver.get(), &HXServer::stateChanged, this, &MainWindow::stateHXChanged);
+    connect(hxserver.get(), &HXServer::log, this, &MainWindow::log);    
     connect(hxserver.get(), &HXServer::dump, this, &MainWindow::dump);
     connect(hxserver.get(), &HXServer::baudRateChanged, this, &MainWindow::baudRateChanged);
+    connect(hxserver.get(), &HXServer::flowControlChanged, this, &MainWindow::flowControlChanged);
+    connect(hxserver.get(), &HXServer::stateChanged, this, &MainWindow::stateHXChanged);
 
     m_PortLabel.setText(m_port_label);
     m_baudRateLabel.setText(m_baudRate_label);
+    m_flowControlLabel.setText(m_flowControl_label);
     m_StateLabel.setText(m_state_label);
+
     statusbar->addWidget(&m_PortLabel);
     statusbar->addWidget(&m_baudRateLabel);
+    statusbar->addWidget(&m_flowControlLabel);
     statusbar->addWidget(&m_StateLabel);
 
     initWidgets();
@@ -141,7 +145,7 @@ void MainWindow::updateHXServer()
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::stateHXChanged(HXServer::ServerStates state)
 {
-    m_StateLabel.setText(m_state_label + hxserver->nameState());
+    m_StateLabel.setText(m_state_label + hxserver->nameState() + "  ");
     switch(state)
     {
     case HXServer::ServerStates::Closed:
@@ -207,9 +211,14 @@ void MainWindow::dump(const QByteArray &value, bool in)
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::baudRateChanged(quint32 baudRate)
 {
-    m_baudRateLabel.setText(m_baudRate_label + (baudRate ? QString::number(baudRate) : ""));
+    m_baudRateLabel.setText(m_baudRate_label + (baudRate ? QString::number(baudRate) : "") + "  ");
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+void MainWindow::flowControlChanged(const QString &flowControl)
+{
+    m_flowControlLabel.setText(m_flowControl_label + flowControl + "  ");
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::initWidgets()
@@ -268,7 +277,7 @@ void MainWindow::apply_settings()
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::port_opened(const QString &portName)
 {
-    m_PortLabel.setText(m_port_label + portName);
+    m_PortLabel.setText(m_port_label + portName + "  ");
 }
 
 //----------------------------------------------------------------------------------------------------------------------

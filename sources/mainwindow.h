@@ -38,11 +38,14 @@ private:
     std::unique_ptr<HXServer> hxserver;
 
     QLabel m_PortLabel;
-    QLabel m_StateLabel;
     QLabel m_baudRateLabel;
+    QLabel m_flowControlLabel;
+    QLabel m_StateLabel;
+
     QString m_port_label = tr("Port name: ");
+    QString m_baudRate_label = tr("Baud rate: ");
+    QString m_flowControl_label = tr("Flow control: ");
     QString m_state_label = tr("State: ");
-    QString m_baudRate_label = tr("BaudRate: ");
 
     std::shared_ptr<Settings> settings;
     std::unique_ptr<SettingsImages> images_widget;
@@ -69,6 +72,7 @@ public slots:
     void stateHXChanged(HXServer::ServerStates state);
     void dump(const QByteArray& value, bool in = true);
     void baudRateChanged(quint32 baudRate);
+    void flowControlChanged(const QString& flowControl);
 };
 
 #endif // MAINWINDOW_H

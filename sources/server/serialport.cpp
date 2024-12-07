@@ -27,7 +27,8 @@ void SerialPortThread::init()
     //serial_port->moveToThread(&thread);
 
     connect(serial_port.get(), &QSerialPort::readyRead, this, &SerialPortThread::s_readyRead);
-    connect(serial_port.get(), &QSerialPort::baudRateChanged, this, &SerialPortThread::baudRateChange);
+    connect(serial_port.get(), &QSerialPort::baudRateChanged, this, &SerialPortThread::baudRateChanged);
+    connect(serial_port.get(), &QSerialPort::flowControlChanged, this, &SerialPortThread::flowControlChanged);
 
 #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
@@ -140,7 +141,8 @@ void SerialPortThread::open(const QString& com_port)
     }
 
     emit opened();
-    emit baudRateChanged(serial_port->baudRate());
+    emit portBaudRateChanged(serial_port->baudRate());
+    flowControlChanged(serial_port->flowControl());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -211,11 +213,34 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::baudRateChange(quint32 baudRate, QSerialPort::Directions directions)
+void SerialPortThread::baudRateChanged(quint32 baudRate, QSerialPort::Directions directions)
 {
     Q_UNUSED(directions);
     if(serial_port->isOpen())
-        emit baudRateChanged(baudRate);
+        emit portBaudRateChanged(baudRate);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void SerialPortThread::flowControlChanged(QSerialPort::FlowControl flowControl)
+{
+    if(serial_port->isOpen())
+    {
+        switch(flowControl)
+        {
+        case QSerialPort::NoFlowControl:
+            emit portFlowControlChanged("None");
+            break;
+        case QSerialPort::HardwareControl:
+            emit portFlowControlChanged("RTS/CTS");
+            break;
+        case QSerialPort::SoftwareControl:
+            emit portFlowControlChanged("XON/XOFF");
+            break;
+        default:
+            emit portFlowControlChanged("");
+            break;
+        }
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

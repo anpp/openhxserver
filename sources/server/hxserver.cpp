@@ -116,7 +116,8 @@ void HXServer::setupComPort()
     connect(port.get(), &SerialPortThread::error, this, &HXServer::error);
     connect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
     connect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
-    connect(port.get(), &SerialPortThread::baudRateChanged, this, &HXServer::baudRateChanged);
+    connect(port.get(), &SerialPortThread::portBaudRateChanged, this, &HXServer::baudRateChanged);
+    connect(port.get(), &SerialPortThread::portFlowControlChanged, this, &HXServer::flowControlChanged);
 
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close, Qt::DirectConnection);
 
@@ -876,6 +877,7 @@ void HXServer::isClosed()
     emit log("", Qt::black, true);
 
     emit baudRateChanged(0);
+    emit flowControlChanged("");
     emit stateChanged(state());
 }
 
