@@ -30,10 +30,6 @@ void SerialPortThread::init()
     connect(serial_port.get(), &QSerialPort::baudRateChanged, this, &SerialPortThread::baudRateChanged);
     connect(serial_port.get(), &QSerialPort::flowControlChanged, this, &SerialPortThread::flowControlChanged);
 
-#if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
-    connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
-#endif
-
     start();
 }
 
@@ -74,9 +70,6 @@ void SerialPortThread::setPortSettings()
     serial_port->setParity(ps.parity);
     serial_port->setStopBits(ps.stopBits);
     serial_port->setFlowControl(ps.flowControl);
-
-    if(serial_port->isOpen())
-        serial_port->clear();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -120,7 +113,7 @@ void SerialPortThread::close()
         serial_port->close();
 
     QCoreApplication::processEvents();
-    emit closed();    
+    emit closed();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -141,6 +134,11 @@ void SerialPortThread::open(const QString& com_port)
         emit error(serial_port->errorString() + " " + com_port);
         return;
     }
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
+    disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
+    connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
+#endif
 
     emit opened();
     emit portBaudRateChanged(serial_port->baudRate());

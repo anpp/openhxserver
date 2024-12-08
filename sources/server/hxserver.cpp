@@ -65,19 +65,17 @@ void HXServer::setPortName(const QString &PortName)
     if(port)
         if(PortName == m_PortName && port->SerialPort().isOpen()) return;
 
-    m_PortName = PortName;
-
     if(!sm->isRunning()) return;
-
-    if(m_PortName.isEmpty()) return;
 
     if(port)
         removeComPort();
 
+    m_PortName = PortName;
+    if(m_PortName.isEmpty()) return;
+
     port = std::make_unique<SerialPortThread>();
     setupComPort();
 
-    emit port_opened("");
     port->open(m_PortName);
 }
 
@@ -137,14 +135,16 @@ void HXServer::removeComPort()
 
     serialport_transition_error_disconnected = nullptr;
 
-    disconnect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close);
-
     disconnect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
-    disconnect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
 
     if(port)
     {
-        port->close();
+        disconnect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, port.get(), &SerialPortThread::close);
+        disconnect(this, &HXServer::sendPacket, port.get(), &SerialPortThread::sendPacket);
+
+        if(state() != ServerStates::Closed)
+            port->close();
+
         port->disconnect();
         port.reset();
     }
@@ -878,6 +878,7 @@ void HXServer::isClosed()
 {
     emit log("", Qt::black, true);
 
+    emit port_opened("");
     emit baudRateChanged(0);
     emit flowControlChanged("");
     emit stateChanged(state());
@@ -936,6 +937,9 @@ void HXServer::isError()
         emit log(m_ErrorMessage, Qt::red);
 
     emit stateChanged(state());
+
+    if(port)
+        port->close();
 }
 
 //------------------------------------------------------------------------------------------------

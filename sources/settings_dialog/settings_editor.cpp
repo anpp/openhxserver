@@ -61,8 +61,8 @@ void SettingsEditor::setup()
     com_port_widget->load();
     images_widget->update();
 
-    tw.addTab(images_widget.get(), QIcon(":/images/icons/disk-light.png"), tr("Images"));
     tw.addTab(com_port_widget.get(), QIcon(":/images/icons/com-light.png"), tr("COM port"));
+    tw.addTab(images_widget.get(), QIcon(":/images/icons/disk-light.png"), tr("Images"));    
     tw.setTabsClosable(false);
     tw.setDocumentMode(false);
     tw.setMovable(false);
