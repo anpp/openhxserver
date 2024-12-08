@@ -20,7 +20,7 @@ class HXServer : public QObject
     typedef unsigned short       word;
 
     enum class ServerPhases: int {None = -1, SOH, PacketHaveByteSize, PacketHaveSize, PacketIsCommand, CommandRead, CommandPackedRead, CommandGetSize, UnkComand, CommandWrite};
-    enum class ServerPCTypes: unsigned char {None = 0, ShortPacket = 253, LongPacket = 254, LongPacketWith = 1, BadPacket, UnkPacket, UnpackedData = 'D',
+    enum class ServerPCTypes: unsigned char {None = 0, ShortPacket = 253, LongPacket = 254, LongPacketWith = 1, BadPacket, UnkPacket, UnpackedData = 'D', PackedData = 252,
                                               PCCommad = 'C', PCRead = 'R', PCPackedRead = 'r', PCEof = 'F', PCGetSize = 's', PCWrite = 'W', PCError = 'E', PCSuccess = 'Y'};
     enum class ReadWritePhases: int {None = -1, BlockNumber, Bytes, CheckSum, GetBytes};
 
@@ -77,6 +77,7 @@ private:
     word m_bytes;
     word m_readbytes;
     byte m_numBytes;
+    bool m_packed_data = false;
 
     std::unique_ptr<Images> m_images;
 
@@ -91,9 +92,11 @@ private:
     void sendSpecialPacket1() const;
     void sendShortPacket(ServerPCTypes result, ServerPCTypes type = ServerPCTypes::PCRead, byte size = 2, size_t value = 0) const;
     void readDataExecute();
+    void readPackedDataExecute();
     void writeDataExecute();
     void resetState();
     void logRead();
+    void logReadPacked();
     void logWrite();
     void loadImage(byte index);
     void releaseAllImages();
@@ -130,6 +133,7 @@ public slots:
     void processData(const QByteArray& data);
     void sendPacketDump(const QByteArray& packet, uint delayms = 0) const;
     void update();
+    void setPackedData(bool value);
 };
 
 #endif // HXSERVER_H

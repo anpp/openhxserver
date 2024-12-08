@@ -489,7 +489,12 @@ bool HXServer::readData(byte ch)
             return true;
 
         if(m_CheckSumm == m_CheckedSumm)
-            readDataExecute();
+        {
+            if(m_packed_data)
+                readPackedDataExecute();
+            else
+                readDataExecute();
+        }
         else
         {
             logRead();
@@ -772,6 +777,205 @@ void HXServer::readDataExecute()
 }
 
 //------------------------------------------------------------------------------------------------
+void HXServer::readPackedDataExecute()
+{
+    if(state() == ServerStates::Paused)
+        return sendShortPacket(ServerPCTypes::PCError);
+
+    logReadPacked();
+    loadImage(m_unit);
+
+    if(!m_images->at(m_unit).valid())
+        return sendShortPacket(ServerPCTypes::PCError);
+
+    word checksum = 0;
+    byte ch;
+
+    size_t num_blocks = m_images->at(m_unit).size();
+    if(m_block >= num_blocks)
+        return sendShortPacket(ServerPCTypes::PCEof);
+
+    word rest = m_bytes % ImageDsk::DskConsts::BLOCK_SIZE;
+
+    buffer_to_com.clear();
+    buffer_to_com.push_back(static_cast<char>(ServerPCTypes::PackedData));
+
+    QByteArray data_buffer;
+    for(size_t i = m_block ; i < m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE ; ++i)
+        data_buffer.append(m_images->at(m_unit).blockAt(i));
+    if(rest)
+        data_buffer.append(m_images->at(m_unit).blockAt(m_block + m_bytes / ImageDsk::DskConsts::BLOCK_SIZE).mid(0, rest));
+
+
+    int nHeaderBytesSent = 0;
+    int nDataBytesSent   = 0;
+    int nBytesSaved      = 0;
+
+    int nBytesInBuf  = m_bytes;
+    int nBytesToCopy = 0;
+    int nCopyOffset  = 0;
+    for( int nOffset = 0 ; nOffset < nBytesInBuf ; )
+    {
+        byte chr = data_buffer[nOffset];
+
+        int nRept = 1;
+        while( chr == data_buffer[nOffset + nRept] && nRept <= 255 && (nOffset + nRept) < nBytesInBuf)
+        {
+            nRept++;
+        }
+
+        if(nRept >= 6)
+        {
+            if(nBytesToCopy)
+            {
+                if(nBytesToCopy == 1)
+                {
+                    ch = 01;		         // ByteCount == 1
+                    checksum += ch;
+                    buffer_to_com.push_back(ch);
+                    nHeaderBytesSent++;
+
+                    ch = 01;                 // ReptCount == 1
+                    checksum += ch;
+                    buffer_to_com.push_back(ch);
+                    nHeaderBytesSent++;
+
+                    ch = data_buffer[nCopyOffset++];
+                    checksum += ch;
+                    buffer_to_com.push_back(ch);
+                    nDataBytesSent++;
+
+                    nBytesToCopy = 0;
+                }
+                else
+                {
+                    ch = nBytesToCopy;		 // ByteCount == nBytesToCopy
+                    checksum += ch;
+                    buffer_to_com.push_back(ch);
+                    nHeaderBytesSent++;
+
+                    while( nBytesToCopy-- )
+                    {
+                        ch = data_buffer[nCopyOffset++];
+                        checksum += ch;
+                        buffer_to_com.push_back(ch);
+                        nDataBytesSent++;
+                    }
+
+                    nBytesToCopy = 0;
+                }
+            }
+
+            ch = 01;		// ByteCount == 1
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nHeaderBytesSent++;
+
+            ch = nRept;   // ReptCount == nRept
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nHeaderBytesSent++;
+
+            ch = chr;		// Byte == chr
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nDataBytesSent++;
+
+            nBytesSaved += nRept-1;
+
+            nOffset     += nRept;
+            nCopyOffset += nRept;
+            continue;
+        }
+
+        // Здесь - следующий символ не повторный.
+        nBytesToCopy++;
+        nOffset++;
+
+        if( nBytesToCopy < 255 ) { continue; }
+
+        // Здесь - пора копировать 255 байтов.
+
+        ch = 255;		    // ByteCount == 255
+        checksum += ch;
+        buffer_to_com.push_back(ch);
+        nHeaderBytesSent++;
+
+        for( int i = 0 ; i < 255 ; i++ )
+        {
+            ch = data_buffer[nCopyOffset++];
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nDataBytesSent++;
+        }
+
+        nBytesToCopy = 0;
+    }
+
+    if( nBytesToCopy )
+    {
+        if( nBytesToCopy == 1 )
+        {
+            ch = 01;		         // ByteCount == 1
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nHeaderBytesSent++;
+
+            ch = 01;                 // ReptCount == 1
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nHeaderBytesSent++;
+
+            ch = data_buffer[nCopyOffset++];
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nDataBytesSent++;
+
+            nBytesToCopy = 0;
+        }
+        else
+        {
+            ch = nBytesToCopy;		 // ByteCount == nBytesToCopy
+            checksum += ch;
+            buffer_to_com.push_back(ch);
+            nHeaderBytesSent++;
+
+            while( nBytesToCopy-- )
+            {
+                ch = data_buffer[nCopyOffset++];
+                checksum += ch;
+                buffer_to_com.push_back(ch);
+                nDataBytesSent++;
+            }
+            nBytesToCopy = 0;
+        }
+    }
+
+    ch = 00;						 // Конец потока.
+    checksum += ch;
+    buffer_to_com.push_back(ch);
+    nHeaderBytesSent++;
+
+    ch = checksum;
+    buffer_to_com.push_back(ch);
+    ch = checksum >> 8;
+    buffer_to_com.push_back(ch);
+
+    emit sendPacket(buffer_to_com);
+
+    QString mes;
+    if( m_bytes != nDataBytesSent + nBytesSaved )
+    {
+        mes = QString(tr("RAW Bytes: %1  |  Header Bytes: %2  |  Total Sent: %3  |  To Restore: %4 ").arg(QString::number(m_bytes), QString::number(nHeaderBytesSent), QString::number(nHeaderBytesSent + nDataBytesSent), QString::number(nDataBytesSent + nBytesSaved)));
+    }
+    else
+        mes = QString(tr("Bytes Saved: %1 ").arg(QString::number(nBytesSaved - nHeaderBytesSent + 4)));
+
+    emit log(mes, Qt::darkBlue);
+    emit dump("", false);
+}
+
+//------------------------------------------------------------------------------------------------
 void HXServer::writeDataExecute()
 {
     if(state() == ServerStates::Paused)
@@ -822,6 +1026,13 @@ void HXServer::resetState()
 void HXServer::logRead()
 {
     QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    emit log(mes, Qt::darkBlue);
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::logReadPacked()
+{
+    QString mes = QString(tr("HX: read :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(mes, Qt::darkBlue);
 }
 
@@ -979,6 +1190,12 @@ void HXServer::sendPacketDump(const QByteArray &packet, uint delayms) const
 void HXServer::update()
 {
     checkReady();
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::setPackedData(bool value)
+{
+    m_packed_data = value;
 }
 
 

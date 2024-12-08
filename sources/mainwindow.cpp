@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QCoreApplication::processEvents();
     updateHXServer();
+    hxserver->setPackedData(true);
 }
 
 
