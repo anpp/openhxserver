@@ -1,10 +1,9 @@
 # OpenHXServer
 
-Пока не реализовано: 
-1. Сжатие. 
-2. Терминал.
+Пока не реализован терминал. 
 
 [Сборка для Windows](https://disk.yandex.ru/d/V_BeXg2tUqwDPw)
+
 [Сборка для Windows XP](https://disk.yandex.ru/d/lZ2vvSD9tmcCIw)
 
 

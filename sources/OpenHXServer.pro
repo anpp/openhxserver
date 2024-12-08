@@ -59,3 +59,4 @@ DISTFILES +=
 
 RESOURCES += \
     images.qrc
+

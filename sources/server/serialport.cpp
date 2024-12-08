@@ -159,7 +159,7 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
             break;
 
         case QSerialPort::PermissionError:
-            emit error(QObject::tr("Permission error"));
+            emit error(QObject::tr("Permission denied ") + serial_port->portName());
             break;
 
         case QSerialPort::OpenError:

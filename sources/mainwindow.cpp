@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {    
     setupUi(this);
+    setWindowIcon(QIcon(":/images/icons/cpu-light.png"));
     //QApplication::setStyle("fusion");
     settings = Settings::instance(this, "OpenHXServer", "OpenHXServer");
     settings->load();
@@ -80,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QCoreApplication::processEvents();
     updateHXServer();
-    hxserver->setPackedData(true);
 }
 
 
@@ -124,9 +124,17 @@ void MainWindow::initActions()
     m_pauseAction->setToolTip(tr("Pause"));
     connect(m_pauseAction, &QAction::triggered, hxserver.get(), &HXServer::pause);
 
+    m_packedDataAction = new QAction(QIcon(":/images/icons/package-light.png"), tr("Packed data"), this);
+    m_actions.push_back(m_packedDataAction);
+    m_packedDataAction->setToolTip(tr("Packed data (only for flow control RTS/CTS)"));
+    m_packedDataAction->setCheckable(true);
+    connect(m_packedDataAction, &QAction::triggered, hxserver.get(), &HXServer::setPackedData);
+
     toolBar->addAction(m_startAction);
     toolBar->addAction(m_stopAction);
     toolBar->addAction(m_pauseAction);
+    toolBar->addSeparator();
+    toolBar->addAction(m_packedDataAction);
 
     menuMain->addAction(m_startAction);
     menuMain->addAction(m_stopAction);

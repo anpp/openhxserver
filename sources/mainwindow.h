@@ -58,6 +58,7 @@ private:
     QPointer<QAction> m_startAction;
     QPointer<QAction> m_stopAction;
     QPointer<QAction> m_pauseAction;
+    QPointer<QAction> m_packedDataAction;
 
     void initActions();    
     void initWidgets();

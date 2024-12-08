@@ -11,5 +11,7 @@
         <file>images/icons/dump-light.png</file>
         <file>images/icons/log-light.png</file>
         <file>images/icons/terminal-light.png</file>
+        <file>images/icons/cpu-light.png</file>
+        <file>images/icons/package-light.png</file>
     </qresource>
 </RCC>
