@@ -168,6 +168,7 @@ void HXServer::initSM()
     openedState->addTransition(this, &HXServer::ready, readyState.get());
     readyState->addTransition(this, &HXServer::start, waitingState.get());
     readyState->addTransition(this, &HXServer::notready, openedState.get());
+    readyState->addTransition(this, &HXServer::work, processingState.get());
     waitingState->addTransition(this, &HXServer::work, processingState.get());
     waitingState->addTransition(this, &HXServer::stop, readyState.get());
 
@@ -720,8 +721,8 @@ void HXServer::readDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
+    loadImage(m_unit);
     logRead();
-    loadImage(m_unit);    
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
@@ -782,8 +783,8 @@ void HXServer::readPackedDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
-    logReadPacked();
     loadImage(m_unit);
+    logReadPacked();
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);
@@ -981,8 +982,8 @@ void HXServer::writeDataExecute()
     if(state() == ServerStates::Paused)
         return sendShortPacket(ServerPCTypes::PCError);
 
+    loadImage(m_unit);
     logWrite();
-    loadImage(m_unit);    
 
     if(!m_images->at(m_unit).valid())
         return sendShortPacket(ServerPCTypes::PCError);    
@@ -1160,13 +1161,13 @@ void HXServer::processData(const QByteArray& data)
 
     emit dump(data);
 
-    if(state() == ServerStates::Waiting && data[0] == '@')
+    if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
         QThread::msleep(1000);
         sendLoader();
     }
 
-    if(state() == ServerStates::Processing || state() == ServerStates::Paused)
+    if(state() == ServerStates::Ready || state() == ServerStates::Waiting || state() == ServerStates::Processing || state() == ServerStates::Paused)
         for(auto ch: data)
         {
             if(!processByte(ch))
@@ -1174,6 +1175,11 @@ void HXServer::processData(const QByteArray& data)
                 resetState();
                 if(state() != ServerStates::Paused)
                     emit ttyOut(data);
+            }
+            else
+            {// переходим в работу без загрузки
+                if(state() == ServerStates::Ready || state() == ServerStates::Waiting)
+                    emit work();
             }
         }
 }

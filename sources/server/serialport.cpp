@@ -137,7 +137,7 @@ void SerialPortThread::open(const QString& com_port)
 
 #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
-    connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
+    //connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
 #endif
 
     emit opened();
@@ -151,64 +151,7 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
     if(spe != QSerialPort::NoError)
     {
         stop();
-
-        switch(spe)
-        {
-        case QSerialPort::DeviceNotFoundError:
-            emit error(QObject::tr("Device not found"));
-            break;
-
-        case QSerialPort::PermissionError:
-            emit error(QObject::tr("Permission denied ") + serial_port->portName());
-            break;
-
-        case QSerialPort::OpenError:
-            emit error(QObject::tr("Open error"));
-            break;
-
-        case QSerialPort::NotOpenError:
-            emit error(QObject::tr("Not open error"));
-            break;
-
-        case QSerialPort::ParityError:
-            emit error(QObject::tr("Parity error"));
-            break;
-
-        case QSerialPort::FramingError:
-            emit error(QObject::tr("Framing error"));
-            break;
-
-        case QSerialPort::BreakConditionError:
-            emit error(QObject::tr("Break condition error"));
-            break;
-
-        case QSerialPort::WriteError:
-            emit error(QObject::tr("Write error"));
-            break;
-
-        case QSerialPort::ReadError:
-            emit error(QObject::tr("Read error"));
-            break;
-
-        case QSerialPort::ResourceError:
-            emit error(QObject::tr("Resource error"));
-            break;
-
-        case QSerialPort::UnsupportedOperationError:
-            emit error(QObject::tr("Unsupported operation error"));
-            break;
-
-        case QSerialPort::TimeoutError:
-            emit error(QObject::tr("Timeout error"));
-            break;
-
-        case QSerialPort::UnknownError:
-            emit error(QObject::tr("Unknown error"));
-            break;
-
-        default:
-            break;
-        }
+        emit error(serial_port->errorString() + " " + serial_port->portName());
     }
 }
 
