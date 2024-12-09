@@ -111,8 +111,6 @@ void HXServer::setLoader(const QString &value)
 //------------------------------------------------------------------------------------------------
 void HXServer::setupComPort()
 {
-    serialport_transition_error_disconnected = errorState->addTransition(&port.get()->SerialPort(), &QSerialPort::aboutToClose, closedState.get());
-
     connect(port.get(), &SerialPortThread::error, this, &HXServer::error);
     connect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
     connect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
@@ -130,11 +128,6 @@ void HXServer::setupComPort()
 //------------------------------------------------------------------------------------------------
 void HXServer::removeComPort()
 {
-    if(serialport_transition_error_disconnected != nullptr)
-        errorState->removeTransition(serialport_transition_error_disconnected);
-
-    serialport_transition_error_disconnected = nullptr;
-
     disconnect(this, &HXServer::sendPacket, this, &HXServer::sendPacketDump);
 
     if(port)

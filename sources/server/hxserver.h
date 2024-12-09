@@ -81,8 +81,6 @@ private:
 
     std::unique_ptr<Images> m_images;
 
-    QAbstractTransition *serialport_transition_error_disconnected{nullptr};
-
     void sendLoader();
     bool processByte(byte ch);
     bool readData(byte ch);

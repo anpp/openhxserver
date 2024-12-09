@@ -137,7 +137,7 @@ void SerialPortThread::open(const QString& com_port)
 
 #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
-    //connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
+    connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
 #endif
 
     emit opened();
