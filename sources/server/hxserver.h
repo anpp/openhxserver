@@ -69,7 +69,7 @@ private:
     ServerPCTypes spt = ServerPCTypes::None;
     ReadWritePhases rp = ReadWritePhases::None;
     ReadWritePhases wp = ReadWritePhases::None;
-    word m_PacketSize = 0;
+    word m_PacketSize;
     word m_CheckSumm;
     word m_CheckedSumm;
     byte m_unit;

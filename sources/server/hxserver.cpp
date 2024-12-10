@@ -651,7 +651,6 @@ bool HXServer::writeData(byte ch)
         if(m_CheckSumm == m_CheckedSumm)
         {
             emit hxCommand(); //признак, что комманда распознана как HX
-
             writeDataExecute();
         }
         else
@@ -1021,6 +1020,7 @@ void HXServer::resetState()
     m_numBytes = 0;
     m_CheckSumm = 0;
     m_block = 0;
+    m_unit = 0;
     m_bytes = 0;
     packet_buffer.clear();
 }
@@ -1112,6 +1112,7 @@ void HXServer::isOpened()
 void HXServer::isReady()
 {
     connect(this, &HXServer::hxCommand, this, &HXServer::work);// переходим в работу без загрузки
+    resetState();
     releaseAllImages();
     emit log(tr(" (press Start)"), Qt::black, true);
     emit stateChanged(state());
