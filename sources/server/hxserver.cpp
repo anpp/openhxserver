@@ -173,6 +173,7 @@ void HXServer::initSM()
     connect(closedState.get(), &QState::entered, this, &HXServer::isClosed);
     connect(openedState.get(), &QState::entered, this, &HXServer::isOpened);
     connect(readyState.get(), &QState::entered, this, &HXServer::isReady);
+    connect(readyState.get(), &QState::exited, this, &HXServer::isExitReady);
     connect(waitingState.get(), &QState::entered, this, &HXServer::isWaiting);
     connect(processingState.get(), &QState::entered, this, &HXServer::isProcessing);
     connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused);
@@ -484,6 +485,8 @@ bool HXServer::readData(byte ch)
 
         if(m_CheckSumm == m_CheckedSumm)
         {
+            emit hxCommand(); //признак, что комманда распознана как HX
+
             if(m_packed_data)
                 readPackedDataExecute();
             else
@@ -537,6 +540,8 @@ bool HXServer::getSize(byte ch)
 
         if(m_CheckSumm == m_CheckedSumm)
         {
+            emit hxCommand(); //признак, что комманда распознана как HX
+
             size_t num_blocks = m_images->at(m_unit).size();
             QString mes = QString(tr("HX: SIZE :  Unit: %1  |   Blocks: %2 ").arg(QString::number(m_unit), QString::number(num_blocks)));
             emit log(mes);
@@ -555,7 +560,7 @@ bool HXServer::getSize(byte ch)
         break;
     }
 
-    return true;
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -644,7 +649,11 @@ bool HXServer::writeData(byte ch)
             return true;
 
         if(m_CheckSumm == m_CheckedSumm)
+        {
+            emit hxCommand(); //признак, что комманда распознана как HX
+
             writeDataExecute();
+        }
         else
         {
             logWrite();
@@ -657,7 +666,7 @@ bool HXServer::writeData(byte ch)
         break;
     }
 
-    return true;
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1102,27 +1111,30 @@ void HXServer::isOpened()
 //------------------------------------------------------------------------------------------------
 void HXServer::isReady()
 {
+    connect(this, &HXServer::hxCommand, this, &HXServer::work);// переходим в работу без загрузки
     releaseAllImages();
     emit log(tr(" (press Start)"), Qt::black, true);
-
     emit stateChanged(state());
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::isExitReady()
+{
+    //
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::isWaiting()
 {
-    connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
     emit log("", Qt::black, true);
-
     emit stateChanged(state());
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::isProcessing()
-{    
-    disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
+{
+    disconnect(this, &HXServer::hxCommand, this, &HXServer::work);
     emit log("", Qt::black, true);
-
     emit stateChanged(state());
 }
 
@@ -1130,7 +1142,6 @@ void HXServer::isProcessing()
 void HXServer::isPaused()
 {
     emit log("", Qt::black, true);
-
     emit stateChanged(state());
 }
 
@@ -1157,7 +1168,9 @@ void HXServer::processData(const QByteArray& data)
     if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
         QThread::msleep(1000);
+        connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
         sendLoader();
+        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
     }
 
     if(state() == ServerStates::Ready || state() == ServerStates::Waiting || state() == ServerStates::Processing || state() == ServerStates::Paused)
@@ -1168,11 +1181,6 @@ void HXServer::processData(const QByteArray& data)
                 resetState();
                 if(state() != ServerStates::Paused)
                     emit ttyOut(data);
-            }
-            else
-            {// переходим в работу без загрузки
-                if(state() == ServerStates::Ready || state() == ServerStates::Waiting)
-                    emit work();
             }
         }
 }
@@ -1196,6 +1204,3 @@ void HXServer::setPackedData(bool value)
 {
     m_packed_data = value;
 }
-
-
-

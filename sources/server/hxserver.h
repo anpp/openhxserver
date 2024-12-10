@@ -118,12 +118,14 @@ signals:
     void stateChanged(ServerStates);
     void baudRateChanged(quint32 baudRate);
     void flowControlChanged(const QString& flowControl);
+    void hxCommand();
 
 public slots:
     void setError(const QString& value);
     void isClosed();
     void isOpened();
     void isReady();
+    void isExitReady();
     void isWaiting();
     void isProcessing();
     void isPaused();
