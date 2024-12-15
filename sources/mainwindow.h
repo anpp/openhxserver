@@ -15,6 +15,7 @@
 class SettingsImages;
 class Settings;
 class PortDump;
+class PortState;
 
 class MainWindow : public QMainWindow, protected Ui::MainWindow
 
@@ -49,7 +50,8 @@ private:
 
     std::shared_ptr<Settings> settings;
     std::unique_ptr<SettingsImages> images_widget;
-    std::unique_ptr<PortDump> dump_widget;;
+    std::unique_ptr<PortDump> dump_widget;
+    std::unique_ptr<PortState> portState_widget;
 
     QVector<QPointer<QAction>> m_actions;
     QPointer<QAction> m_toggleImages;

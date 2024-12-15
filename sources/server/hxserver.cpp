@@ -543,14 +543,14 @@ bool HXServer::getSize(byte ch)
             emit hxCommand(); //признак, что комманда распознана как HX
 
             size_t num_blocks = m_images->at(m_unit).size();
-            QString mes = QString(tr("HX: SIZE :  Unit: %1  |   Blocks: %2 ").arg(QString::number(m_unit), QString::number(num_blocks)));
+            QString mes = QString(tr("HX: Size :  Unit: %1  |   Blocks: %2 ").arg(QString::number(m_unit), QString::number(num_blocks)));
             emit log(mes);
 
             sendShortPacket(ServerPCTypes::PCGetSize, ServerPCTypes::PCRead, 6, num_blocks);
         }
         else
         {
-            emit log(tr("HX: GetSize command checkSum ERROR!"), Qt::red);
+            emit log(tr("HX: GetSize command checksum ERROR!"), Qt::red);
             sendSpecialPacket1();
         }
 
@@ -656,7 +656,7 @@ bool HXServer::writeData(byte ch)
         else
         {
             logWrite();
-            emit log(tr("HX: Write command checkSum ERROR!"), Qt::red);
+            emit log(tr("HX: Write command checksum ERROR!"), Qt::red);
             sendSpecialPacket1();
         }
 
@@ -968,12 +968,12 @@ void HXServer::readPackedDataExecute()
     QString mes;
     if( m_bytes != nDataBytesSent + nBytesSaved )
     {
-        mes = QString(tr("RAW Bytes: %1  |  Header Bytes: %2  |  Total Sent: %3  |  To Restore: %4 ").arg(QString::number(m_bytes), QString::number(nHeaderBytesSent), QString::number(nHeaderBytesSent + nDataBytesSent), QString::number(nDataBytesSent + nBytesSaved)));
+        mes = QString(tr("RAW bytes: %1 | Header Bytes: %2 | Total Sent: %3 | To Restore: %4 ").arg(QString::number(m_bytes), QString::number(nHeaderBytesSent), QString::number(nHeaderBytesSent + nDataBytesSent), QString::number(nDataBytesSent + nBytesSaved)));
     }
     else
-        mes = QString(tr("Bytes Saved: %1 ").arg(QString::number(nBytesSaved - nHeaderBytesSent + 4)));
+        mes = QString(tr("Bytes saved: %1 ").arg(QString::number(nBytesSaved - nHeaderBytesSent + 4)));
 
-    emit log(mes, Qt::darkBlue);
+    emit log(mes, Qt::darkMagenta);
     emit dump("", false);
 }
 
@@ -1028,21 +1028,21 @@ void HXServer::resetState()
 //------------------------------------------------------------------------------------------------
 void HXServer::logRead()
 {
-    QString mes = QString(tr("HX: READ :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    QString mes = QString(tr("HX: Read: Unit: %1 | Block: %2 | Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(mes, Qt::darkBlue);
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::logReadPacked()
 {
-    QString mes = QString(tr("HX: read :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    QString mes = QString(tr("HX: Read packed data: Unit: %1 | Block: %2 | tBytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(mes, Qt::darkBlue);
 }
 
 //------------------------------------------------------------------------------------------------
 void HXServer::logWrite()
 {
-    QString mes = QString(tr("HX: WRITE :  Unit: %1  |   Block: %2   |   Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    QString mes = QString(tr("HX: Write: Unit: %1 | Block: %2 | Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(mes, Qt::darkGreen);
 }
 

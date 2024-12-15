@@ -5,6 +5,7 @@
 #include "settings.h"
 #include "server/images.h"
 #include "port_dump.h"
+#include "port_state.h"
 
 #include <QDockWidget>
 #include <QTimer>
@@ -74,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
     statusbar->addWidget(&m_PortLabel);
     statusbar->addWidget(&m_baudRateLabel);
     statusbar->addWidget(&m_flowControlLabel);
-    statusbar->addWidget(&m_StateLabel);
+    statusbar->addWidget(&m_StateLabel, 1);
 
     initWidgets();
     initActions();
@@ -126,7 +127,7 @@ void MainWindow::initActions()
 
     m_packedDataAction = new QAction(QIcon(":/images/icons/package-light.png"), tr("Packed data"), this);
     m_actions.push_back(m_packedDataAction);
-    m_packedDataAction->setToolTip(tr("Packed data (only for flow control RTS/CTS)"));
+    m_packedDataAction->setToolTip(tr("Packed data (RTS/CTS flow control only)"));
     m_packedDataAction->setCheckable(true);
     connect(m_packedDataAction, &QAction::triggered, hxserver.get(), &HXServer::setPackedData);
 
@@ -252,6 +253,8 @@ void MainWindow::initWidgets()
     m_togglePortDump = dockDump->toggleViewAction();
     m_togglePortDump->setShortcut(QKeySequence("F12"));
 
+    portState_widget = std::make_unique<PortState>();
+    statusbar->addPermanentWidget(portState_widget.get());
 }
 
 //----------------------------------------------------------------------------------------------------------------------

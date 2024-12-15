@@ -14,6 +14,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     port_dump.cpp \
+    port_state.cpp \
     server/hxserver.cpp \
     server/imagedsk.cpp \
     server/images.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 HEADERS += \
     mainwindow.h \
     port_dump.h \
+    port_state.h \
     server/hxserver.h \
     server/imagedsk.h \
     server/images.h \
