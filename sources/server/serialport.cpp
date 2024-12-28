@@ -81,12 +81,12 @@ void SerialPortThread::sendPacket(const QByteArray& packet, const uint delayms) 
     int psize = packet.size();
     while (psize > 0)
     {
-        if(msDelay > 0)
-            QThread::msleep(msDelay);
+        if(m_msDelay > 0)
+            QThread::msleep(m_msDelay);
 
-        sendRatePacket(packet.mid(packet.size() - psize, bytes_to_port));
+        sendRatePacket(packet.mid(packet.size() - psize, m_bytes_to_port));
         QCoreApplication::processEvents();
-        psize -= bytes_to_port;
+        psize -= m_bytes_to_port;
     }
     emit finished();
 }

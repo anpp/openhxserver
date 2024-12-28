@@ -6,7 +6,7 @@
 #include <memory>
 
 
-Q_DECLARE_METATYPE(QSerialPort::SerialPortError)
+//Q_DECLARE_METATYPE(QSerialPort::SerialPortError)
 
 
 class SerialPortThread : public QObject
@@ -26,13 +26,12 @@ public:
 private:
     std::unique_ptr<QSerialPort> serial_port;
     //QThread thread;
-    int bytes_to_port = 8;
-    unsigned long msDelay = 0;
+    int m_bytes_to_port = 8;
+    unsigned long m_msDelay = 0;
     port_settings ps;
 
     void init();
     void delay(const unsigned long ms) const;
-    void sendPacketToPort(const QByteArray &packet);    
 
 public:
     explicit SerialPortThread();
@@ -40,8 +39,8 @@ public:
 
     void stop();
     void start();
-    void setBytesToPort(const int value) { bytes_to_port = value; }
-    void setDelay(const unsigned long value) { msDelay = value; }    
+    void setBytesToPort(const int value) { m_bytes_to_port = value; }
+    void setDelay(const unsigned long value) { m_msDelay = value; }
 
     QSerialPort& SerialPort() const { return *serial_port; } ;
 

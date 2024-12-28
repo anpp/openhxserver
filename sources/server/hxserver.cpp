@@ -235,7 +235,7 @@ void HXServer::sendLoader()
         {
             loader[504] = (time >> 16) & 0xFF;
             loader[505] = (time >> 24) & 0xFF;
-            loader[506] = time & 0xFF;;
+            loader[506] = time & 0xFF;
             loader[507] = (time >> 8) & 0xFF;
             loader[508] = ((year - 1972) & 0x1f) | day << 5;
             loader[509] = ((day >> 3 & 0x3) | month << 2) | (((year - 1972) & 0x60) << 1);
@@ -1035,7 +1035,7 @@ void HXServer::logRead()
 //------------------------------------------------------------------------------------------------
 void HXServer::logReadPacked()
 {
-    QString mes = QString(tr("HX: Read packed data: Unit: %1 | Block: %2 | tBytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
+    QString mes = QString(tr("HX: Read packed data: Unit: %1 | Block: %2 | Bytes: %3 ").arg(QString::number(m_unit), QString::number(m_block), QString::number(m_bytes)));
     emit log(mes, Qt::darkBlue);
 }
 
