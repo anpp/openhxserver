@@ -131,7 +131,7 @@ void SerialPortThread::open(const QString& com_port)
 {
     serial_port->setPortName(com_port);
     if (!serial_port->open(QIODevice::ReadWrite)){
-        emit error(serial_port->errorString() + " " + com_port);
+        portError(serial_port->error());
         return;
     }
 
@@ -150,8 +150,16 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
 {
     if(spe != QSerialPort::NoError)
     {
+        QString hint_value = "";
         stop();
+#ifdef Q_OS_LINUX
+        if(QSerialPort::PermissionError == spe)
+            hint_value = "Hint: run the command 'sudo chown " + qgetenv("USER") + " /dev/" + serial_port->portName() + "'";
+#endif
         emit error(serial_port->errorString() + " " + serial_port->portName());
+
+        if(!hint_value.isEmpty())
+            emit hint(hint_value);
     }
 }
 

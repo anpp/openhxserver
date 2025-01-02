@@ -47,6 +47,7 @@ public:
 signals:
     void finished() const;
     void error(const QString&) const;
+    void hint(const QString& value) const;
     void readyData(const QByteArray& data);
     void opened();
     void closed();

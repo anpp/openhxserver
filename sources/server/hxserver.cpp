@@ -112,6 +112,7 @@ void HXServer::setLoader(const QString &value)
 void HXServer::setupComPort()
 {
     connect(port.get(), &SerialPortThread::error, this, &HXServer::error);
+    connect(port.get(), &SerialPortThread::hint, this, &HXServer::portHint);
     connect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
     connect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
     connect(port.get(), &SerialPortThread::portBaudRateChanged, this, &HXServer::baudRateChanged);
@@ -1204,4 +1205,10 @@ void HXServer::update()
 void HXServer::setPackedData(bool value)
 {
     m_packed_data = value;
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::portHint(const QString &value) const
+{
+    emit log(value, Qt::darkMagenta);
 }
