@@ -102,7 +102,7 @@ private:
 signals:
     void sendPacket(const QByteArray& packet, uint delayms = 0) const;
     void error(const QString&);
-    void log(const QString& value, const QColor& color = Qt::black, bool b_state = false);
+    void log(const QString& value, const QColor& color = Qt::black, bool b_state = false) const;
     void port_opened(const QString&);
     void dump(const QByteArray&, bool in = true) const;
     void ttyOut(const QByteArray&);
@@ -134,6 +134,7 @@ public slots:
     void sendPacketDump(const QByteArray& packet, uint delayms = 0) const;
     void update();
     void setPackedData(bool value);
+    void portHint(const QString& value) const;
 };
 
 #endif // HXSERVER_H
