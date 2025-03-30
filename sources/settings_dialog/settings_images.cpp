@@ -108,8 +108,9 @@ void SettingsImages::openFileBin()
     QString filename;
     QStringList filters;
     QString defaultFilter = tr("Bin files (*.bin)");
+    QString savFilter = tr("Program files (*.sav)");
 
-    filters << defaultFilter << tr("All files (*.*)");
+    filters << defaultFilter << savFilter << tr("All files (*.*)");
 
     QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_bin").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);

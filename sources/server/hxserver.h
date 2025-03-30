@@ -82,6 +82,7 @@ private:
     std::unique_ptr<Images> m_images;
 
     void sendLoader();
+    void patchSAVFirstBlock(QByteArray& buffer) const;
     bool processByte(byte ch);
     bool readData(byte ch);
     bool readPackedData(byte ch);

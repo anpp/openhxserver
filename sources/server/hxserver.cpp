@@ -28,6 +28,30 @@ const static QString StateNames[] = {
                                     };
 
 
+//Загрузчик для .SAV файлов, взято - https://github.com/nzeemin/ukncbtl-utils/blob/master/UkncComSender/UkncComSender.cpp
+static unsigned short const loader1[] = {
+    /*000*/ 000240, 000447, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*020*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*040*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*060*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*100*/ 000000, 000000, 000000, 000240, 000240, 000240, 000240, 000240,
+    /*120*/ 000240, 012701, 001000, 013702, 000324, 006302,0105737,0176570,
+    /*140*/0100375,0113721,0176572, 077206, 013706, 000042, 013707, 000040,
+    /*160*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*200*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*220*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*240*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*260*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*300*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*320*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*340*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*360*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*400*/ 000000, 000000, 000000, 000000, 000000, 000000, 067514, 062141,
+    /*420*/ 067151, 020147, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*440*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+    /*460*/ 000000, 000000, 000000, 000000, 000000, 000000, 000000, 000000,
+};
+
 //------------------------------------------------------------------------------------------------
 HXServer::HXServer(QObject *parent)
     : QObject{parent}
@@ -208,6 +232,8 @@ void HXServer::checkReady()
 void HXServer::sendLoader()
 {
     QString owner;
+    bool isHXLoader = true;
+
     if(QFile(m_loader).exists())
     {
         QFileInfo fileinfo(m_loader);
@@ -232,7 +258,15 @@ void HXServer::sendLoader()
         uint32_t time = (QDateTime::currentDateTime().time().hour() * 3600 + QDateTime::currentDateTime().time().minute() * 60 + QDateTime::currentDateTime().time().second()) * 50;
         QByteArray loader = f.read(f.size());
 
-        if(loader.size() >= 512)
+
+        if(loader.size() > 512) //считаем, что выбран .sav файл
+        {
+            isHXLoader = false;
+            emit log(tr("Sending program file: ") + m_loader, Qt::black);
+            patchSAVFirstBlock(loader);
+        }
+        else
+        if(loader.size() == 512)
         {
             loader[504] = (time >> 16) & 0xFF;
             loader[505] = (time >> 24) & 0xFF;
@@ -241,9 +275,25 @@ void HXServer::sendLoader()
             loader[508] = ((year - 1972) & 0x1f) | day << 5;
             loader[509] = ((day >> 3 & 0x3) | month << 2) | (((year - 1972) & 0x60) << 1);
         }
+        else
+        {
+            emit error(tr("Error file: size < 512"));
+            f.close();
+            return;
+        }
+
+        if(isHXLoader)
+            connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
+        else
+            connect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
+
         emit sendPacket(loader);
+
+        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
+        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
+
         emit dump("", false);
-        emit log(tr("Sending file: ") + m_loader, Qt::black);
+        emit log(tr("Sended file: ") + m_loader, Qt::black);
     }
     else
     {
@@ -252,6 +302,19 @@ void HXServer::sendLoader()
     }
 
     f.close();
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::patchSAVFirstBlock(QByteArray &buffer) const
+{
+    if(buffer.size() < 1024) return;
+
+    unsigned short * wbuffer = (unsigned short*)buffer.data();
+    wbuffer[0] = loader1[0];
+    wbuffer[1] = loader1[1];
+    for (auto i = 0100/2; i < 0200/2; ++i)  wbuffer[i] = loader1[i];
+    //unsigned short datalen = *(wbuffer + 050/2);
+    *(wbuffer + 0324/2) = (*(wbuffer + 050/2) - 0776) / 2;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1170,9 +1233,7 @@ void HXServer::processData(const QByteArray& data)
     if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
         QThread::msleep(1000);
-        connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
         sendLoader();
-        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
     }
 
     if(state() == ServerStates::Ready || state() == ServerStates::Waiting || state() == ServerStates::Processing || state() == ServerStates::Paused)

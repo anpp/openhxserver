@@ -174,8 +174,10 @@ ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
             return DskErrors::DEFileError;
         }
 
+        //здесь запись в файл физически
         m_file->write(data);
 
+        //здесь запись в память, чтобы не перечитывать файл
         for(int i = 0; i < n_blocks; ++i)
             *m_blocks.at(i + block) = data.mid(i * ImageDsk::DskConsts::BLOCK_SIZE, ImageDsk::DskConsts::BLOCK_SIZE);            
         if(rest)
