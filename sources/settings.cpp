@@ -13,6 +13,8 @@ Settings::Settings(QMainWindow* widget_owner, const QString& organization, const
 {
     vec_settings = {
         std::make_shared<Setting>("loader", kindset::misc, "", QVariant(QVariant::String), false),
+        std::make_shared<Setting>("savfile", kindset::misc, "", QVariant(QVariant::String), false),
+        std::make_shared<Setting>("HXMode", kindset::misc, true, QVariant(QVariant::Bool), false),
 
         std::make_shared<Setting>("geometry", kindset::screen, 0, QVariant(QVariant::Int), false),
         std::make_shared<Setting>("state", kindset::screen, 0, QVariant(QVariant::Int), false),
@@ -25,6 +27,7 @@ Settings::Settings(QMainWindow* widget_owner, const QString& organization, const
         std::make_shared<Setting>("flowControl", kindset::com_port, QSerialPort::NoFlowControl, QVariant(QVariant::Int), false),
         //Environment
         std::make_shared<Setting>("directory_bin", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
+        std::make_shared<Setting>("directory_sav", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
         std::make_shared<Setting>("directory_dsk", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
     };
 }

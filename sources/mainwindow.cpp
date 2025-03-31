@@ -150,6 +150,7 @@ void MainWindow::updateHXServer()
     hxserver->setPortName(settings->COMSettings().name);
     hxserver->setPortSettings();
     hxserver->setLoader(settings->getSetting("loader", kindset::misc).toString());
+    //hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
 }
 
 //----------------------------------------------------------------------------------------------------------------------

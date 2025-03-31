@@ -48,12 +48,9 @@
          <height>0</height>
         </size>
        </property>
-       <layout class="QFormLayout" name="formLayout_2">
+       <layout class="QFormLayout" name="formLayout">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
-        </property>
-        <property name="fieldGrowthPolicy">
-         <enum>QFormLayout::ExpandingFieldsGrow</enum>
         </property>
         <property name="leftMargin">
          <number>4</number>
@@ -68,7 +65,7 @@
          <number>4</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QRadioButton" name="rbLoaderHX">
           <property name="text">
            <string>Loader</string>
           </property>
@@ -79,6 +76,26 @@
           <property name="text">
            <string/>
           </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="cursorMoveStyle">
+           <enum>Qt::VisualMoveStyle</enum>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="rbLoaderSAV">
+          <property name="text">
+           <string>.SAV file</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="leSAV">
           <property name="readOnly">
            <bool>true</bool>
           </property>

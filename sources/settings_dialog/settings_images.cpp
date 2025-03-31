@@ -31,6 +31,10 @@ SettingsImages::SettingsImages(Images& images_data, QWidget *parent) :
     m_openLoaderAction->setToolTip(tr("Open file..."));
     connect(m_openLoaderAction, &QAction::triggered, this, &SettingsImages::openFileBin);
 
+    m_openSAVAction = ui->leSAV->addAction(QIcon(":/images/icons/folder-open-light.png"), QLineEdit::TrailingPosition);
+    m_openSAVAction->setToolTip(tr("Open file..."));
+    connect(m_openSAVAction, &QAction::triggered, this, &SettingsImages::openFileSAV);
+
     connect(m_model.get(), &ImagesModel::selected_file, this, &SettingsImages::selected_image_file);
     connect(&images_data, &Images::update, this, &SettingsImages::updateWidget);
 }
@@ -52,6 +56,16 @@ void SettingsImages::setLoader(const QString &value)
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+void SettingsImages::setSAVFile(const QString &value)
+{
+    if(QFile(value).exists())
+    {
+        m_SAVFile = value;
+        ui->leSAV->setText(QFileInfo(m_SAVFile).fileName());
+    }
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::setSaveImmediate(bool a_save_immediate)
 {
     m_save_immediate = a_save_immediate;
@@ -61,7 +75,13 @@ void SettingsImages::setSaveImmediate(bool a_save_immediate)
 void SettingsImages::update()
 {
     if(Settings::instance())
+    {
         setLoader(Settings::instance()->getSetting("loader", kindset::misc).toString());
+        setSAVFile(Settings::instance()->getSetting("savfile", kindset::misc).toString());
+
+        ui->rbLoaderHX->setChecked(Settings::instance()->getSetting("HXMode", kindset::misc).toBool());
+        ui->rbLoaderSAV->setChecked(!Settings::instance()->getSetting("HXMode", kindset::misc).toBool());
+    }
 
     updateWidget();
 }
@@ -69,17 +89,20 @@ void SettingsImages::update()
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::save()
 {
-    saveLoader();
+    saveLoaders();
     saveImages();
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-void SettingsImages::saveLoader()
+void SettingsImages::saveLoaders()
 {
     if(Settings::instance())
     {
         Settings::instance()->setSetting("loader", loader(), kindset::misc);
-        Settings::instance()->setSetting("directory_bin", QFileInfo(loader()).path(), kindset::environment);
+        Settings::instance()->setSetting("directory_bin", QFileInfo(loader()).path(), kindset::environment);        
+        Settings::instance()->setSetting("savfile", SAV(), kindset::misc);
+        Settings::instance()->setSetting("directory_sav", QFileInfo(SAV()).path(), kindset::environment);
+        Settings::instance()->setSetting("HXMode", ui->rbLoaderHX->isChecked(), kindset::misc);
 
         Settings::instance()->saveSettingsByKind(kindset::misc);
         Settings::instance()->saveSettingsByKind(kindset::environment);
@@ -108,9 +131,8 @@ void SettingsImages::openFileBin()
     QString filename;
     QStringList filters;
     QString defaultFilter = tr("Bin files (*.bin)");
-    QString savFilter = tr("Program files (*.sav)");
 
-    filters << defaultFilter << savFilter << tr("All files (*.*)");
+    filters << defaultFilter << tr("All files (*.*)");
 
     QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_bin").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);
@@ -124,7 +146,32 @@ void SettingsImages::openFileBin()
         filename = fd.selectedFiles().at(0);
         setLoader(filename);
         if(m_save_immediate)
-            saveLoader();
+            saveLoaders();
+    }
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+void SettingsImages::openFileSAV()
+{
+    QString filename;
+    QStringList filters;
+    QString defaultFilter = tr("SAV files (*.sav)");
+
+    filters << defaultFilter << tr("All files (*.*)");
+
+    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_sav").toString(), filters.join(";;"));
+    fd.selectNameFilter(defaultFilter);
+
+    connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });
+    fd.setFileMode(QFileDialog::ExistingFile);
+    fd.setAcceptMode(QFileDialog::AcceptOpen);
+
+    if(fd.exec())
+    {
+        filename = fd.selectedFiles().at(0);
+        setSAVFile(filename);
+        if(m_save_immediate)
+            saveLoaders();
     }
 }
 

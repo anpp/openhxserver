@@ -21,12 +21,14 @@ public:
     ~SettingsImages();
 
     void setLoader(const QString& value);
+    void setSAVFile(const QString& value);
     const QString& loader() const { return m_loader; };
+    const QString& SAV() const { return m_SAVFile; };
     void setSaveImmediate(bool a_save_immediate);
     bool saveImmediate() const {return m_save_immediate; };
     void update();
     void save();
-    void saveLoader();
+    void saveLoaders();
     void saveImages();
 
 private:
@@ -35,16 +37,19 @@ private:
     std::unique_ptr<ImagesModel> m_model;
     std::unique_ptr<ImagesDelegate> m_delegate;
     QString m_loader;
+    QString m_SAVFile;
     bool m_save_immediate = false;
     QString last_image_file;
 
     QAction* m_openLoaderAction = nullptr;
+    QAction* m_openSAVAction = nullptr;
 
 signals:
     void updateHX();
 
 public slots:
     void openFileBin();
+    void openFileSAV();
     void selected_image_file(const QString& filename);
     void updateWidget() const;
 };
