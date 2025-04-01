@@ -133,6 +133,20 @@ void HXServer::setLoader(const QString &value)
 }
 
 //------------------------------------------------------------------------------------------------
+void HXServer::setSAVFile(const QString &value)
+{
+    m_SAVFile = value;
+    checkReady();
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::setServerMode(ServerMode value)
+{
+    m_ServerMode = value;
+    checkReady();
+}
+
+//------------------------------------------------------------------------------------------------
 void HXServer::setupComPort()
 {
     connect(port.get(), &SerialPortThread::error, this, &HXServer::error);
@@ -216,15 +230,35 @@ void HXServer::initSM()
 //------------------------------------------------------------------------------------------------
 void HXServer::checkReady()
 {
-    if(state() == ServerStates::Opened)
-    {
-        if(!m_loader.isEmpty() && m_images->at(m_boot_hx).valid())
-            emit ready();
-    }
-    if(state() == ServerStates::Ready)
-    {
-        if(m_loader.isEmpty() || !m_images->at(m_boot_hx).valid())
-            emit notready();
+    switch(m_ServerMode){
+    case ServerMode::HXMode:
+        if(state() == ServerStates::Opened)
+        {
+            if(!m_loader.isEmpty() && m_images->at(m_boot_hx).valid())
+                emit ready();
+        }
+        if(state() == ServerStates::Ready)
+        {
+            if(m_loader.isEmpty() || !m_images->at(m_boot_hx).valid())
+                emit notready();
+        }
+        break;
+
+    case ServerMode::SAVMode:
+        if(state() == ServerStates::Opened)
+        {
+            if(!m_SAVFile.isEmpty())
+                emit ready();
+        }
+        if(state() == ServerStates::Ready)
+        {
+            if(m_SAVFile.isEmpty())
+                emit notready();
+        }
+        break;
+
+    default:
+        emit notready();
     }
 }
 

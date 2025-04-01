@@ -24,12 +24,14 @@ public:
     void setSAVFile(const QString& value);
     const QString& loader() const { return m_loader; };
     const QString& SAV() const { return m_SAVFile; };
+    bool HXMode() const;
     void setSaveImmediate(bool a_save_immediate);
     bool saveImmediate() const {return m_save_immediate; };
     void update();
     void save();
-    void saveLoaders();
-    void saveImages();
+    void saveLoaders() const;
+    void saveImages() const;
+    void saveHXMode(bool value) const;
 
 private:
     Ui::SettingsImages *ui;
@@ -45,13 +47,14 @@ private:
     QAction* m_openSAVAction = nullptr;
 
 signals:
-    void updateHX();
+    void updateHX() const;
 
 public slots:
     void openFileBin();
     void openFileSAV();
     void selected_image_file(const QString& filename);
     void updateWidget() const;
+    void rbModeClicked(bool checked);
 };
 
 #endif // SETTINGS_IMAGES_H

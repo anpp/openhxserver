@@ -26,6 +26,7 @@ class HXServer : public QObject
 
 public:
     enum ServerStates: int {Unk = -1, Closed = 0, Opened = 1, Ready = 2, Waiting = 3, Processing = 4, Paused = 5, Error = 6};
+    enum ServerMode: int {HXMode = 0, SAVMode = 1};
 
     explicit HXServer(QObject *parent = nullptr);
     ~HXServer();
@@ -37,6 +38,8 @@ public:
     ServerStates state() const;
     const QString& nameState() const;
     void setLoader(const QString& value);
+    void setSAVFile(const QString& value);
+    void setServerMode(ServerMode value);
     Images& images() const {return *m_images; };
 
 protected:
@@ -61,7 +64,9 @@ private:
     QString m_PortName = "";
     QString m_ErrorMessage = "";
     QString m_loader = "";
+    QString m_SAVFile = "";
     uint8_t m_boot_hx = 0;
+    ServerMode m_ServerMode = ServerMode::HXMode;
     QByteArray packet_buffer;
     mutable QByteArray buffer_to_com;
     QByteArray buffer_from_com;

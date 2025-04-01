@@ -37,6 +37,8 @@ SettingsImages::SettingsImages(Images& images_data, QWidget *parent) :
 
     connect(m_model.get(), &ImagesModel::selected_file, this, &SettingsImages::selected_image_file);
     connect(&images_data, &Images::update, this, &SettingsImages::updateWidget);
+    connect(ui->rbLoaderHX, &QRadioButton::clicked, this,  &SettingsImages::rbModeClicked);
+    connect(ui->rbLoaderSAV, &QRadioButton::clicked, this,  &SettingsImages::rbModeClicked);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -66,6 +68,12 @@ void SettingsImages::setSAVFile(const QString &value)
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+bool SettingsImages::HXMode() const
+{
+    return ui->rbLoaderHX->isChecked();
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::setSaveImmediate(bool a_save_immediate)
 {
     m_save_immediate = a_save_immediate;
@@ -91,10 +99,11 @@ void SettingsImages::save()
 {
     saveLoaders();
     saveImages();
+    saveHXMode(HXMode());
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-void SettingsImages::saveLoaders()
+void SettingsImages::saveLoaders() const
 {
     if(Settings::instance())
     {
@@ -102,7 +111,6 @@ void SettingsImages::saveLoaders()
         Settings::instance()->setSetting("directory_bin", QFileInfo(loader()).path(), kindset::environment);        
         Settings::instance()->setSetting("savfile", SAV(), kindset::misc);
         Settings::instance()->setSetting("directory_sav", QFileInfo(SAV()).path(), kindset::environment);
-        Settings::instance()->setSetting("HXMode", ui->rbLoaderHX->isChecked(), kindset::misc);
 
         Settings::instance()->saveSettingsByKind(kindset::misc);
         Settings::instance()->saveSettingsByKind(kindset::environment);
@@ -111,7 +119,7 @@ void SettingsImages::saveLoaders()
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-void SettingsImages::saveImages()
+void SettingsImages::saveImages() const
 {
     m_model->save();
     if(Settings::instance())
@@ -122,6 +130,17 @@ void SettingsImages::saveImages()
             Settings::instance()->saveSettingsByKind(kindset::environment);
         }
     }
+    emit updateHX();
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+void SettingsImages::saveHXMode(bool value) const
+{
+    if(Settings::instance())
+        Settings::instance()->setSetting("HXMode", value, kindset::misc);
+
+    Settings::instance()->saveSettingsByKind(kindset::misc);
+
     emit updateHX();
 }
 
@@ -188,6 +207,16 @@ void SettingsImages::selected_image_file(const QString &filename)
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::updateWidget() const
 {
-     emit m_model->dataChanged(QModelIndex(), QModelIndex());
+    emit m_model->dataChanged(QModelIndex(), QModelIndex());
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+void SettingsImages::rbModeClicked(bool checked)
+{
+    QRadioButton *rb = static_cast<QRadioButton*>(sender());
+    if(!rb) return;
+
+    if(m_save_immediate)
+        saveHXMode(ui->rbLoaderHX == rb ? checked : !checked);
 }
 

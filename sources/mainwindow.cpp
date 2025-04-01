@@ -150,7 +150,13 @@ void MainWindow::updateHXServer()
     hxserver->setPortName(settings->COMSettings().name);
     hxserver->setPortSettings();
     hxserver->setLoader(settings->getSetting("loader", kindset::misc).toString());
-    //hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
+    hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
+
+    bool HXMode = settings->getSetting("HXMode", kindset::misc).toBool();
+    if(HXMode)
+        hxserver->setServerMode(HXServer::ServerMode::HXMode);
+    else
+        hxserver->setServerMode(HXServer::ServerMode::SAVMode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
