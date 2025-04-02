@@ -266,7 +266,6 @@ void HXServer::checkReady()
 void HXServer::sendLoader()
 {
     QString owner;
-    bool isHXLoader = true;
 
     if(QFile(m_loader).exists())
     {
@@ -292,15 +291,7 @@ void HXServer::sendLoader()
         uint32_t time = (QDateTime::currentDateTime().time().hour() * 3600 + QDateTime::currentDateTime().time().minute() * 60 + QDateTime::currentDateTime().time().second()) * 50;
         QByteArray loader = f.read(f.size());
 
-
-        if(loader.size() > 512) //считаем, что выбран .sav файл
-        {
-            isHXLoader = false;
-            emit log(tr("Sending program file: ") + m_loader, Qt::black);
-            patchSAVFirstBlock(loader);
-        }
-        else
-        if(loader.size() == 512)
+        if(loader.size() >= 512)
         {
             loader[504] = (time >> 16) & 0xFF;
             loader[505] = (time >> 24) & 0xFF;
@@ -308,26 +299,14 @@ void HXServer::sendLoader()
             loader[507] = (time >> 8) & 0xFF;
             loader[508] = ((year - 1972) & 0x1f) | day << 5;
             loader[509] = ((day >> 3 & 0x3) | month << 2) | (((year - 1972) & 0x60) << 1);
+
+            emit sendPacket(loader);
+
+            emit dump("", false);
+            emit log(tr("Sended file: ") + m_loader, Qt::black);
         }
         else
-        {
-            emit error(tr("Error file: size < 512"));
-            f.close();
-            return;
-        }
-
-        if(isHXLoader)
-            connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
-        else
-            connect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
-
-        emit sendPacket(loader);
-
-        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
-        disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
-
-        emit dump("", false);
-        emit log(tr("Sended file: ") + m_loader, Qt::black);
+            emit error(tr("File is too small: ") + m_loader);
     }
     else
     {
@@ -339,9 +318,55 @@ void HXServer::sendLoader()
 }
 
 //------------------------------------------------------------------------------------------------
-void HXServer::patchSAVFirstBlock(QByteArray &buffer) const
+void HXServer::sendSAVFile()
 {
-    if(buffer.size() < 1024) return;
+    QString owner;
+
+    if(QFile(m_SAVFile).exists())
+    {
+        QFileInfo fileinfo(m_SAVFile);
+        owner = fileinfo.owner();
+    }
+    else
+    {
+        emit error(tr("File is not exist: ") + m_SAVFile);
+        return;
+    }
+
+    QFile f(m_SAVFile);
+#if QT_VERSION <= QT_VERSION_CHECK(5, 6, 3)
+    if(f.open(QIODevice::ReadOnly))
+#else
+    if(f.open(QIODevice::ReadOnly | QFile::ExistingOnly))
+#endif
+    {
+        QByteArray SAVFile = f.read(f.size());
+        emit log(tr("Sending file: ") + m_SAVFile, Qt::black);
+
+        if(patchSAVFirstBlock(SAVFile))
+        {
+
+            emit sendPacket(SAVFile);
+
+            emit dump("", false);
+            emit log(tr("Sended file: ") + m_SAVFile, Qt::black);
+        }
+        else
+            emit error(tr("File is too small: ") + m_SAVFile);
+    }
+    else
+    {
+        emit error(f.errorString() + tr(" Error - cannot read file: ") + m_loader + (owner.isEmpty() ? "" : tr(". File owner is ") + owner));
+        return;
+    }
+
+    f.close();
+}
+
+//------------------------------------------------------------------------------------------------
+bool HXServer::patchSAVFirstBlock(QByteArray &buffer) const
+{
+    if(buffer.size() < 1024) return false;
 
     unsigned short * wbuffer = (unsigned short*)buffer.data();
     wbuffer[0] = loader1[0];
@@ -349,6 +374,8 @@ void HXServer::patchSAVFirstBlock(QByteArray &buffer) const
     for (auto i = 0100/2; i < 0200/2; ++i)  wbuffer[i] = loader1[i];
     //unsigned short datalen = *(wbuffer + 050/2);
     *(wbuffer + 0324/2) = (*(wbuffer + 050/2) - 0776) / 2;
+
+    return true;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1267,7 +1294,19 @@ void HXServer::processData(const QByteArray& data)
     if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
         QThread::msleep(1000);
-        sendLoader();
+
+        if(ServerMode::HXMode == m_ServerMode)
+        {
+            connect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
+            sendLoader();
+            disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
+        }
+        else
+        {
+            connect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
+            sendSAVFile();
+            disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
+        }
     }
 
     if(state() == ServerStates::Ready || state() == ServerStates::Waiting || state() == ServerStates::Processing || state() == ServerStates::Paused)

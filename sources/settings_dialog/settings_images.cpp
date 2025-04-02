@@ -144,6 +144,7 @@ void SettingsImages::saveHXMode(bool value) const
     emit updateHX();
 }
 
+//Нужно отрефакторить - 2 почти одинаковые функции...
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::openFileBin()
 {
