@@ -341,15 +341,26 @@ void HXServer::sendSAVFile()
 #endif
     {
         QByteArray SAVFile = f.read(f.size());
-        emit log(tr("Sending file: ") + m_SAVFile, Qt::black);
 
         if(patchSAVFirstBlock(SAVFile))
         {
+            emit work();
+            emit log(tr("Sending file: ") + m_SAVFile + " - 0%", Qt::black);
 
-            emit sendPacket(SAVFile);
+            int fsize = SAVFile.size();
+            while (fsize > 0)
+            {
+                QThread::msleep(100);
+
+                emit sendPacket(SAVFile.mid(SAVFile.size() - fsize, ImageDsk::DskConsts::BLOCK_SIZE));
+                QCoreApplication::processEvents();
+                fsize -= ImageDsk::DskConsts::BLOCK_SIZE;
+                emit log(tr("Sending file: ") + m_SAVFile + " - " + QString::number(((SAVFile.size() - fsize) * 100) / SAVFile.size()) + "%", Qt::black, false, true);
+            }
+
+            emit stop();
 
             emit dump("", false);
-            emit log(tr("Sended file: ") + m_SAVFile, Qt::black);
         }
         else
             emit error(tr("File is too small: ") + m_SAVFile);
@@ -1302,11 +1313,7 @@ void HXServer::processData(const QByteArray& data)
             disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::work);
         }
         else
-        {
-            connect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
             sendSAVFile();
-            disconnect(port.get(), &SerialPortThread::finished, this, &HXServer::stop);
-        }
     }
 
     if(state() == ServerStates::Ready || state() == ServerStates::Waiting || state() == ServerStates::Processing || state() == ServerStates::Paused)

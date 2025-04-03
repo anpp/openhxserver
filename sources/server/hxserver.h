@@ -109,7 +109,7 @@ private:
 signals:
     void sendPacket(const QByteArray& packet, uint delayms = 0) const;
     void error(const QString&);
-    void log(const QString& value, const QColor& color = Qt::black, bool b_state = false) const;
+    void log(const QString& value, const QColor& color = Qt::black, bool b_state = false, bool b_clear_last = false) const;
     void port_opened(const QString&);
     void dump(const QByteArray&, bool in = true) const;
     void ttyOut(const QByteArray&);

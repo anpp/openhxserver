@@ -14,6 +14,7 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QDateTime>
+#include <QScrollBar>
 
 
 class IconDockStyle: public QProxyStyle{
@@ -300,7 +301,7 @@ void MainWindow::port_opened(const QString &portName)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MainWindow::log(const QString& value, const QColor& color, bool b_state)
+void MainWindow::log(const QString& value, const QColor& color, bool b_state, bool b_clear_last)
 {
     QString message;
     QString date_color = "#0000ff";
@@ -312,8 +313,12 @@ void MainWindow::log(const QString& value, const QColor& color, bool b_state)
 
     message = "<FONT color=" + color.name(QColor::HexRgb) + ">" + message + "</FONT>";
 
+    if(b_clear_last)
+        teLog->undo();
+
     message = "<FONT color=" + date_color + ">" + "[" + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") + "]</FONT> " + message;
     teLog->append(message);
+    teLog->verticalScrollBar()->setValue(teLog->verticalScrollBar()->maximum());
 }
 
 
