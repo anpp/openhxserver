@@ -1,26 +1,26 @@
 # OpenHXServer
 
-OpenHXServer или просто OpenHX - открытая реализация протокола HX, разработанного участником форума zx-pk.ru под ником Patron.
-Протокол позволяет загружать ОС RT-11 на компьютерах [УКНЦ](https://ru.wikipedia.org/wiki/%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE%D0%BD%D0%B8%D0%BA%D0%B0_%D0%9C%D0%A1_0511) (и другие, например ДВК) через Стык С2 (COM порт) с образов дискет, находящися на современном компьютере.
-Подробнее - [тут](https://zx-pk.ru/threads/20683-protokol-hx-imitatsiya-blochnogo-ustrojstva-s-posledovatelnym-interfejsom.html).
-Кратко - драйвер HX.SYS должен быть записан на образ дискеты .dsk, который "монтируется" в слот HX0 в программе.
+OpenHXServer РёР»Рё РїСЂРѕСЃС‚Рѕ OpenHX - РѕС‚РєСЂС‹С‚Р°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РїСЂРѕС‚РѕРєРѕР»Р° HX, СЂР°Р·СЂР°Р±РѕС‚Р°РЅРЅРѕРіРѕ СѓС‡Р°СЃС‚РЅРёРєРѕРј С„РѕСЂСѓРјР° zx-pk.ru РїРѕРґ РЅРёРєРѕРј Patron.
+РџСЂРѕС‚РѕРєРѕР» РїРѕР·РІРѕР»СЏРµС‚ Р·Р°РіСЂСѓР¶Р°С‚СЊ РћРЎ RT-11 РЅР° РєРѕРјРїСЊСЋС‚РµСЂР°С… [РЈРљРќР¦](https://ru.wikipedia.org/wiki/%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE%D0%BD%D0%B8%D0%BA%D0%B0_%D0%9C%D0%A1_0511) (Рё РґСЂСѓРіРёРµ, РЅР°РїСЂРёРјРµСЂ Р”Р’Рљ) С‡РµСЂРµР· РЎС‚С‹Рє РЎ2 (COM РїРѕСЂС‚) СЃ РѕР±СЂР°Р·РѕРІ РґРёСЃРєРµС‚, РЅР°С…РѕРґСЏС‰РёСЃСЏ РЅР° СЃРѕРІСЂРµРјРµРЅРЅРѕРј РєРѕРјРїСЊСЋС‚РµСЂРµ.
+РџРѕРґСЂРѕР±РЅРµРµ - [С‚СѓС‚](https://zx-pk.ru/threads/20683-protokol-hx-imitatsiya-blochnogo-ustrojstva-s-posledovatelnym-interfejsom.html).
+РљСЂР°С‚РєРѕ - РґСЂР°Р№РІРµСЂ HX.SYS РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р·Р°РїРёСЃР°РЅ РЅР° РѕР±СЂР°Р· РґРёСЃРєРµС‚С‹ .dsk, РєРѕС‚РѕСЂС‹Р№ "РјРѕРЅС‚РёСЂСѓРµС‚СЃСЏ" РІ СЃР»РѕС‚ HX0 РІ РїСЂРѕРіСЂР°РјРјРµ.
 
-# Смежные проекты
+# РЎРјРµР¶РЅС‹Рµ РїСЂРѕРµРєС‚С‹
 
-[Эмулятор УКНЦ by Nikita Zimin](https://github.com/nzeemin/ukncbtl/) - тоже может загружаться по протоколу HX (нужно настроить вирутальные ком-порты, например программой com0com)
-[Утилиты by Nikita Zimin](https://github.com/nzeemin/ukncbtl-utils/) - полезные утилиты для редактирования образов и др.
-
-
-Пока не реализован терминал. 
-
-[Сборка для Windows](https://disk.yandex.ru/d/V_BeXg2tUqwDPw)
-
-[Сборка для Windows XP](https://disk.yandex.ru/d/lZ2vvSD9tmcCIw)
-
-[Сборка для Linux (.deb)](https://disk.yandex.ru/d/Gig7HQGHeMXBCw)
+[Р­РјСѓР»СЏС‚РѕСЂ РЈРљРќР¦ by Nikita Zimin](https://github.com/nzeemin/ukncbtl/) - С‚РѕР¶Рµ РјРѕР¶РµС‚ Р·Р°РіСЂСѓР¶Р°С‚СЊСЃСЏ РїРѕ РїСЂРѕС‚РѕРєРѕР»Сѓ HX (РЅСѓР¶РЅРѕ РЅР°СЃС‚СЂРѕРёС‚СЊ РІРёСЂСѓС‚Р°Р»СЊРЅС‹Рµ РєРѕРј-РїРѕСЂС‚С‹, РЅР°РїСЂРёРјРµСЂ РїСЂРѕРіСЂР°РјРјРѕР№ com0com)
+[РЈС‚РёР»РёС‚С‹ by Nikita Zimin](https://github.com/nzeemin/ukncbtl-utils/) - РїРѕР»РµР·РЅС‹Рµ СѓС‚РёР»РёС‚С‹ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РѕР±СЂР°Р·РѕРІ Рё РґСЂ.
 
 
-![alt text](screenshots/dsk_switching.png "Загрузка RT-11.")
+РџРѕРєР° РЅРµ СЂРµР°Р»РёР·РѕРІР°РЅ С‚РµСЂРјРёРЅР°Р». 
 
-## Лицензия
+[РЎР±РѕСЂРєР° РґР»СЏ Windows](https://disk.yandex.ru/d/V_BeXg2tUqwDPw)
+
+[РЎР±РѕСЂРєР° РґР»СЏ Windows XP](https://disk.yandex.ru/d/lZ2vvSD9tmcCIw)
+
+[РЎР±РѕСЂРєР° РґР»СЏ Linux (.deb)](https://disk.yandex.ru/d/Gig7HQGHeMXBCw)
+
+
+![alt text](screenshots/dsk_switching.png "Р—Р°РіСЂСѓР·РєР° RT-11.")
+
+## Р›РёС†РµРЅР·РёСЏ
 [BSD](https://choosealicense.com/licenses/bsd-2-clause/)
