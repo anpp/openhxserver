@@ -9,7 +9,7 @@ QT += serialport
 
 CONFIG += c++14
 QMAKE_CXXFLAGS += -pie
-QMAKE_LFLAGS += -pie
+#QMAKE_LFLAGS += -pie
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
