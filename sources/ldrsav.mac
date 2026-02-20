@@ -29,9 +29,8 @@ TMINT:
 	RTI
 
 
-RUN:    
-	MOV   R0, -(SP)
-	MOV   #LDSTR, R0        
+RUN:
+	MOV   #LDSTR, R0        ;Вывести надпись "Loading"
 	EMT   #351	
 
 	MOV   #001000, R1  ; Адрес куда считывать остаток файла
@@ -51,19 +50,30 @@ RUN:
 11$:
 	SOB   R2,1$   ; Продолжаем пока не прочитали всё
 
-	MOV   (SP)+, R0
-
 	MOV   @#000040, startpr ;сохранить, чтоб можно было перезапустить
 	MOV   @#000042,stack   
 
-	MOV   @#000042,SP
-	BIS	#100,@#177560
-	MTPS	#0
-	MOV   @#000040,PC ; Запускаем загруженную программу
+	;копируем диспетчер EMT в верхнюю память
+	MOV   #156000, R0 ;по этому адресу будет диспетчер EMT
+	MOV   #MYEMT, R1
+	MOV   ENDMYEMT, R2
+22$:	MOV   (R1)+, (R0)+
+	SOB   R2, 22$
+
+	MOV   #156000, @#30
+
+	MOV   stack,SP
+	BIS   #100,@#177560
+	MTPS  #0
+	MOV   startpr,PC ; Запускаем загруженную программу
+
+
+LDSTR:	.ASCII	"Loading "<200>
+.EVEN
 
 ;###### Разбор EMT ######
 MYEMT:  	
-	MOV       R0,SAVR0        ;сохранить параметр EMT
+	MOV       R0, SAVR0        ;сохранить параметр EMT
         MOV       (SP),R0         ;адрес возврата в R0
         MOV       -(R0), R0       ;извлечь команду EMT
         BIC       #1,2(SP)        ;установить в PSW C=0
@@ -90,10 +100,10 @@ CY1:    MOV       SAVR0,R0        ;восстановить R0
 
 NE340:  CMPB	#351, R0
 EMT351: BNE	NOT351
-	MOV       SAVR0, R0        ;восстановить R0 (адрес строки) 
+	MOV     SAVR0, R0        ;восстановить R0 (адрес строки) 
 2$:	TSTB	@R0
 	BEQ	4$
-	CMP	@R0, #200
+	CMPB	@R0, #200
 	BEQ	exit351
 3$:     TSTB      @#177564        ;готовность есть?
         BPL       3$             ;дисплей не готов!	
@@ -117,7 +127,7 @@ EMT354: MOV       SAVR0,R0        ;требуемый адрес
         BIC       #1,R0           ;сделать четным
         CMP       #177776,R0      ;максимум памяти?
         BEQ       MAX
-        CMP	HIMEM,R0
+        CMP	  HIMEM,R0
         BCC       OK              ;да
 MAX:    MOV       HIMEM,R0        ;установить максимум
 OK:     MOV       R0,@#50         ;записать адрес в ячейку 50	
@@ -130,12 +140,12 @@ EMT350:
 NE350:  .WORD 0                   ;ОСТАНОВ ПО НЕПРЕДУСМОТРЕННО-
                                   ;МУEMT
         BR        CY1             ;установить признак ошибки!
-SAVR0:  .WORD 0
-HIMEM: .WORD 140000
 
 stack: .word 0
 startpr: .word 0
+SAVR0: .WORD 0
+HIMEM: .WORD 140000
 
-LDSTR:	.ASCII	/Loading /<200>
+ENDMYEMT: .WORD <ENDMYEMT - MYEMT> / 2
 
 .END START

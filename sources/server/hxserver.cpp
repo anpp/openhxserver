@@ -400,7 +400,7 @@ bool HXServer::patchSAVFirstBlock(QByteArray &buffer) const
     unsigned short * wloader = (unsigned short*)loader2.data();
 
     for (auto i = 0; i < 040/2; ++i)  wbuffer[i] = wloader[i];
-    for (auto i = 054/2; i < 0600/2; ++i)  wbuffer[i] = wloader[i];
+    for (auto i = 054/2; i < 01000/2; ++i)  wbuffer[i] = wloader[i];
     *(wbuffer + 076 / 2) = (buffer.size() - 512) / 2;
 
     return true;
