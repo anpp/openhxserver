@@ -16,10 +16,6 @@ START:  NOP
 	.WORD	KBINT,200
 	.WORD	66, 0
 
-	.=70
-KBINT:	TST	@#177562
-	RTI
-
 	.=76
 SAVSIZ:	.BLKW	1
 
@@ -28,6 +24,9 @@ SAVSIZ:	.BLKW	1
 TMINT:	
 	RTI
 
+
+KBINT:	MOVB  @#177562, CHARKEYB ;буфер из одного символа
+	RTI
 
 RUN:
 	MOV   #LDSTR, R0        ;Вывести надпись "Loading"
@@ -54,9 +53,9 @@ RUN:
 	MOV   @#000042,stack   
 
 	;копируем диспетчер EMT в верхнюю память
-	MOV   #156000, R0 ;по этому адресу будет диспетчер EMT
-	MOV   #MYEMT, R1
-	MOV   ENDMYEMT, R2
+	MOV   #156000, R0	;по этому адресу будет диспетчер EMT
+	MOV   #MYEMT, R1	;начало диспетчера
+	MOV   ENDMYEMT, R2	;длина диспетчера в словах
 22$:	MOV   (R1)+, (R0)+
 	SOB   R2, 22$
 
@@ -67,7 +66,8 @@ RUN:
 	MTPS  #0
 	MOV   startpr,PC ; Запускаем загруженную программу
 
-
+CHARKEYB: .BYTE 0
+	  .BYTE 0
 LDSTR:	.ASCII	"Loading "<200>
 .EVEN
 
@@ -90,10 +90,12 @@ OUTSYM: MOV       SAVR0,R0        ;восстановить R0
         RTI                       ;выход
 NE341:  CMPB      #340,R0         ;ВВОД СИМВОЛА?
 EMT340: BNE       NE340           ;нет
-        TSTB      @#177560        ;готовность есть?
-        BPL       CY1             ;символ не готов!
-INSYM:  MOVB      @#177562,R0     ;прочитать символ	
-        RTI                       ;выход
+	TSTB      @#CHARKEYB	  ;символ есть в буфере?
+	BEQ       CY1             ;нет
+	MOVB      @#CHARKEYB, R0  ;взять символ
+	CLRB      @#CHARKEYB      ;очистить буфер
+        RTI
+                       ;выход
 CY1:    MOV       SAVR0,R0        ;восстановить R0
         INC       2(SP)           ;установить в PSW C=1
         RTI                       ;и выйти с признаком ошибки
