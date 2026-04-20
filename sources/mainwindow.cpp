@@ -79,6 +79,10 @@ MainWindow::MainWindow(QWidget *parent)
     statusbar->addWidget(&m_flowControlLabel);
     statusbar->addWidget(&m_StateLabel, 1);
 
+    QStringList args = QCoreApplication::arguments();
+    if(args.count() > 1)
+        setSAVFileFromCL(args.at(1));
+
     initWidgets();
     initActions();
 
@@ -100,14 +104,8 @@ void MainWindow::setSAVFileFromCL(const QString &fileName)
     {
         settings->setSetting("savfile", QFileInfo(fileName).absoluteFilePath(), kindset::misc);
         settings->setSetting("HXMode", false, kindset::misc);
-        hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
-        hxserver->setServerMode(HXServer::ServerMode::SAVMode);
-
-        images_widget->update();
     }
 }
-
-//----------------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------------------------------------------------------------------------------------------------

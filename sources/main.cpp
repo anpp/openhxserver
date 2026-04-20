@@ -27,12 +27,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.1");
 
     MainWindow *w = MainWindow::instance();
-
-    QStringList args = QCoreApplication::arguments();
-    if(args.count() > 1)
-        w->setSAVFileFromCL(args.at(1));
-
     w->show();
+
     int result = a.exec();
     delete w;
     return result;
