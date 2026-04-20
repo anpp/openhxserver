@@ -94,7 +94,7 @@ MainWindow::~MainWindow()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MainWindow::setSaveFileFromCL(const QString &fileName)
+void MainWindow::setSAVFileFromCL(const QString &fileName)
 {
     if(!fileName.isEmpty() && QFile(fileName).exists())
     {
@@ -106,6 +106,9 @@ void MainWindow::setSaveFileFromCL(const QString &fileName)
         images_widget->update();
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
 
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::initActions()

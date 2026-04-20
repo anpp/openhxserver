@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     QStringList args = QCoreApplication::arguments();
     if(args.count() > 1)
-        w->setSaveFileFromCL(args.at(1));
+        w->setSAVFileFromCL(args.at(1));
 
     w->show();
     int result = a.exec();
