@@ -32,6 +32,8 @@ public:
     }
     ~MainWindow();
 
+    void setSaveFileFromCL(const QString& fileName);
+
 protected:
     MainWindow(QWidget *parent = nullptr);
 

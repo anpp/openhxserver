@@ -15,7 +15,8 @@
 #include <QPainter>
 #include <QDateTime>
 #include <QScrollBar>
-
+#include <QFile>
+#include <QFileInfo>
 
 class IconDockStyle: public QProxyStyle{
 
@@ -90,6 +91,20 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     settings->save(); 
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MainWindow::setSaveFileFromCL(const QString &fileName)
+{
+    if(!fileName.isEmpty() && QFile(fileName).exists())
+    {
+        settings->setSetting("savfile", QFileInfo(fileName).absoluteFilePath(), kindset::misc);
+        settings->setSetting("HXMode", false, kindset::misc);
+        hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
+        hxserver->setServerMode(HXServer::ServerMode::SAVMode);
+
+        images_widget->update();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
