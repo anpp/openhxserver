@@ -32,13 +32,12 @@ public:
     }
     ~MainWindow();
 
-    void setSAVFileFromCL(const QString& fileName);
-
 protected:
     MainWindow(QWidget *parent = nullptr);
 
 private:
     std::unique_ptr<HXServer> hxserver;
+    bool m_sav_from_cl = false;
 
     QLabel m_PortLabel;
     QLabel m_baudRateLabel;
@@ -67,6 +66,9 @@ private:
     void initActions();    
     void initWidgets();
     void updateImagesWidget();
+
+    void setSAVFileFromCL(const QString& fileName);
+    void launchAndFocus(const QString &path);
 
 public slots:
     void settings_edit();

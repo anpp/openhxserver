@@ -18,6 +18,13 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include <QProcess>
+#include <QThread>
+
+#ifdef Q_OS_WINDOWS
+#include <windows.h>
+#endif
+
 class IconDockStyle: public QProxyStyle{
 
     QIcon m_icon;
@@ -88,6 +95,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     QCoreApplication::processEvents();
     updateHXServer();
+
+    if(m_sav_from_cl)
+    {
+        hxserver->start();
+        QTimer::singleShot(0, this, [&]() {launchAndFocus("path from settings"); });
+    }
 }
 
 
@@ -104,9 +117,30 @@ void MainWindow::setSAVFileFromCL(const QString &fileName)
     {
         settings->setSetting("savfile", QFileInfo(fileName).absoluteFilePath(), kindset::misc);
         settings->setSetting("HXMode", false, kindset::misc);
+        m_sav_from_cl = true;
     }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+void MainWindow::launchAndFocus(const QString &path)
+{
+    QProcess *proc = new QProcess();
+    proc->start(path);
+
+    if (proc->waitForStarted())
+    {
+        QThread::msleep(500);
+
+        #ifdef Q_OS_WINDOWS
+        HWND hwnd = FindWindow(NULL, L"");
+        if (hwnd)
+        {
+            ShowWindow(hwnd, SW_RESTORE);
+            SetForegroundWindow(hwnd);
+        }
+        #endif
+    }
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::initActions()
@@ -199,6 +233,10 @@ void MainWindow::stateHXChanged(HXServer::ServerStates state)
         m_stopAction->setEnabled(false);
         m_pauseAction->setEnabled(false);
         actionSettings->setEnabled(true);
+
+        if(m_sav_from_cl)
+            QApplication::quit();
+
         break;
         case HXServer::ServerStates::Waiting:
         m_startAction->setEnabled(false);
