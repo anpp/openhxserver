@@ -29,7 +29,8 @@ SOURCES += \
     settings_dialog/images_model.cpp \
     settings_dialog/settings_com_port.cpp \
     settings_dialog/settings_editor.cpp \
-    settings_dialog/settings_images.cpp
+    settings_dialog/settings_images.cpp \
+    settings_dialog/settings_misc.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -44,13 +45,15 @@ HEADERS += \
     settings_dialog/images_model.h \
     settings_dialog/settings_com_port.h \
     settings_dialog/settings_editor.h \
-    settings_dialog/settings_images.h
+    settings_dialog/settings_images.h \
+    settings_dialog/settings_misc.h
 
 FORMS += \
     mainwindow.ui \
     port_dump.ui \
     settings_dialog/settings_com_port.ui \
-    settings_dialog/settings_images.ui
+    settings_dialog/settings_images.ui \
+    settings_dialog/settings_misc.ui
 
 TRANSLATIONS += \
     OpenHXServer_ru_RU.ts

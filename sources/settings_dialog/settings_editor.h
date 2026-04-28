@@ -12,6 +12,7 @@
 class SettingsCOMPort;
 class SettingsImages;
 class Images;
+class SettingsMisc;
 
 class SettingsEditor : public QDialog
 {
@@ -26,6 +27,7 @@ class SettingsEditor : public QDialog
 
     std::unique_ptr<SettingsImages> images_widget;
     std::unique_ptr<SettingsCOMPort> com_port_widget;
+    std::unique_ptr<SettingsMisc> misc_widget;
 
 public:
     explicit SettingsEditor(Images& images_data, QWidget *parent = nullptr);

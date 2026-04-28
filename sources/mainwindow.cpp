@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
     if(m_sav_from_cl)
     {
         hxserver->start();
-        QTimer::singleShot(0, this, [&]() {launchAndFocus("path from settings"); });
+        QTimer::singleShot(0, this, [&]() {launchAndFocus(settings->getSetting("path_to_emulator", kindset::misc).toString()); });
     }
 }
 
@@ -125,21 +125,10 @@ void MainWindow::setSAVFileFromCL(const QString &fileName)
 void MainWindow::launchAndFocus(const QString &path)
 {
     QProcess *proc = new QProcess();
-    proc->start(path);
+    proc->start(path, QStringList());
 
-    if (proc->waitForStarted())
-    {
+    while(!proc->waitForStarted())
         QThread::msleep(500);
-
-        #ifdef Q_OS_WINDOWS
-        HWND hwnd = FindWindow(NULL, L"");
-        if (hwnd)
-        {
-            ShowWindow(hwnd, SW_RESTORE);
-            SetForegroundWindow(hwnd);
-        }
-        #endif
-    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

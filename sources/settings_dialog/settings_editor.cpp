@@ -1,6 +1,7 @@
 #include "settings_editor.h"
 #include "settings_com_port.h"
 #include "settings_images.h"
+#include "settings_misc.h"
 
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -17,6 +18,7 @@ SettingsEditor::SettingsEditor(Images& images_data, QWidget *parent) : QDialog(p
 
     images_widget = std::make_unique<SettingsImages>(images_data);
     com_port_widget = std::make_unique<SettingsCOMPort>();
+    misc_widget = std::make_unique<SettingsMisc>();
 
     setup();
 
@@ -60,9 +62,12 @@ void SettingsEditor::setup()
 
     com_port_widget->load();
     images_widget->update();
+    misc_widget->load();
 
     tw.addTab(com_port_widget.get(), QIcon(":/images/icons/com-light.png"), tr("COM port"));
-    tw.addTab(images_widget.get(), QIcon(":/images/icons/disk-light.png"), tr("Images"));    
+    tw.addTab(images_widget.get(), QIcon(":/images/icons/disk-light.png"), tr("Images"));
+    tw.addTab(misc_widget.get(), QIcon(":/images/icons/list_icon_light.png"), tr("Misc"));
+
     tw.setTabsClosable(false);
     tw.setDocumentMode(false);
     tw.setMovable(false);
@@ -78,4 +83,5 @@ void SettingsEditor::applySettings()
 {    
     images_widget->save();
     com_port_widget->save();
+    misc_widget->save();
 }

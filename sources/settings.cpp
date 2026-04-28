@@ -15,6 +15,7 @@ Settings::Settings(QMainWindow* widget_owner, const QString& organization, const
         std::make_shared<Setting>("loader", kindset::misc, "", QVariant(QVariant::String), false),
         std::make_shared<Setting>("savfile", kindset::misc, "", QVariant(QVariant::String), false),
         std::make_shared<Setting>("HXMode", kindset::misc, true, QVariant(QVariant::Bool), false),
+        std::make_shared<Setting>("path_to_emulator", kindset::misc, true, QVariant(QVariant::String), false),
 
         std::make_shared<Setting>("geometry", kindset::screen, 0, QVariant(QVariant::Int), false),
         std::make_shared<Setting>("state", kindset::screen, 0, QVariant(QVariant::Int), false),
