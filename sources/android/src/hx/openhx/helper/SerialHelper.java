@@ -24,6 +24,21 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SerialHelper {
+
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final String ACTION_USB_PERMISSION = "hx.openhx.helper.USB_PERMISSION";
+    private static UsbManager usbManager = null;
+    private static UsbSerialPort serialPort;
+
+    private static final int WRITE_WAIT_MILLIS = 2000;
+    private static final int READ_WAIT_MILLIS = 2000;
+
+    public static native void javaResponseReady(byte[] response);
+    public static native void javaConnectedStateChanged(boolean state);
+    public static native void javaErrorOccured(String error);
+    public static native void javaMyDeviceAttached(boolean state);
+
+
 public static String[] getAvailablePorts(Context context) {
     UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     UsbSerialProber prober = UsbSerialProber.getDefaultProber();
@@ -38,4 +53,82 @@ public static String[] getAvailablePorts(Context context) {
     }
     return portNames;
 }
+
+public static void connectToDevice(Context context, int vid, int pid) {
+    executorService.submit(new Runnable() {
+        @Override
+        public void run() {
+            UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+            UsbSerialProber prober = UsbSerialProber.getDefaultProber();
+            
+            for (UsbDevice device : manager.getDeviceList().values()) {
+                if (device.getVendorId() == vid && device.getProductId() == pid) {
+                    
+                    if (!manager.hasPermission(device)) {
+                        PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                            context, 0, new Intent(ACTION_USB_PERMISSION), 
+                            PendingIntent.FLAG_IMMUTABLE // Для современных Android
+                        );
+                        manager.requestPermission(device, permissionIntent);
+                        javaErrorOccured("Permission request sent for " + vid + ":" + pid);
+                        return;
+                    }
+
+                    UsbSerialDriver driver = prober.probeDevice(device);
+                    if (driver == null) {
+                        javaErrorOccured("No driver found for this device");
+                        return;
+                    }
+
+                    UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
+                    if (connection == null) {
+                        javaErrorOccured("Failed to open connection");
+                        return;
+                    }
+
+                    serialPort = driver.getPorts().get(0);
+                    try {
+                        serialPort.open(connection);
+                        serialPort.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                                                
+                        try {
+                            serialPort.setFlowControl(UsbSerialPort.FlowControl.RTS_CTS);
+                        } catch (Exception e) {
+                            Log.d("Serial", "Flow control not supported");
+                        }
+
+                        javaConnectedStateChanged(true);
+                        
+                        startIoManager();
+                        
+                    } catch (IOException e) {
+                        javaErrorOccured("Error opening port: " + e.getMessage());
+                        javaConnectedStateChanged(false);
+                    }
+                    return;
+                }
+            }
+            javaErrorOccured("Device " + vid + ":" + pid + " not found");
+        }
+    });
+}
+
+private static void startIoManager() {
+    if (serialPort == null) return;
+    
+    SerialInputOutputManager ioManager = new SerialInputOutputManager(serialPort, new SerialInputOutputManager.Listener() {
+        @Override
+        public void onNewData(byte[] data) {
+            javaResponseReady(data); 
+        }
+        @Override
+        public void onRunError(Exception e) {
+            javaConnectedStateChanged(false);
+            javaErrorOccured("IO Manager error: " + e.getMessage());
+        }
+    });
+
+    ioManager.start(); 
+}
+
 }
