@@ -2,6 +2,10 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+#endif
+
 #include "../settings.h"
 
 //----------------------------------------------------------------------------------------------------------------------

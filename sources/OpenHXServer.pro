@@ -1,15 +1,21 @@
 
 TARGET = openhx
 
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 5): QT += statemachine
 
 QT += serialport
 
-CONFIG += c++14
-QMAKE_CXXFLAGS += -pie
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+CONFIG += c++17
+#QMAKE_CXXFLAGS += -pie
 #QMAKE_LFLAGS += -pie
+
+greaterThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -stdlib=libc++
+greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -69,4 +75,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     bin.qrc \
     images.qrc
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/res/values/libs.xml \
+    android/res/xml/qtprovider_paths.xml
+
+
+TARGET = openhx
 

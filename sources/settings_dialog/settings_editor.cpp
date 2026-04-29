@@ -56,7 +56,7 @@ void SettingsEditor::clicked_slot(QAbstractButton* button)
 void SettingsEditor::setup()
 {
     auto layout = new QVBoxLayout(this);
-    layout->setMargin(margin);
+    layout->setContentsMargins(margin, margin, margin, margin);
 
     buttonBox.setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok | QDialogButtonBox::Apply);
 

@@ -20,6 +20,7 @@
 
 #include <QProcess>
 #include <QThread>
+#include <QToolButton>
 
 #ifdef Q_OS_WINDOWS
 #include <windows.h>
@@ -64,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 {    
     setupUi(this);
     setWindowIcon(QIcon(":/images/icons/cpu-light.png"));
-    //QApplication::setStyle("fusion");
+    //QApplication::setStyle("fusion");    
     settings = Settings::instance(this, "OpenHXServer", "OpenHXServer");
     settings->load();
 
@@ -102,7 +103,6 @@ MainWindow::MainWindow(QWidget *parent)
         QTimer::singleShot(0, this, [&]() {launchAndFocus(settings->getSetting("path_to_emulator", kindset::misc).toString()); });
     }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 MainWindow::~MainWindow()
@@ -176,6 +176,9 @@ void MainWindow::initActions()
     toolBar->addAction(m_pauseAction);
     toolBar->addSeparator();
     toolBar->addAction(m_packedDataAction);
+
+    toolBar->addSeparator();
+    toolBar->addAction(actionSettings);
 
     menuMain->addAction(m_startAction);
     menuMain->addAction(m_stopAction);
