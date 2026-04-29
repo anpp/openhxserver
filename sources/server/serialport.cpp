@@ -4,6 +4,7 @@
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
+#include <qnativeinterface.h>
 #endif
 
 #include "../settings.h"
@@ -25,6 +26,10 @@ void SerialPortThread::init()
 {
     qRegisterMetaType <QSerialPort::SerialPortError> ();
 
+#ifdef Q_OS_ANDROID
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+
+#else
     serial_port = std::make_unique<QSerialPort>();
 
     //this->moveToThread(&thread);
@@ -33,7 +38,7 @@ void SerialPortThread::init()
     connect(serial_port.get(), &QSerialPort::readyRead, this, &SerialPortThread::s_readyRead);
     connect(serial_port.get(), &QSerialPort::baudRateChanged, this, &SerialPortThread::baudRateChanged);
     connect(serial_port.get(), &QSerialPort::flowControlChanged, this, &SerialPortThread::flowControlChanged);
-
+#endif
     start();
 }
 

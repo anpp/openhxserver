@@ -6,6 +6,13 @@
 
 #include "../settings.h"
 
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+#include <qnativeinterface.h>
+#endif
+
+
+
 #if QT_VERSION <= QT_VERSION_CHECK(5, 6, 3)
 //для XP
 template <typename T>
@@ -155,9 +162,31 @@ void SettingsCOMPort::checkCustomBaudRatePolicy(int idx)
 //--------------------------------------------------------------------------------------------------------------------------------
 void SettingsCOMPort::fillPortsParameters()
 {
+#ifdef Q_OS_ANDROID
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    QJniObject jPortArray = QJniObject::callStaticMethod<jobjectArray>(
+        "hx/openhx/helper/SerialHelper",
+        "getAvailablePorts",
+        "(Landroid/content/Context;)[Ljava/lang/String;",
+        context.object()
+        );
+
+    if (jPortArray.isValid())
+    {
+        QJniEnvironment env;
+        jobjectArray array = jPortArray.object<jobjectArray>();
+        jsize count = env->GetArrayLength(array);
+
+        for (int i = 0; i < count; ++i) {
+            QJniObject jStr = QJniObject::fromLocalRef(env->GetObjectArrayElement(array, i));
+            comPortNameBox->addItem(jStr.toString());
+        }
+    }
+#else
     auto availablePorts = QSerialPortInfo::availablePorts();
     for(const auto &port: availablePorts)
         comPortNameBox->addItem(port.portName());
+#endif
 
     baudRateBox->addItem(QStringLiteral("9600"), QSerialPort::Baud9600);
     baudRateBox->addItem(QStringLiteral("19200"), QSerialPort::Baud19200);

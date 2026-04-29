@@ -20,7 +20,6 @@
 
 #include <QProcess>
 #include <QThread>
-#include <QToolButton>
 
 #ifdef Q_OS_WINDOWS
 #include <windows.h>
