@@ -57,6 +57,7 @@ public:
     void setDelay(const unsigned long value) { m_msDelay = value; }
 
     QSerialPort& SerialPort() const { return *serial_port; } ;
+    bool isOpen();
 
 signals:
     void finished() const;

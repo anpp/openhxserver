@@ -41,10 +41,7 @@ void SerialPortThread::init()
 {
     qRegisterMetaType <QSerialPort::SerialPortError> ();
 
-#ifdef Q_OS_ANDROID
-    QJniObject context = QNativeInterface::QAndroidApplication::context();
-
-#else
+#ifndef Q_OS_ANDROID
     serial_port = std::make_unique<QSerialPort>();
 
     //this->moveToThread(&thread);
@@ -162,12 +159,25 @@ void SerialPortThread::start()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+bool SerialPortThread::isOpen()
+{
+    bool result = false;
+    if(serial_port)
+        result = serial_port->isOpen();
+    return result;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::close()
 {
     stop();
+#ifdef Q_OS_ANDROID
+    QJniObject::callStaticMethod<void>("hx/openhx/helper/SerialHelper", "closeDeviceConnection");
+#else
     if(serial_port->isOpen())
         serial_port->close();
-
+#endif
     QCoreApplication::processEvents();
     emit closed();
 }
@@ -175,30 +185,83 @@ void SerialPortThread::close()
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::sendRatePacket(const QByteArray& rate) const
 {
+#ifdef Q_OS_ANDROID
+    QJniEnvironment env;
+    jbyteArray jData = env->NewByteArray(rate.size());
+    env->SetByteArrayRegion(jData, 0, rate.size(), reinterpret_cast<const jbyte*>(rate.constData()));
+    QJniObject::callStaticMethod<void>(
+        "hx/openhx/helper/SerialHelper",
+        "writeData",
+        "([B)V",
+        jData
+        );
+
+    env->DeleteLocalRef(jData);
+
+    if (env->ExceptionCheck()) {
+        emit error(QObject::tr("Java: Exception occurred in writeData!") + " " + serial_port->portName());
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+
+#else
     if(serial_port->write(rate) == -1)
     {
         emit error(QObject::tr("Failed to write the data to port") + ": " + serial_port->errorString());
         //stop();
     }
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::open(const QString& com_port)
 {
+#ifdef Q_OS_ANDROID
+    QStringList parts = com_port.split(" "); // "USB Device 0403:6001"
+    if (parts.size() >= 3)
+    {
+        QStringList ids = parts.last().split(":");
+        bool okV, okP;
+        int vid = ids[0].toInt(&okV, 16);
+        int pid = ids[1].toInt(&okP, 16);
+
+        if (okV && okP)
+        {
+            QJniObject context = QNativeInterface::QAndroidApplication::context();
+            QJniObject::callStaticMethod<void>(
+                "hx/openhx/helper/SerialHelper",
+                "connectToDevice",
+                "(Landroid/content/Context;II)V",
+                context.object(),
+                static_cast<jint>(vid),
+                static_cast<jint>(pid)
+                );
+
+            QJniEnvironment env;
+            if (env->ExceptionCheck()) {
+                emit error(tr("Java: Failed to connect to device %1:%2").arg(vid).arg(pid));
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            } else {
+                // Лучше подтверждать "emit opened()" только Java пришлет колбэк об успешном подключении.
+            }
+        }
+    }
+#else
     serial_port->setPortName(com_port);
     if (!serial_port->open(QIODevice::ReadWrite)){
         portError(serial_port->error());
         return;
     }
 
-#if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
+  #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
     connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
-#endif
-
+  #endif
     emit opened();
     emit portBaudRateChanged(serial_port->baudRate());
     flowControlChanged(serial_port->flowControl());
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -261,10 +324,13 @@ void SerialPortThread::s_readyRead()
 extern "C" {
 // ВАЖНО: Имя должно в точности совпадать с пакетом и классом в Java
 //----------------------------------------------------------------------------------------------------------------------
-JNIEXPORT void JNICALL
-Java_hx_openhx_helper_SerialHelper_javaResponseReady(JNIEnv *env, jclass clazz, jbyteArray response) {
+JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaResponseReady(JNIEnv *env, jclass clazz, jbyteArray response)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(clazz);
 
-    if (SerialPortThread::instance()) {
+    if (SerialPortThread::instance())
+    {
         jbyte *bytes = env->GetByteArrayElements(response, nullptr);
         jsize len = env->GetArrayLength(response);
 
@@ -277,8 +343,11 @@ Java_hx_openhx_helper_SerialHelper_javaResponseReady(JNIEnv *env, jclass clazz, 
     }
 }
 //----------------------------------------------------------------------------------------------------------------------
-JNIEXPORT void JNICALL
-Java_hx_openhx_helper_SerialHelper_javaConnectedStateChanged(JNIEnv *env, jclass clazz, jboolean state) {
+JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaConnectedStateChanged(JNIEnv *env, jclass clazz, jboolean state)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(clazz);
+
     if (SerialPortThread::instance()) {
         emit SerialPortThread::instance()->connectionChanged((bool)state);
     }
