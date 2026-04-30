@@ -43,7 +43,7 @@ public:
     Images& images() const {return *m_images; };
 
 protected:
-    std::unique_ptr<SerialPortThread> port;
+    std::shared_ptr<SerialPortThread> port;
     std::unique_ptr<QStateMachine> sm;
 
     std::unique_ptr<QState> commonState;

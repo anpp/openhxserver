@@ -28,7 +28,7 @@ public class SerialHelper {
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final String ACTION_USB_PERMISSION = "hx.openhx.helper.USB_PERMISSION";
     private static UsbManager usbManager = null;
-    private static UsbSerialPort serialPort;
+    private static UsbSerialPort serialPort = null;
 
     private static final int WRITE_WAIT_MILLIS = 2000;
     private static final int READ_WAIT_MILLIS = 2000;
@@ -52,6 +52,13 @@ public static String[] getAvailablePorts(Context context) {
         portNames[i] = name;
     }
     return portNames;
+}
+
+public static void setParametersPort(int baudRate, int dataBits, int stopBits, int flowControl) throws IOException {
+    if (serialPort == null) return;
+
+     serialPort.setParameters(baudRate, dataBits, stopBits, UsbSerialPort.PARITY_NONE);
+     serialPort.setFlowControl(UsbSerialPort.FlowControl.values()[flowControl]);
 }
 
 public static void connectToDevice(Context context, int vid, int pid) {
@@ -89,13 +96,6 @@ public static void connectToDevice(Context context, int vid, int pid) {
                     serialPort = driver.getPorts().get(0);
                     try {
                         serialPort.open(connection);
-                        serialPort.setParameters(9600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-                                                
-                        try {
-                            serialPort.setFlowControl(UsbSerialPort.FlowControl.RTS_CTS);
-                        } catch (Exception e) {
-                            Log.d("Serial", "Flow control not supported");
-                        }
 
                         javaConnectedStateChanged(true);
                         

@@ -45,6 +45,7 @@ std::shared_ptr<Settings> Settings::instance(QMainWindow *widget_owner, const QS
 //----------------------------------------------------------------------------------------------------------------------
 Settings::~Settings()
 {
+    m_self = nullptr;
 }
 
 

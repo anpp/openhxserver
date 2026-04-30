@@ -99,7 +99,7 @@ void HXServer::setPortName(const QString &PortName)
     m_PortName = PortName;
     if(m_PortName.isEmpty()) return;
 
-    port = std::make_unique<SerialPortThread>();
+    port = SerialPortThread::instance();
     setupComPort();
 
     port->open(m_PortName);

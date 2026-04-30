@@ -80,7 +80,8 @@ DISTFILES += \
     android/AndroidManifest.xml \
     android/build.gradle \
     android/res/values/libs.xml \
-    android/res/xml/qtprovider_paths.xml
+    android/res/xml/qtprovider_paths.xml \
+    android/src/hx/openhx/helper/SerialHelper.java
 
 
 TARGET = openhx

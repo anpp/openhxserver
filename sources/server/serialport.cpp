@@ -9,6 +9,9 @@
 
 #include "../settings.h"
 
+
+std::shared_ptr<SerialPortThread> SerialPortThread::m_self = nullptr;
+
 //----------------------------------------------------------------------------------------------------------------------
 SerialPortThread::SerialPortThread()
 {
@@ -18,8 +21,20 @@ SerialPortThread::SerialPortThread()
 //----------------------------------------------------------------------------------------------------------------------
 SerialPortThread::~SerialPortThread()
 {
-    stop();   
+    stop();
+    m_self = nullptr;
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+std::shared_ptr<SerialPortThread> SerialPortThread::instance()
+{
+    if(!m_self)
+        m_self = std::shared_ptr<SerialPortThread>(new SerialPortThread());
+    return m_self;
+
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::init()
@@ -54,6 +69,34 @@ void SerialPortThread::delay(const unsigned long ms) const
     }
 }
 
+#ifdef Q_OS_ANDROID
+//----------------------------------------------------------------------------------------------------------------------
+void SerialPortThread::javaSetPortSettings(int baud, int data, int stop, QSerialPort::FlowControl flow)
+{
+    JavaFlowControl flowControl = JavaFlowControl::None;
+    if(flow == QSerialPort::HardwareControl)
+        flowControl = JavaFlowControl::RtsCts;
+    if(flow == QSerialPort::SoftwareControl)
+        flowControl = JavaFlowControl::XonXoff;
+
+    // Вызываем статический метод Java
+    // Сигнатура "(IIII)V" означает: 4 аргумента типа int (I), возвращает void (V)
+    QJniObject::callStaticMethod<void>(
+        "hx/openhx/helper/SerialHelper",
+        "setParametersPort",             // Имя метода
+        "(IIII)V",                       // Сигнатура
+        baud, data, stop, static_cast<int>(flowControl)           // Аргументы
+        );
+
+    QJniEnvironment env;
+    if (env->ExceptionCheck()) {
+        emit error(QObject::tr("Java: Exception occurred in setParametersPort!") + " " + serial_port->portName());
+        env->ExceptionDescribe(); // Выведет детали ошибки в Logcat
+        env->ExceptionClear();
+    }
+}
+#endif
+
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::setPortSettings()
 {    
@@ -74,11 +117,15 @@ void SerialPortThread::setPortSettings()
         ps.flowControl = com_settings.flowControl;
     }
 
+#ifdef Q_OS_ANDROID
+    javaSetPortSettings(ps.baudRate, ps.dataBits, ps.stopBits, ps.flowControl);
+#else
     serial_port->setBaudRate(ps.baudRate);
     serial_port->setDataBits(ps.dataBits);
     serial_port->setParity(ps.parity);
     serial_port->setStopBits(ps.stopBits);
     serial_port->setFlowControl(ps.flowControl);
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -210,4 +257,31 @@ void SerialPortThread::s_readyRead()
 }
 
 
+#ifdef Q_OS_ANDROID
+extern "C" {
+// ВАЖНО: Имя должно в точности совпадать с пакетом и классом в Java
+//----------------------------------------------------------------------------------------------------------------------
+JNIEXPORT void JNICALL
+Java_hx_openhx_helper_SerialHelper_javaResponseReady(JNIEnv *env, jclass clazz, jbyteArray response) {
 
+    if (SerialPortThread::instance()) {
+        jbyte *bytes = env->GetByteArrayElements(response, nullptr);
+        jsize len = env->GetArrayLength(response);
+
+        if (len > 0) {
+            QByteArray data(reinterpret_cast<const char*>(bytes), len);
+            emit SerialPortThread::instance()->readyData(data);
+        }
+
+        env->ReleaseByteArrayElements(response, bytes, JNI_ABORT);
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------
+JNIEXPORT void JNICALL
+Java_hx_openhx_helper_SerialHelper_javaConnectedStateChanged(JNIEnv *env, jclass clazz, jboolean state) {
+    if (SerialPortThread::instance()) {
+        emit SerialPortThread::instance()->connectionChanged((bool)state);
+    }
+}
+}
+#endif

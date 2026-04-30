@@ -12,7 +12,7 @@
 class SerialPortThread : public QObject
 {
     Q_OBJECT
-
+    static std::shared_ptr<SerialPortThread> m_self;
 public:
     struct port_settings {
         qint32 baudRate;
@@ -22,6 +22,15 @@ public:
         QSerialPort::FlowControl flowControl;
 
     };
+#ifdef Q_OS_ANDROID
+    enum class JavaFlowControl {
+        None,
+        RtsCts,
+        DtrDsr,
+        XonXoff,
+        XonXoffInline
+    };
+#endif
 
 private:
     std::unique_ptr<QSerialPort> serial_port;
@@ -33,9 +42,14 @@ private:
     void init();
     void delay(const unsigned long ms) const;
 
-public:
+#ifdef Q_OS_ANDROID
+    void javaSetPortSettings(int baud, int data, int stop, QSerialPort::FlowControl flow);
+#endif
+protected:
     explicit SerialPortThread();
+public:
     ~SerialPortThread() override;
+    static std::shared_ptr<SerialPortThread> instance();
 
     void stop();
     void start();
@@ -64,6 +78,7 @@ public slots:
     void portError(QSerialPort::SerialPortError spe);
     void baudRateChanged(quint32 baudRate, QSerialPort::Directions directions);
     void flowControlChanged(QSerialPort::FlowControl flowControl);
+    void connectionChanged(bool state) {};
 };
 
 #endif // SERIALPORT_H
