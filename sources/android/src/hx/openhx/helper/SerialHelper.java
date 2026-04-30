@@ -27,6 +27,7 @@ public class SerialHelper {
 
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final String ACTION_USB_PERMISSION = "hx.openhx.helper.USB_PERMISSION";
+    private static SerialInputOutputManager ioManager = null;
     private static UsbSerialPort serialPort = null;
 
     private static final int WRITE_WAIT_MILLIS = 2000;
@@ -114,8 +115,9 @@ public static void connectToDevice(Context context, int vid, int pid) {
 
 private static void startIoManager() {
     if (serialPort == null) return;
+    if (ioManager != null) return;
     
-    SerialInputOutputManager ioManager = new SerialInputOutputManager(serialPort, new SerialInputOutputManager.Listener() {
+    ioManager = new SerialInputOutputManager(serialPort, new SerialInputOutputManager.Listener() {
         @Override
         public void onNewData(byte[] data) {
             javaResponseReady(data); 
@@ -141,14 +143,22 @@ public static void writeData(byte[] data) {
 }
 
 public static void closeDeviceConnection() {
+    if (ioManager != null) {
+        ioManager.stop();
+        ioManager = null;
+        Log.d("Serial", "IO Manager stopped");
+    }
+
     if (serialPort != null) {
         try {
             serialPort.close();
+            Log.d("Serial", "Port closed");
+        } catch (IOException e) {
+            javaErrorOccured("Close error: " + e.getMessage());
+        } finally {
             serialPort = null;
             javaConnectedStateChanged(false);
-            } catch (IOException e) {
-                javaErrorOccured("Close error: " + e.getMessage());
-            }
+        }
     }
 }
 

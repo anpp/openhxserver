@@ -174,12 +174,13 @@ void SerialPortThread::close()
     stop();
 #ifdef Q_OS_ANDROID
     QJniObject::callStaticMethod<void>("hx/openhx/helper/SerialHelper", "closeDeviceConnection");
+    //emit closed(); от java будет в connectionChanged
 #else
     if(serial_port->isOpen())
         serial_port->close();
-#endif
     QCoreApplication::processEvents();
     emit closed();
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -352,5 +353,16 @@ JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaConnectedStateChan
         emit SerialPortThread::instance()->connectionChanged((bool)state);
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaErrorOccured(JNIEnv *env, jclass clazz, jstring error)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(clazz);
+
+    //if (SerialPortThread::instance())
+    //    emit SerialPortThread::instance()->connectionChanged((bool)state);
+}
+
 }
 #endif
