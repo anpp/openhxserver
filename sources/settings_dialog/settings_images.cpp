@@ -152,7 +152,12 @@ void SettingsImages::openFileBin()
     QStringList filters;
     QString defaultFilter = tr("Bin files (*.bin)");
 
+#ifdef Q_OS_ANDROID
+    filters << tr("All files (*)");
+    defaultFilter = tr("All files (*)");
+#else
     filters << defaultFilter << tr("All files (*.*)");
+#endif
 
     QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_bin").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);

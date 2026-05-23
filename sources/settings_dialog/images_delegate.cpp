@@ -110,7 +110,12 @@ void ImagesDelegate::openFile()
         QStringList filters;
         QString defaultFilter = tr("Disk images files (*.dsk)");
 
+#ifdef Q_OS_ANDROID
+        filters << tr("All files (*)");
+        defaultFilter = tr("All files (*)");
+#else
         filters << defaultFilter << tr("All files (*.*)");
+#endif
 
         QFileDialog fd(nullptr, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_dsk").toString(), filters.join(";;"));
         fd.selectNameFilter(defaultFilter);
