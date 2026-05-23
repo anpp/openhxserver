@@ -119,7 +119,11 @@ bool ImageDsk::openFile()
 #if QT_VERSION <= QT_VERSION_CHECK(5, 6, 3)
     if(m_file->open(QIODevice::ReadWrite) && m_file->size() >= DskConsts::BLOCK_SIZE)
 #else
+#ifdef Q_OS_ANDROID
+    if(m_file->open(QIODevice::ReadOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
+#else
     if(m_file->open(QIODevice::ReadWrite | QFile::ExistingOnly) && m_file->size() >= DskConsts::BLOCK_SIZE)
+#endif
 #endif
     {
         emit delFileName(m_filename); //открытый файл не отслеживать на изменения
@@ -158,6 +162,10 @@ bool ImageDsk::loaded() const
 //-------------------------------------------------------------------------------------------------------
 ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
 {
+#ifdef Q_OS_ANDROID
+    return DskErrors::DESuccess;
+#endif
+
     if(block >= size())
         return DskErrors::DEEOF;
     if(data.size() <= 0)
