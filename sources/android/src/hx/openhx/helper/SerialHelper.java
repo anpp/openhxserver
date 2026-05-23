@@ -140,6 +140,8 @@ public static void writeData(byte[] data) {
             javaErrorOccured("Write error: " + e.getMessage());
         }
     }
+    else
+        javaConnectedStateChanged(false);
 }
 
 public static void closeDeviceConnection() {

@@ -38,6 +38,8 @@ private:
     int m_bytes_to_port = 8;
     unsigned long m_msDelay = 0;
     port_settings ps;
+    QString m_portName = "";
+    bool m_opened = false;
 
     void init();
     void delay(const unsigned long ms) const;
@@ -55,9 +57,11 @@ public:
     void start();
     void setBytesToPort(const int value) { m_bytes_to_port = value; }
     void setDelay(const unsigned long value) { m_msDelay = value; }
+    void waitBytesWritten() const;
 
     QSerialPort& SerialPort() const { return *serial_port; } ;
     bool isOpen();
+    const QString& portName() { return m_portName; } ;
 
 signals:
     void finished() const;
@@ -79,7 +83,7 @@ public slots:
     void portError(QSerialPort::SerialPortError spe);
     void baudRateChanged(quint32 baudRate, QSerialPort::Directions directions);
     void flowControlChanged(QSerialPort::FlowControl flowControl);
-    void connectionChanged(bool state) {};
+    void connectionChanged(bool state);
 };
 
 #endif // SERIALPORT_H

@@ -159,9 +159,21 @@ void SerialPortThread::start()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void SerialPortThread::waitBytesWritten() const
+{
+#ifndef Q_OS_ANDROID
+    while (serial_port->bytesToWrite() > 0)
+    {
+        serial_port->waitForBytesWritten();
+        QCoreApplication::processEvents();
+    }
+#endif
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 bool SerialPortThread::isOpen()
 {
-    bool result = false;
+    bool result = m_opened;
     if(serial_port)
         result = serial_port->isOpen();
     return result;
@@ -217,8 +229,9 @@ void SerialPortThread::sendRatePacket(const QByteArray& rate) const
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::open(const QString& com_port)
 {
+    m_portName = com_port;
 #ifdef Q_OS_ANDROID
-    QStringList parts = com_port.split(" "); // "USB Device 0403:6001"
+    QStringList parts = m_portName.split(" "); // "USB Device 0403:6001"
     if (parts.size() >= 3)
     {
         QStringList ids = parts.last().split(":");
@@ -249,7 +262,7 @@ void SerialPortThread::open(const QString& com_port)
         }
     }
 #else
-    serial_port->setPortName(com_port);
+    serial_port->setPortName(m_portName);
     if (!serial_port->open(QIODevice::ReadWrite)){
         portError(serial_port->error());
         return;
@@ -274,9 +287,9 @@ void SerialPortThread::portError(QSerialPort::SerialPortError spe)
         stop();
 #ifdef Q_OS_LINUX
         if(QSerialPort::PermissionError == spe)
-            hint_value = "Hint: run the command 'sudo chown " + qgetenv("USER") + " /dev/" + serial_port->portName() + "'";
+            hint_value = "Hint: run the command 'sudo chown " + qgetenv("USER") + " /dev/" + portName() + "'";
 #endif
-        emit error(serial_port->errorString() + " " + serial_port->portName());
+        emit error(serial_port->errorString() + " " + portName());
 
         if(!hint_value.isEmpty())
             emit hint(hint_value);
@@ -312,6 +325,17 @@ void SerialPortThread::flowControlChanged(QSerialPort::FlowControl flowControl)
             break;
         }
     }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void SerialPortThread::connectionChanged(bool state)
+{
+    m_opened = state;
+
+    if(m_opened)
+        emit opened();
+    else
+        emit closed();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

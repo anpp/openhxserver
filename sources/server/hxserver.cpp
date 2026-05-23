@@ -353,11 +353,7 @@ void HXServer::sendSAVFile()
             while (fsize > 0)
             {
                 emit sendPacket(SAVFile.mid(SAVFile.size() - fsize, ImageDsk::DskConsts::BLOCK_SIZE));
-                while (port->SerialPort().bytesToWrite() > 0)
-                {
-                    port->SerialPort().waitForBytesWritten();
-                    QCoreApplication::processEvents();
-                }
+                port->waitBytesWritten();
                 fsize -= ImageDsk::DskConsts::BLOCK_SIZE;
                 emit log(tr("Sending file: ") + m_SAVFile + " - " + QString::number(((SAVFile.size() - fsize) * 100) / SAVFile.size()) + "%", Qt::black, false, true);
                 QCoreApplication::processEvents();
