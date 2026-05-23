@@ -96,6 +96,8 @@ public static void connectToDevice(Context context, int vid, int pid) {
                     serialPort = driver.getPorts().get(0);
                     try {
                         serialPort.open(connection);
+                        serialPort.setDTR(true);
+                        serialPort.setRTS(true);
 
                         javaConnectedStateChanged(true);
                         

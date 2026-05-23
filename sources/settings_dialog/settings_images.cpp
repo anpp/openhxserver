@@ -177,15 +177,18 @@ void SettingsImages::openFileSAV()
     QStringList filters;
     QString defaultFilter = tr("SAV files (*.sav)");
 
+#ifdef Q_OS_ANDROID
+    filters << tr("All files (*)");
+    defaultFilter = tr("All files (*)");
+#else
     filters << defaultFilter << tr("All files (*.*)");
+#endif
 
     QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_sav").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);
-
     connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });
     fd.setFileMode(QFileDialog::ExistingFile);
     fd.setAcceptMode(QFileDialog::AcceptOpen);
-
     if(fd.exec())
     {
         filename = fd.selectedFiles().at(0);
@@ -194,7 +197,6 @@ void SettingsImages::openFileSAV()
             saveLoaders();
     }
 }
-
 
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::selected_image_file(const QString &filename)

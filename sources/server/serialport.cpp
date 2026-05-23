@@ -351,20 +351,27 @@ extern "C" {
 //----------------------------------------------------------------------------------------------------------------------
 JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaResponseReady(JNIEnv *env, jclass clazz, jbyteArray response)
 {
-    Q_UNUSED(env);
     Q_UNUSED(clazz);
+
+    if (!response) {
+        return;
+    }
 
     if (SerialPortThread::instance())
     {
-        jbyte *bytes = env->GetByteArrayElements(response, nullptr);
         jsize len = env->GetArrayLength(response);
 
         if (len > 0) {
-            QByteArray data(reinterpret_cast<const char*>(bytes), len);
-            emit SerialPortThread::instance()->readyData(data);
-        }
+            jbyte *bytes = env->GetByteArrayElements(response, nullptr);
 
-        env->ReleaseByteArrayElements(response, bytes, JNI_ABORT);
+            if (bytes) {
+                QByteArray data(reinterpret_cast<const char*>(bytes), len);
+
+                env->ReleaseByteArrayElements(response, bytes, JNI_ABORT);
+
+                emit SerialPortThread::instance()->readyData(data);
+            }
+        }
     }
 }
 //----------------------------------------------------------------------------------------------------------------------
