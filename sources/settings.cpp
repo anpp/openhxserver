@@ -12,24 +12,24 @@ Settings::Settings(QMainWindow* widget_owner, const QString& organization, const
     owner(widget_owner), qsettings(organization, application), default_return(false)
 {
     vec_settings = {
-        std::make_shared<Setting>("loader", kindset::misc, "", QVariant(QVariant::String), false),
-        std::make_shared<Setting>("savfile", kindset::misc, "", QVariant(QVariant::String), false),
-        std::make_shared<Setting>("HXMode", kindset::misc, true, QVariant(QVariant::Bool), false),
-        std::make_shared<Setting>("path_to_emulator", kindset::misc, true, QVariant(QVariant::String), false),
+        std::make_shared<Setting>("loader", kindset::misc, "", QVariant(), false),
+        std::make_shared<Setting>("savfile", kindset::misc, "", QVariant(), false),
+        std::make_shared<Setting>("HXMode", kindset::misc, true, QVariant(), false),
+        std::make_shared<Setting>("path_to_emulator", kindset::misc, true, QVariant(), false),
 
-        std::make_shared<Setting>("geometry", kindset::screen, 0, QVariant(QVariant::Int), false),
-        std::make_shared<Setting>("state", kindset::screen, 0, QVariant(QVariant::Int), false),
+        std::make_shared<Setting>("geometry", kindset::screen, 0, QVariant(), false),
+        std::make_shared<Setting>("state", kindset::screen, 0, QVariant(), false),
         //COM Port
-        std::make_shared<Setting>("name", kindset::com_port, "", QVariant(QVariant::String), false),
-        std::make_shared<Setting>("baudRate", kindset::com_port, QSerialPort::Baud9600, QVariant(QVariant::Int), false),
-        std::make_shared<Setting>("dataBits", kindset::com_port, QSerialPort::Data8, QVariant(QVariant::Int), false),
-        std::make_shared<Setting>("parity", kindset::com_port, QSerialPort::NoParity, QVariant(QVariant::Int), false),
-        std::make_shared<Setting>("stopBits", kindset::com_port, QSerialPort::TwoStop, QVariant(QVariant::Int), false),
-        std::make_shared<Setting>("flowControl", kindset::com_port, QSerialPort::NoFlowControl, QVariant(QVariant::Int), false),
+        std::make_shared<Setting>("name", kindset::com_port, "", QVariant(), false),
+        std::make_shared<Setting>("baudRate", kindset::com_port, QSerialPort::Baud9600, QVariant(), false),
+        std::make_shared<Setting>("dataBits", kindset::com_port, QSerialPort::Data8, QVariant(), false),
+        std::make_shared<Setting>("parity", kindset::com_port, QSerialPort::NoParity, QVariant(), false),
+        std::make_shared<Setting>("stopBits", kindset::com_port, QSerialPort::TwoStop, QVariant(), false),
+        std::make_shared<Setting>("flowControl", kindset::com_port, QSerialPort::NoFlowControl, QVariant(), false),
         //Environment
-        std::make_shared<Setting>("directory_bin", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
-        std::make_shared<Setting>("directory_sav", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
-        std::make_shared<Setting>("directory_dsk", kindset::environment, QDir::homePath(), QVariant(QVariant::String), false),
+        std::make_shared<Setting>("directory_bin", kindset::environment, QDir::homePath(), QVariant(), false),
+        std::make_shared<Setting>("directory_sav", kindset::environment, QDir::homePath(), QVariant(), false),
+        std::make_shared<Setting>("directory_dsk", kindset::environment, QDir::homePath(), QVariant(), false),
     };
 }
 
@@ -68,6 +68,7 @@ void Settings::loadSettingsByKind(kindset ks)
             }
             else //если настройки нет реестре, загружается настройка по-умолчанию
                 setSetting(key, qsettings.value("/" + key, ""), ks);
+                //setSetting(key, getSetting(key, ks), ks); //getSetting(key, ks) вернет умолчание...
         }
     qsettings.endGroup();
 }

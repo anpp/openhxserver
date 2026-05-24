@@ -305,7 +305,7 @@ void HXServer::sendLoader()
             emit sendPacket(loader);
 
             emit dump("", false);
-            emit log(tr("Sended file: ") + m_loader, Qt::black);
+            emit log(tr("Sent file: ") + m_loader, Qt::black);
         }
         else
             emit error(tr("File is too small: ") + m_loader);
