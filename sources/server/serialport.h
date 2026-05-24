@@ -57,7 +57,7 @@ public:
     void start();
     void setBytesToPort(const int value) { m_bytes_to_port = value; }
     void setDelay(const unsigned long value) { m_msDelay = value; }
-    void waitBytesWritten() const;
+    void waitForBytesWritten() const;
 
     QSerialPort& SerialPort() const { return *serial_port; } ;
     bool isOpen();

@@ -159,7 +159,7 @@ void SerialPortThread::start()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void SerialPortThread::waitBytesWritten() const
+void SerialPortThread::waitForBytesWritten() const
 {
 #ifndef Q_OS_ANDROID
     while (serial_port->bytesToWrite() > 0)
@@ -167,6 +167,8 @@ void SerialPortThread::waitBytesWritten() const
         serial_port->waitForBytesWritten();
         QCoreApplication::processEvents();
     }
+#else
+    QThread::msleep(50);
 #endif
 }
 
@@ -191,7 +193,7 @@ void SerialPortThread::close()
     if(serial_port->isOpen())
         serial_port->close();
     QCoreApplication::processEvents();
-    emit closed();
+    connectionChanged(false);
 #endif
 }
 
@@ -272,7 +274,7 @@ void SerialPortThread::open(const QString& com_port)
     disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
     connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
   #endif
-    emit opened();
+    connectionChanged(true);
     emit portBaudRateChanged(serial_port->baudRate());
     flowControlChanged(serial_port->flowControl());
 #endif

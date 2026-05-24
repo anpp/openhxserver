@@ -353,7 +353,7 @@ void HXServer::sendSAVFile()
             while (fsize > 0)
             {
                 emit sendPacket(SAVFile.mid(SAVFile.size() - fsize, ImageDsk::DskConsts::BLOCK_SIZE));
-                port->waitBytesWritten();
+                port->waitForBytesWritten();
                 fsize -= ImageDsk::DskConsts::BLOCK_SIZE;
                 emit log(tr("Sending file: ") + m_SAVFile + " - " + QString::number(((SAVFile.size() - fsize) * 100) / SAVFile.size()) + "%", Qt::black, false, true);
                 QCoreApplication::processEvents();
@@ -1217,9 +1217,9 @@ void HXServer::loadImage(byte index)
     if(m_images->at(index).needLoad())
     {
         if(!m_images->at(index).loaded())
-            emit log(tr("Loading file ") + m_images->at(index).fileName());
+            emit log(tr("Loading file: ") + m_images->at(index).fileName());
         else
-            emit log(tr("Reloading file ") + m_images->at(index).fileName());
+            emit log(tr("Reloading file: ") + m_images->at(index).fileName());
 
         m_images->loadImage(index);
     }
