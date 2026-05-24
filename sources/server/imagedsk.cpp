@@ -162,10 +162,6 @@ bool ImageDsk::loaded() const
 //-------------------------------------------------------------------------------------------------------
 ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
 {
-#ifdef Q_OS_ANDROID
-    return DskErrors::DESuccess;
-#endif
-
     if(block >= size())
         return DskErrors::DEEOF;
     if(data.size() <= 0)
@@ -181,10 +177,10 @@ ImageDsk::DskErrors ImageDsk::write(size_t block, const QByteArray &data)
             m_file->close();
             return DskErrors::DEFileError;
         }
-
+#ifndef Q_OS_ANDROID
         //здесь запись в файл физически
         m_file->write(data);
-
+#endif
         //здесь запись в память, чтобы не перечитывать файл
         for(int i = 0; i < n_blocks; ++i)
             *m_blocks.at(i + block) = data.mid(i * ImageDsk::DskConsts::BLOCK_SIZE, ImageDsk::DskConsts::BLOCK_SIZE);            
