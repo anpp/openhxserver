@@ -157,10 +157,10 @@ public static void closeDeviceConnection() {
         } catch (IOException e) {
             javaErrorOccured("Close error: " + e.getMessage());
         } finally {
-            serialPort = null;
-            javaConnectedStateChanged(false);
+            serialPort = null;            
         }
     }
+    javaConnectedStateChanged(false);
 }
 
 }

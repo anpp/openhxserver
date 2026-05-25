@@ -332,9 +332,8 @@ void SerialPortThread::flowControlChanged(QSerialPort::FlowControl flowControl)
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::connectionChanged(bool state)
 {
-    if(m_opened == state) return;
-
     m_opened = state;
+
     if(m_opened)
         emit opened();
     else
