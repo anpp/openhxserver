@@ -68,7 +68,6 @@ void Settings::loadSettingsByKind(kindset ks)
             }
             else //если настройки нет реестре, загружается настройка по-умолчанию
                 setSetting(key, qsettings.value("/" + key, ""), ks);
-                //setSetting(key, getSetting(key, ks), ks); //getSetting(key, ks) вернет умолчание...
         }
     qsettings.endGroup();
 }

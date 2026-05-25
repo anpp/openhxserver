@@ -233,8 +233,8 @@ void SerialPortThread::open(const QString& com_port)
 {
     m_portName = com_port;
 #ifdef Q_OS_ANDROID
-    QStringList parts = m_portName.split(" "); // "USB Device 0403:6001"
-    if (parts.size() >= 3)
+    QStringList parts = m_portName.split(" "); // "USB 0403:6001"
+    if (parts.size() >= 2)
     {
         QStringList ids = parts.last().split(":");
         bool okV, okP;

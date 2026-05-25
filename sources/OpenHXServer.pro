@@ -1,12 +1,10 @@
 
 TARGET = openhx
 
-QT += core gui
+QT += core gui serialport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 5): QT += statemachine
 
-QT += serialport
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
@@ -14,16 +12,41 @@ CONFIG += c++17
 #QMAKE_CXXFLAGS += -pie
 #QMAKE_LFLAGS += -pie
 
+# На Qt6 пока только под Андроид с дин. сборкой
 greaterThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -stdlib=libc++
 greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+# Если сборка НЕ под андроид — добавляем виджеты
+!android {
+    QT += widgets
+    SOURCES += mainwindow.cpp
+    HEADERS += mainwindow.h
+    FORMS   += mainwindow.ui
+}
+
+# Если сборка ПОД андроид — добавляем QML
+android {
+    QT += qml quick
+    QT += widgets
+#    RESOURCES += qml.qrc
+
+    SOURCES += mainwindow.cpp
+    HEADERS += mainwindow.h
+    FORMS   += mainwindow.ui
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/res/values/libs.xml \
+    android/res/xml/qtprovider_paths.xml \
+    android/src/hx/openhx/helper/SerialHelper.java
+
+}
+
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp \
     port_dump.cpp \
     port_state.cpp \
     server/hxserver.cpp \
@@ -39,7 +62,6 @@ SOURCES += \
     settings_dialog/settings_misc.cpp
 
 HEADERS += \
-    mainwindow.h \
     port_dump.h \
     port_state.h \
     server/hxserver.h \
@@ -55,11 +77,11 @@ HEADERS += \
     settings_dialog/settings_misc.h
 
 FORMS += \
-    mainwindow.ui \
     port_dump.ui \
     settings_dialog/settings_com_port.ui \
     settings_dialog/settings_images.ui \
     settings_dialog/settings_misc.ui
+
 
 TRANSLATIONS += \
     OpenHXServer_ru_RU.ts
@@ -76,13 +98,6 @@ RESOURCES += \
     bin.qrc \
     images.qrc
 
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/build.gradle \
-    android/res/values/libs.xml \
-    android/res/xml/qtprovider_paths.xml \
-    android/src/hx/openhx/helper/SerialHelper.java
 
 
-TARGET = openhx
 

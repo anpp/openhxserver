@@ -47,8 +47,8 @@ public static String[] getAvailablePorts(Context context) {
     String[] portNames = new String[drivers.size()];
     for (int i = 0; i < drivers.size(); i++) {
         UsbDevice device = drivers.get(i).getDevice();
-        String name = device.getProductName();        
-        name = "USB Device " + String.format("%04X:%04X", device.getVendorId(), device.getProductId());
+        String name = device.getProductName();
+        name = "USB " + String.format("%04X:%04X", device.getVendorId(), device.getProductId());
         portNames[i] = name;
     }
     return portNames;
@@ -139,6 +139,7 @@ public static void writeData(byte[] data) {
         try {
             serialPort.write(data, 1000);
         } catch (IOException e) {
+            javaConnectedStateChanged(false);
             javaErrorOccured("Write error: " + e.getMessage());
         }
     }
