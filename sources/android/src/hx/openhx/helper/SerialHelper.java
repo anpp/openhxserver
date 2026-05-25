@@ -77,7 +77,6 @@ public static void connectToDevice(Context context, int vid, int pid) {
                             PendingIntent.FLAG_IMMUTABLE // Для современных Android
                         );
                         manager.requestPermission(device, permissionIntent);
-                        javaErrorOccured("Permission request sent for " + vid + ":" + pid);
                         return;
                     }
 
@@ -105,12 +104,11 @@ public static void connectToDevice(Context context, int vid, int pid) {
                         
                     } catch (IOException e) {
                         javaErrorOccured("Error opening port: " + e.getMessage());
-                        javaConnectedStateChanged(false);
                     }
                     return;
                 }
             }
-            javaErrorOccured("Device " + vid + ":" + pid + " not found");
+            javaErrorOccured(String.format("Device %04X:%04X not found", vid, pid));
         }
     });
 }
@@ -126,7 +124,6 @@ private static void startIoManager() {
         }
         @Override
         public void onRunError(Exception e) {
-            javaConnectedStateChanged(false);
             javaErrorOccured("IO Manager error: " + e.getMessage());
         }
     });
@@ -139,7 +136,6 @@ public static void writeData(byte[] data) {
         try {
             serialPort.write(data, 1000);
         } catch (IOException e) {
-            javaConnectedStateChanged(false);
             javaErrorOccured("Write error: " + e.getMessage());
         }
     }

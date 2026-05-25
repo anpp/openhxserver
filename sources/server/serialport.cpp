@@ -332,8 +332,9 @@ void SerialPortThread::flowControlChanged(QSerialPort::FlowControl flowControl)
 //----------------------------------------------------------------------------------------------------------------------
 void SerialPortThread::connectionChanged(bool state)
 {
-    m_opened = state;
+    if(m_opened == state) return;
 
+    m_opened = state;
     if(m_opened)
         emit opened();
     else
@@ -393,8 +394,11 @@ JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaErrorOccured(JNIEn
     Q_UNUSED(env);
     Q_UNUSED(clazz);
 
-    //if (SerialPortThread::instance())
-    //    emit SerialPortThread::instance()->connectionChanged((bool)state);
+    if (SerialPortThread::instance())
+    {
+        QString qError = QJniObject(error).toString();
+        emit SerialPortThread::instance()->error(qError);
+    }
 }
 
 }
