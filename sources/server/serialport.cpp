@@ -383,7 +383,7 @@ JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaConnectedStateChan
     Q_UNUSED(clazz);
 
     if (SerialPortThread::instance()) {
-        emit SerialPortThread::instance()->connectionChanged((bool)state);
+        SerialPortThread::instance()->connectionChanged((bool)state);
     }
 }
 
@@ -399,6 +399,25 @@ JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaErrorOccured(JNIEn
         emit SerialPortThread::instance()->error(qError);
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+JNIEXPORT void JNICALL Java_hx_openhx_helper_SerialHelper_javaPermissionGranted(JNIEnv *env, jclass clazz, jboolean value)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(clazz);
+
+    if (SerialPortThread::instance())
+    {
+        if((bool)value)
+        {
+            SerialPortThread::instance()->open(SerialPortThread::instance()->portName());
+            SerialPortThread::instance()->setPortSettings();
+        }
+        else
+            emit SerialPortThread::instance()->hint(QObject::tr("Permission denied: ") + SerialPortThread::instance()->portName());
+    }
+}
+
 
 }
 #endif

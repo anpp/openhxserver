@@ -13,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
+import android.os.Build;
 
 import com.hoho.android.usbserial.driver.*;
 import com.hoho.android.usbserial.util.HexDump;
@@ -37,7 +38,20 @@ public class SerialHelper {
     public static native void javaConnectedStateChanged(boolean state);
     public static native void javaErrorOccured(String error);
     public static native void javaMyDeviceAttached(boolean state);
+    public static native void javaPermissionGranted(boolean value);
 
+
+    private static final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (ACTION_USB_PERMISSION.equals(action)) {
+                synchronized (this) {
+                    javaPermissionGranted(intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false));
+                }
+            }
+        }
+    };
 
 public static String[] getAvailablePorts(Context context) {
     UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
@@ -74,8 +88,27 @@ public static void connectToDevice(Context context, int vid, int pid) {
                     if (!manager.hasPermission(device)) {
                         PendingIntent permissionIntent = PendingIntent.getBroadcast(
                             context, 0, new Intent(ACTION_USB_PERMISSION), 
-                            PendingIntent.FLAG_IMMUTABLE // Для современных Android
+                            PendingIntent.FLAG_MUTABLE // Для современных Android
                         );
+
+                        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+
+                        try {
+                            // На всякий случай пробуем отписать старый, если он завис
+                            context.unregisterReceiver(usbReceiver);
+                        } catch (IllegalArgumentException e) {
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            context.registerReceiver(
+                                usbReceiver,
+                                filter,
+                                Context.RECEIVER_NOT_EXPORTED
+                            );
+                        } else {
+                            context.registerReceiver(usbReceiver, filter);
+                        }
+
                         manager.requestPermission(device, permissionIntent);
                         return;
                     }
@@ -97,11 +130,15 @@ public static void connectToDevice(Context context, int vid, int pid) {
                     serialPort = driver.getPorts().get(0);
                     try {
                         serialPort.open(connection);
+
+                        serialPort.purgeHwBuffers(true, true);
+
+                        serialPort.setParameters(9600, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_2, UsbSerialPort.PARITY_NONE);
+
                         serialPort.setDTR(true);
                         serialPort.setRTS(true);
 
-                        javaConnectedStateChanged(true);
-                        
+                        javaConnectedStateChanged(true);                        
                         startIoManager();
                         
                     } catch (IOException e) {
@@ -139,7 +176,7 @@ private static void startIoManager() {
 public static void writeData(byte[] data) {
     if (serialPort != null) {
         try {
-            serialPort.write(data, 1000);
+            serialPort.write(data, WRITE_WAIT_MILLIS);
         } catch (IOException e) {
             javaErrorOccured("Write error: " + e.getMessage());
             closeDeviceConnection();
