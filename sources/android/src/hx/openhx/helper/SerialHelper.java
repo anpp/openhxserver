@@ -83,12 +83,14 @@ public static void connectToDevice(Context context, int vid, int pid) {
                     UsbSerialDriver driver = prober.probeDevice(device);
                     if (driver == null) {
                         javaErrorOccured("No driver found for this device");
+                        javaConnectedStateChanged(false);
                         return;
                     }
 
                     UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
                     if (connection == null) {
                         javaErrorOccured("Failed to open connection");
+                        javaConnectedStateChanged(false);
                         return;
                     }
 
@@ -104,11 +106,13 @@ public static void connectToDevice(Context context, int vid, int pid) {
                         
                     } catch (IOException e) {
                         javaErrorOccured("Error opening port: " + e.getMessage());
+                        javaConnectedStateChanged(false);
                     }
                     return;
                 }
             }
             javaErrorOccured(String.format("Device %04X:%04X not found", vid, pid));
+            javaConnectedStateChanged(false);
         }
     });
 }
@@ -125,6 +129,7 @@ private static void startIoManager() {
         @Override
         public void onRunError(Exception e) {
             javaErrorOccured("IO Manager error: " + e.getMessage());
+            closeDeviceConnection();
         }
     });
 
@@ -137,10 +142,9 @@ public static void writeData(byte[] data) {
             serialPort.write(data, 1000);
         } catch (IOException e) {
             javaErrorOccured("Write error: " + e.getMessage());
+            closeDeviceConnection();
         }
     }
-    else
-        javaConnectedStateChanged(false);
 }
 
 public static void closeDeviceConnection() {
@@ -158,9 +162,9 @@ public static void closeDeviceConnection() {
             javaErrorOccured("Close error: " + e.getMessage());
         } finally {
             serialPort = null;            
+            javaConnectedStateChanged(false);
         }
-    }
-    javaConnectedStateChanged(false);
+    }    
 }
 
 }
