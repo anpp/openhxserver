@@ -1,19 +1,18 @@
-#include <QApplication>
 
 #define HX_QML_INTERFACE
 
-#ifdef HX_QML_INTERFACE    
+#ifdef HX_QML_INTERFACE
+    #include <QGuiApplication>
     #include <QQmlApplicationEngine>
     #include <QQmlContext>
     #include "server/hxserver.h"
     #include "settingswrapper.h"
 #else
+    #include <QApplication>
     #include <QLocale>
     #include <QTranslator>
     #include "mainwindow.h"
 #endif
-
-#include <QFile>
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +21,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.1");
 
 #ifdef HX_QML_INTERFACE
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
     Settings::instance(nullptr, "OpenHXServer", "OpenHXServer"); //для создания синглтона Settings
     Settings::instance()->load();

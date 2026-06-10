@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import Qt.labs.platform 1.1
 
 ApplicationWindow {
     visible: true
@@ -39,7 +40,7 @@ ApplicationWindow {
                             icon.source: "qrc:/images/icons/folder-open-light.png"
                             icon.width: 24
                             icon.height: 24
-                            onClicked: Settings.pickFile()
+                            onClicked: fileDialogLoader.open()
                         }
                     }
 
@@ -53,7 +54,7 @@ ApplicationWindow {
                             icon.width: 24
                             icon.height: 24
 
-                            onClicked: Settings.pickFile()
+                            onClicked: fileDialogSav.open()
                         }
                     }
                 }
@@ -87,6 +88,8 @@ ApplicationWindow {
                     }
                 }
             }
+            FileDialog { id: fileDialogLoader; nameFilters: ["Binary files (*.bin)"]; onAccepted: pathField1.text = file }
+            FileDialog { id: fileDialogSav; onAccepted: pathField2.text = file }
 
         }
         // Экран 2: Лог

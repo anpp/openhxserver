@@ -51,15 +51,8 @@ public:
         if (s) s->save();
     }
 
-    Q_INVOKABLE void pickFile() {
-        QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "", "*.*");
-        if (!fileName.isEmpty()) {
-            emit filePicked(fileName);
-        }
-    }
 signals:
     void settingChanged(const QString& title);
-    void filePicked(const QString& title);
 
 private:
 };
