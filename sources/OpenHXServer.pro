@@ -20,6 +20,7 @@ greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 # Если сборка НЕ под андроид — добавляем виджеты
 !android {
     QT += widgets
+    QT += qml quick  #для отладки на десктопе
     SOURCES += mainwindow.cpp
     HEADERS += mainwindow.h
     FORMS   += mainwindow.ui
@@ -74,7 +75,8 @@ HEADERS += \
     settings_dialog/settings_com_port.h \
     settings_dialog/settings_editor.h \
     settings_dialog/settings_images.h \
-    settings_dialog/settings_misc.h
+    settings_dialog/settings_misc.h \
+    settingswrapper.h
 
 FORMS += \
     port_dump.ui \
@@ -96,7 +98,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     bin.qrc \
-    images.qrc
+    images.qrc \
+    qml.qrc
+
+DISTFILES += \
+    qml/main.qml
 
 
 

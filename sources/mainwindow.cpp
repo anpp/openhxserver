@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     statusbar->addWidget(&m_flowControlLabel);
     statusbar->addWidget(&m_StateLabel, 1);
 
+
     QStringList args = QCoreApplication::arguments();
     if(args.count() > 1)
         setSAVFileFromCL(args.at(1));
