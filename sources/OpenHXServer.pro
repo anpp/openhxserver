@@ -20,7 +20,9 @@ greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 # Если сборка НЕ под андроид — добавляем виджеты
 !android {
     QT += widgets
-    QT += qml quick  #для отладки на десктопе
+
+    QT += qml quick quickcontrols2 #для отладки на десктопе
+
     SOURCES += mainwindow.cpp
     HEADERS += mainwindow.h
     FORMS   += mainwindow.ui
@@ -28,9 +30,8 @@ greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 
 # Если сборка ПОД андроид — добавляем QML
 android {
-    QT += qml quick
+    QT += qml quick quickcontrols2
     QT += widgets
-#    RESOURCES += qml.qrc
 
     SOURCES += mainwindow.cpp
     HEADERS += mainwindow.h
