@@ -10,13 +10,19 @@ ApplicationWindow {
 
     header: TabBar {
         id: tabBar
-        TabButton { text: qsTr("Images") }
-        TabButton { text: qsTr("Log") }
-        TabButton { text: qsTr("Settings") }
+        TabButton { text: qsTr("Images") ;icon.source: "qrc:/images/icons/disk-light.png"}
+        TabButton { text: qsTr("Log")  ;icon.source: "qrc:/images/icons/log-light.png"}
+        TabButton { text: qsTr("Settings")  ;icon.source: "qrc:/images/icons/settings-light.png"}
     }
 
     ButtonGroup {
         id: interfaceGroup
+        onCheckedButtonChanged: {
+            if (checkedButton) {
+                console.log("Radio:", checkedButton.text)
+                console.log("ID:", checkedButton.id)
+            }
+        }
     }
 
     StackLayout {
@@ -35,16 +41,17 @@ ApplicationWindow {
                 ColumnLayout {
                     Layout.fillWidth: true
 
-                    // Поле 1
-                    RowLayout {
+                    // Loader
+                    ColumnLayout {
                         Layout.fillWidth: true
+                        spacing: 5
 
                         RadioButton {
                             id: rbLoader
                             ButtonGroup.group: interfaceGroup
                             checked: true
-                            text: qsTr("Loader:")
-                            Layout.preferredWidth: 90
+                            text: qsTr("Loader")
+                            //Layout.preferredWidth: 90
                         }
 
                         RowLayout {
@@ -67,14 +74,15 @@ ApplicationWindow {
                     }
 
                     // .SAV
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
+                        spacing: 5
 
                         RadioButton {
                             id: rbSav
                             ButtonGroup.group: interfaceGroup
                             text: qsTr(".SAV:")
-                            Layout.preferredWidth: 90
+                            //Layout.preferredWidth: 90
                         }
 
                         RowLayout {
@@ -95,6 +103,15 @@ ApplicationWindow {
                             }
                         }
                     }
+                }
+                // ДЕКОРАТИВНЫЙ РАЗДЕЛИТЕЛЬ (Линия)
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: "#dbdbdb"
+                }
+                Item {
+                         Layout.preferredHeight: 1
                 }
 
                 // Список .dsk обазов
