@@ -15,6 +15,10 @@ ApplicationWindow {
         TabButton { text: qsTr("Settings") }
     }
 
+    ButtonGroup {
+        id: interfaceGroup
+    }
+
     StackLayout {
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
@@ -34,27 +38,61 @@ ApplicationWindow {
                     // Поле 1
                     RowLayout {
                         Layout.fillWidth: true
-                        TextField { id: pathField1; Layout.fillWidth: true; readOnly: true }
-                        Button {
-                            //text: "";
-                            icon.source: "qrc:/images/icons/folder-open-light.png"
-                            icon.width: 24
-                            icon.height: 24
-                            onClicked: fileDialogLoader.open()
+
+                        RadioButton {
+                            id: rbLoader
+                            ButtonGroup.group: interfaceGroup
+                            checked: true
+                            text: qsTr("Loader:")
+                            Layout.preferredWidth: 90
                         }
+
+                        RowLayout {
+                                    Layout.fillWidth: true
+                                    enabled: rbLoader.checked
+
+                                    TextField {
+                                        id: pathField1
+                                        Layout.fillWidth: true
+                                        readOnly: true
+                                        placeholderText: qsTr("Select loader file...")
+                                    }
+                                    Button {
+                                        icon.source: "qrc:/images/icons/folder-open-light.png"
+                                        icon.width: 24
+                                        icon.height: 24
+                                        onClicked: fileDialogLoader.open()
+                                    }
+                                }
                     }
 
-                    // Поле 2
+                    // .SAV
                     RowLayout {
                         Layout.fillWidth: true
-                        TextField { id: pathField2; Layout.fillWidth: true; readOnly: true }
-                        Button {
-                            //text: "";
-                            icon.source: "qrc:/images/icons/folder-open-light.png"
-                            icon.width: 24
-                            icon.height: 24
 
-                            onClicked: fileDialogSav.open()
+                        RadioButton {
+                            id: rbSav
+                            ButtonGroup.group: interfaceGroup
+                            text: qsTr(".SAV:")
+                            Layout.preferredWidth: 90
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            enabled: rbSav.checked
+
+                            TextField {
+                            id: pathField2
+                            Layout.fillWidth: true
+                            readOnly: true
+                            placeholderText: qsTr("Select .SAV file...")
+                            }
+                            Button {
+                                icon.source: "qrc:/images/icons/folder-open-light.png"
+                                icon.width: 24
+                                icon.height: 24
+                                onClicked: fileDialogSav.open()
+                            }
                         }
                     }
                 }
