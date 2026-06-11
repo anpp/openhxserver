@@ -99,7 +99,7 @@ ApplicationWindow {
                                 icon.source: "qrc:/images/icons/folder-open-light.png"
                                 icon.width: 24
                                 icon.height: 24
-                                onClicked: fileDialogSav.open()
+                                onClicked: fileDialogSAV.open()
                             }
                         }
                     }
@@ -143,8 +143,23 @@ ApplicationWindow {
                     }
                 }
             }
-            FileDialog { id: fileDialogLoader; nameFilters: ["Binary files (*.bin)"]; onAccepted: pathField1.text = file }
-            FileDialog { id: fileDialogSav; onAccepted: pathField2.text = file }
+            FileDialog {
+                id: fileDialogLoader;
+                nameFilters: ["Binary files (*.bin)"];
+                onAccepted: {
+                    let pathStr = decodeURIComponent(file.toString())
+                    pathField1.text = pathStr.split('/').pop()
+                    }
+            }
+            FileDialog {
+                id: fileDialogSAV;
+                //nameFilters: ["SAV files (*.sav)"];
+                onAccepted: {
+                    let pathStr = decodeURIComponent(file.toString())
+                    pathField2.text = pathStr.split('/').pop()
+                }
+            }
+
 
         }
         // Экран 2: Лог
