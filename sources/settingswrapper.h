@@ -5,7 +5,6 @@
 #include <QVariant>
 #include <QString>
 #include <memory>
-#include <QFileDialog>
 #include "settings.h"
 
 class SettingsWrapper : public QObject

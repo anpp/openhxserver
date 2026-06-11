@@ -1,5 +1,5 @@
 
-#define HX_QML_INTERFACE
+//#define HX_QML_INTERFACE
 
 #ifdef HX_QML_INTERFACE
     #include <QGuiApplication>

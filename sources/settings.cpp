@@ -1,5 +1,7 @@
 #include "settings.h"
-#include <QMainWindow>
+#ifndef HX_QML_INTERFACE
+    #include <QMainWindow>
+#endif
 #include <QDir>
 
 
@@ -99,25 +101,29 @@ void Settings::saveSettingsByKind(kindset ks) const
 
 //----------------------------------------------------------------------------------------------------------------------
 void Settings::loadSettingsScreen()
-{    
+{
+#ifndef HX_QML_INTERFACE
     if(owner != nullptr)
     {
         loadSettingsByKind(kindset::screen);
         owner->restoreGeometry(getSetting("geometry").toByteArray());
         owner->restoreState(getSetting("state").toByteArray());
     }
+#endif
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Settings::saveSettingsScreen()
 {
+#ifndef HX_QML_INTERFACE
     if(owner != nullptr)
     {
         setSetting("geometry", owner->saveGeometry());
         setSetting("state", owner->saveState());
         saveSettingsByKind(kindset::screen);
     }
+#endif
 }
 
 
