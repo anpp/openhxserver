@@ -8,6 +8,8 @@ ApplicationWindow {
     width: 800; height: 600
     title: "OpenHX Server"
 
+    property int currentRowIndex: -1
+
     header: TabBar {
         id: tabBar
         TabButton { text: qsTr("Images") ;icon.source: "qrc:/images/icons/disk-light.png"}
@@ -32,6 +34,7 @@ ApplicationWindow {
         Item {
             id: imagesPage
 
+
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 10
@@ -42,7 +45,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
 
                     // Loader
-                    ColumnLayout {
+                    RowLayout {
                         Layout.fillWidth: true
                         spacing: 5
 
@@ -51,7 +54,7 @@ ApplicationWindow {
                             ButtonGroup.group: interfaceGroup
                             checked: true
                             text: qsTr("Loader")
-                            //Layout.preferredWidth: 90
+                            Layout.preferredWidth: 90
                         }
 
                         RowLayout {
@@ -74,7 +77,7 @@ ApplicationWindow {
                     }
 
                     // .SAV
-                    ColumnLayout {
+                    RowLayout {
                         Layout.fillWidth: true
                         spacing: 5
 
@@ -82,7 +85,7 @@ ApplicationWindow {
                             id: rbSav
                             ButtonGroup.group: interfaceGroup
                             text: qsTr(".SAV:")
-                            //Layout.preferredWidth: 90
+                            Layout.preferredWidth: 90
                         }
 
                         RowLayout {
@@ -114,35 +117,119 @@ ApplicationWindow {
                          Layout.preferredHeight: 1
                 }
 
-                // Список .dsk обазов
+                // Список .dsk образов
                 ListView {
                     id: fileList
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    model: Model // модель, надо взять из HXServer
+                    model: DiskImagesModel
+                    clip: true
+                    focus: true
+                    currentIndex: -1
 
                     header: Rectangle {
-                        width: fileList.width; height: 30; color: "lightgrey"
+                        width: fileList.width
+                        height: 30
+                        color: "#e0e0e0"
+                        z: 2
+
                         RowLayout {
                             anchors.fill: parent
-                            Text { text: qsTr("Device"); Layout.preferredWidth: 100 }
-                            Text { text: qsTr("Image"); Layout.preferredWidth: 100 }
-                            Text { text: qsTr("File"); Layout.fillWidth: true }
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            spacing: 10
+
+                            Text { text: qsTr("Device"); Layout.preferredWidth: 60; font.bold: true }
+                            Text { text: qsTr("Image"); Layout.preferredWidth: 100; font.bold: true }
+                            Text { text: qsTr("File"); Layout.fillWidth: true; font.bold: true }
                         }
                     }
 
-                    delegate: RowLayout {
+                    delegate: ItemDelegate {
+                        id: control
                         width: fileList.width
-                        Text { text: model.fileName; Layout.preferredWidth: 100 }
-                        Text { text: model.fileSize; Layout.preferredWidth: 100 }
-                        Button {
-                            text: qsTr("Open")
-                            Layout.fillWidth: true
-                            onClicked: console.log("", model.filePath)
+                        height: 40
+                        property bool isSelected: index === fileList.currentIndex
+
+                        onClicked: {
+                            fileList.currentIndex = index
+                            fileList.forceActiveFocus()
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: control.width
+                            implicitHeight: control.height
+
+                            //color: (index % 2 === 0 ? "#ffffff" : "#f5f5f5")
+                            color: control.isSelected
+                                               ? control.palette.highlight
+                                               : (index % 2 === 0 ? "#ffffff" : "#f5f5f5")
+
+                            // Легкая линия-разделитель снизу
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                height: 1
+                                color: "#e8e8e8"
+                            }
+                        }
+
+                        contentItem: RowLayout {
+                            spacing: 10
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+
+                            Text {
+                                text: model.hxIndex
+                                Layout.preferredWidth: 60
+                                verticalAlignment: Text.AlignVCenter
+                                color: control.isSelected ? control.palette.highlightedText : control.palette.text
+                            }
+                            Text {
+                                text: model.imageName
+                                Layout.preferredWidth: 100
+                                font.bold: true
+                                verticalAlignment: Text.AlignVCenter
+                                color: control.isSelected ? control.palette.highlightedText : control.palette.text
+                            }
+                            Text {
+                                text: model.fileName ? decodeURIComponent(model.fileName) : qsTr("<Empty>")
+                                Layout.fillWidth: true
+                                elide: Text.ElideMiddle
+                                verticalAlignment: Text.AlignVCenter
+                                color: control.isSelected
+                                    ? control.palette.highlightedText
+                                    : (model.fileName ? control.palette.text : "gray")
+                            }
+
+                            ToolButton {
+                                Layout.preferredWidth: 32
+                                Layout.preferredHeight: 32
+
+                                visible: control.isSelected
+                                enabled: control.isSelected
+
+                                icon.source: "qrc:/images/icons/folder-open-light.png"
+                                icon.width: 20
+                                icon.height: 20
+                                //icon.color: hovered ? control.palette.highlight : control.palette.windowText
+                                icon.color: control.isSelected ? control.palette.highlightedText : (hovered ? control.palette.highlight : control.palette.windowText)
+
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Select disk image")
+
+                                onClicked: {
+                                    currentRowIndex = index
+                                    fileDialogDSK.open()
+                                }
+                            }
                         }
                     }
                 }
             }
+
             FileDialog {
                 id: fileDialogLoader;
                 nameFilters: ["Binary files (*.bin)"];
@@ -157,6 +244,18 @@ ApplicationWindow {
                 onAccepted: {
                     let pathStr = decodeURIComponent(file.toString())
                     pathField2.text = pathStr.split('/').pop()
+                }
+            }
+            FileDialog {
+                id: fileDialogDSK;
+                nameFilters: ["Dsk files (*.dsk)"];
+                onAccepted: {
+                    if (currentRowIndex >= 0) {
+                        var localPath = fileDialogDSK.file.toLocaleString()
+                        var cleanPath = fileDialogDSK.file.toString().replace("file:///", "")
+                        DiskImagesModel.setFileNameAt(currentRowIndex, cleanPath)
+                        DiskImagesModel.save();
+                    }
                 }
             }
 

@@ -4,6 +4,23 @@ DEFINES += HX_QML_INTERFACE
 
 QT += core gui serialport
 
+#В Андроиде serialport не используется (потом надо избавиться в коде)
+!android {
+    QT += serialport
+}
+
+android {
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/res/values/libs.xml \
+    android/res/xml/qtprovider_paths.xml \
+    android/src/hx/openhx/helper/SerialHelper.java
+}
+
+
 greaterThan(QT_MAJOR_VERSION, 5): QT += statemachine
 
 
@@ -95,14 +112,4 @@ RESOURCES += \
     bin.qrc \
     images.qrc
 
-android {
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
-
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/build.gradle \
-    android/res/values/libs.xml \
-    android/res/xml/qtprovider_paths.xml \
-    android/src/hx/openhx/helper/SerialHelper.java
-}
 

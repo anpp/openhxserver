@@ -5,6 +5,7 @@
     #include <QGuiApplication>
     #include <QQmlApplicationEngine>
     #include <QQmlContext>
+    #include "settings_dialog/images_model.h"
     #include "server/hxserver.h"
     #include "settingswrapper.h"
 #else
@@ -28,11 +29,13 @@ int main(int argc, char *argv[])
 
     HXServer hxserver;
     SettingsWrapper Settings;
+    std::unique_ptr<ImagesModel> DiskImagesModel = std::make_unique<ImagesModel>(hxserver.images());
 
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("Settings", &Settings);
     engine.rootContext()->setContextProperty("HXServer", &hxserver);
+    engine.rootContext()->setContextProperty("DiskImagesModel", DiskImagesModel.get());
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

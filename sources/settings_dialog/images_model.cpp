@@ -4,14 +4,31 @@
 #include "../server/imagedsk.h"
 
 #include <QFont>
+#include <QDir>
 
 //-----------------------------------------------------------------------------------------------------------------
 QVariant ImagesModel::data(const QModelIndex &index, int role) const
 {
     if(index.isValid())
     {
+        if (role > Qt::UserRole)
+        {
+            switch (role)
+            {
+            case HXIndexRole:
+                return value(index.row(), static_cast<int>(ImagesModel_defs::HXIndex));
+            case ImageNameRole:
+                return value(index.row(), static_cast<int>(ImagesModel_defs::ImageName));
+            case FileNameRole:
+                return value(index.row(), static_cast<int>(ImagesModel_defs::FileName));
+            default:
+                return QVariant();
+            }
+        }
+
         if(Qt::EditRole == role || Qt::DisplayRole == role)
             return value(index.row(), index.column(), role);
+
         if(role == Qt::FontRole)
             switch(index.column())
             {
@@ -57,12 +74,38 @@ void ImagesModel::save() const
 }
 
 //-----------------------------------------------------------------------------------------------------------------
+void ImagesModel::setFileNameAt(int row, const QString &filePath)
+{
+    QModelIndex idx = this->index(row, 0);
+    this->setData(idx, filePath, FileNameRole);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 bool ImagesModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if(!index.isValid())
         return false;
 
     QString filename = "";
+
+    if (role > Qt::UserRole)
+    {
+        switch (role)
+        {
+        case FileNameRole:
+            filename = QDir::toNativeSeparators(value.toString());
+
+            m_data.data().at(index.row())->setFileName(value.toString());
+            emit selected_file(value.toString());
+
+            emit dataChanged(index, index);
+            return true;
+
+        default:
+            break;
+        }
+    }
+
     if(Qt::EditRole == role)
         switch(index.column())
         {
@@ -71,7 +114,7 @@ bool ImagesModel::setData(const QModelIndex &index, const QVariant &value, int r
             m_data.data().at(index.row())->setFileName(value.toString());
             emit selected_file(value.toString());
 
-            emit dataChanged(QModelIndex(), QModelIndex());
+            emit dataChanged(index, index);
             return true;
         default:
             break;
@@ -99,6 +142,17 @@ QVariant ImagesModel::headerData(int section, Qt::Orientation orientation, int r
             return QVariant();
         }
     return QVariant();
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+QHash<int, QByteArray> ImagesModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+
+    roles[HXIndexRole] = "hxIndex";
+    roles[ImageNameRole] = "imageName";
+    roles[FileNameRole] = "fileName";
+    return roles;
 }
 
 //-----------------------------------------------------------------------------------------------------------------

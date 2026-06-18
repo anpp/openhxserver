@@ -12,6 +12,12 @@ class ImagesModel : public QAbstractItemModel
 
     Images& m_data;
 public:
+    enum ImagesRoles {
+        HXIndexRole = Qt::UserRole + 1,
+        ImageNameRole,
+        FileNameRole
+    };
+
     enum class ImagesModel_defs: int {NumColumns = 3, HXIndex = 0, ImageName = 1, FileName = 2};
 
     explicit ImagesModel(Images& data, QObject *parent = nullptr):
@@ -23,12 +29,14 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex&) const override;
     int columnCount(const QModelIndex&) const override {return static_cast<int>(ImagesModel_defs::NumColumns); }
     QVariant value(int row, int col, int role = Qt::DisplayRole) const;
 
-    void save() const;
+    Q_INVOKABLE void save() const;
+    Q_INVOKABLE void setFileNameAt(int row, const QString& filePath);
 
 signals:
     void selected_file(const QString&);
