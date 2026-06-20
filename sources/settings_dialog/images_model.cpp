@@ -11,22 +11,7 @@ QVariant ImagesModel::data(const QModelIndex &index, int role) const
 {
     if(index.isValid())
     {
-        if (role > Qt::UserRole)
-        {
-            switch (role)
-            {
-            case HXIndexRole:
-                return value(index.row(), static_cast<int>(ImagesModel_defs::HXIndex));
-            case ImageNameRole:
-                return value(index.row(), static_cast<int>(ImagesModel_defs::ImageName));
-            case FileNameRole:
-                return value(index.row(), static_cast<int>(ImagesModel_defs::FileName));
-            default:
-                return QVariant();
-            }
-        }
-
-        if(Qt::EditRole == role || Qt::DisplayRole == role)
+        if(Qt::EditRole == role || Qt::DisplayRole == role || role > Qt::UserRole)
             return value(index.row(), index.column(), role);
 
         if(role == Qt::FontRole)
@@ -51,6 +36,21 @@ QVariant ImagesModel::data(const QModelIndex &index, int role) const
 //-----------------------------------------------------------------------------------------------------------------
 QVariant ImagesModel::value(int row, int col, int role) const
 {
+    if (role > Qt::UserRole)
+    {
+        switch (role)
+        {
+        case HXIndexRole:
+            return m_data.prefix() + QString::number(row);
+        case ImageNameRole:
+            return m_data.at(row).shortFileName();
+        case FileNameRole:
+            return m_data.at(row).fileName();
+        default:
+            return QVariant();
+        }
+    }
+
     if(Qt::EditRole == role || Qt::DisplayRole == role)
         switch(col)
         {
@@ -78,6 +78,12 @@ void ImagesModel::setFileNameAt(int row, const QString &filePath)
 {
     QModelIndex idx = this->index(row, 0);
     this->setData(idx, filePath, FileNameRole);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+QString ImagesModel::getFileNameAt(int row)
+{
+    return value(row, 0, FileNameRole).toString();
 }
 
 //-----------------------------------------------------------------------------------------------------------------

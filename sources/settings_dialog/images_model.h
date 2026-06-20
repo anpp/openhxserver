@@ -37,6 +37,7 @@ public:
 
     Q_INVOKABLE void save() const;
     Q_INVOKABLE void setFileNameAt(int row, const QString& filePath);
+    Q_INVOKABLE QString getFileNameAt(int row);
 
 signals:
     void selected_file(const QString&);

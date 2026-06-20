@@ -84,7 +84,7 @@ ApplicationWindow {
                         RadioButton {
                             id: rbSav
                             ButtonGroup.group: interfaceGroup
-                            text: qsTr(".SAV:")
+                            text: qsTr(".SAV")
                             Layout.preferredWidth: 90
                         }
 
@@ -139,8 +139,10 @@ ApplicationWindow {
                             anchors.rightMargin: 10
                             spacing: 10
 
-                            Text { text: qsTr("Device"); Layout.preferredWidth: 60; font.bold: true }
-                            Text { text: qsTr("Image"); Layout.preferredWidth: 100; font.bold: true }
+                            Text { text: qsTr("Device"); Layout.preferredWidth: 40; font.bold: true }
+                            ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
+                            Text { text: qsTr("Image"); Layout.preferredWidth: 90; font.bold: true }
+                            ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
                             Text { text: qsTr("File"); Layout.fillWidth: true; font.bold: true }
                         }
                     }
@@ -183,17 +185,20 @@ ApplicationWindow {
 
                             Text {
                                 text: model.hxIndex
-                                Layout.preferredWidth: 60
+                                Layout.preferredWidth: 40
                                 verticalAlignment: Text.AlignVCenter
                                 color: control.isSelected ? control.palette.highlightedText : control.palette.text
                             }
+                            ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
                             Text {
                                 text: model.imageName
-                                Layout.preferredWidth: 100
+                                Layout.preferredWidth: 90
                                 font.bold: true
+                                elide: Text.ElideMiddle
                                 verticalAlignment: Text.AlignVCenter
                                 color: control.isSelected ? control.palette.highlightedText : control.palette.text
                             }
+                            ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
                             Text {
                                 text: model.fileName ? decodeURIComponent(model.fileName) : qsTr("<Empty>")
                                 Layout.fillWidth: true
@@ -204,6 +209,26 @@ ApplicationWindow {
                                     : (model.fileName ? control.palette.text : "gray")
                             }
 
+                            ToolButton {
+                                Layout.preferredWidth: 32
+                                Layout.preferredHeight: 32
+
+                                visible: control.isSelected && model.fileName !== ""
+                                enabled: control.isSelected && model.fileName !== ""
+
+                                icon.source: "qrc:/images/icons/clear-light.png"
+                                icon.width: 20
+                                icon.height: 20
+                                icon.color: control.isSelected ? control.palette.highlightedText : (hovered ? control.palette.highlight : control.palette.windowText)
+
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Clear")
+
+                                onClicked: {
+                                    model.fileName = "" // то же самое что DiskImagesModel.setFileNameAt(index, "")
+                                    DiskImagesModel.save();
+                                }
+                            }
                             ToolButton {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
@@ -234,7 +259,7 @@ ApplicationWindow {
                 id: fileDialogLoader;
                 nameFilters: ["Binary files (*.bin)"];
                 onAccepted: {
-                    let pathStr = decodeURIComponent(file.toString())
+                    let pathStr = decodeURIComponent(fileDialogLoader.file.toString())
                     pathField1.text = pathStr.split('/').pop()
                     }
             }
@@ -242,7 +267,7 @@ ApplicationWindow {
                 id: fileDialogSAV;
                 //nameFilters: ["SAV files (*.sav)"];
                 onAccepted: {
-                    let pathStr = decodeURIComponent(file.toString())
+                    let pathStr = decodeURIComponent(fileDialogSAV.file.toString())
                     pathField2.text = pathStr.split('/').pop()
                 }
             }
@@ -252,7 +277,7 @@ ApplicationWindow {
                 onAccepted: {
                     if (currentRowIndex >= 0) {
                         var localPath = fileDialogDSK.file.toLocaleString()
-                        var cleanPath = fileDialogDSK.file.toString().replace("file:///", "")
+                        var cleanPath = localPath.replace("file:///", "")
                         DiskImagesModel.setFileNameAt(currentRowIndex, cleanPath)
                         DiskImagesModel.save();
                     }
