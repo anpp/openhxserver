@@ -10,6 +10,7 @@ ApplicationWindow {
     width: 800; height: 600
     title: qsTr("OpenHX Server")
 
+    Material.accent: Material.Blue
     background: Rectangle { color: window.palette.window }
 
     property int currentRowIndex: -1
@@ -115,17 +116,17 @@ ApplicationWindow {
 
                 TabButton {
                     text: qsTr("Images"); icon.source: "qrc:/images/icons/disk-light.png"
-                    Material.foreground: checked ? palette.highlight : window.palette.text
+                    Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
                 }
 
                 TabButton {
                     text: qsTr("Log"); icon.source: "qrc:/images/icons/log-light.png"
-                    Material.foreground: checked ? palette.highlight : window.palette.text
+                    Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
                 }
 
                 TabButton {
                     text: qsTr("Settings"); icon.source: "qrc:/images/icons/settings-light.png"
-                    Material.foreground: checked ? palette.highlight : window.palette.text
+                    Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
                 }
             }
         }
@@ -141,9 +142,17 @@ ApplicationWindow {
             }
         }
     }
-    StackLayout {
+
+    SwipeView {
+        id: swipeView
         anchors.fill: parent
-        currentIndex: tabBar.currentIndex        
+        currentIndex: tabBar.currentIndex
+
+        Binding {
+                target: tabBar
+                property: "currentIndex"
+                value: swipeView.currentIndex
+        }
 
         Item {
             id: imagesPage
