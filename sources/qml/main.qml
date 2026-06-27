@@ -4,21 +4,165 @@ import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.1
 
 ApplicationWindow {
+    id: window
     visible: true
     width: 800; height: 600
-    title: "OpenHX Server"
+    title: qsTr("OpenHX Server")
+
+    background: Rectangle { color: window.palette.window }
 
     property int currentRowIndex: -1
 
-    header: TabBar {
-        id: tabBar
-        TabButton { text: qsTr("Images") ;icon.source: "qrc:/images/icons/disk-light.png"}
-        TabButton { text: qsTr("Log")  ;icon.source: "qrc:/images/icons/log-light.png"}
-        TabButton { text: qsTr("Settings")  ;icon.source: "qrc:/images/icons/settings-light.png"}
+    header: ToolBar {
+        id: topToolBar
+
+        background: Rectangle {
+            color: window.palette.window
+            border.color: window.palette.mid
+            border.width: 1
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 0
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.margins: 5
+                spacing: 10
+
+                ToolButton {
+                    id: startButton
+                    //text: qsTr("Start")
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Start")
+
+                    icon.source: "qrc:/images/icons/play-light.png"
+                    icon.width: 32
+                    icon.height: 32
+                    display: AbstractButton.TextBesideIcon
+                    icon.color: startButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                }
+
+                ToolButton {
+                    id: stopButton
+                    //text: qsTr("Stop")
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Stop")
+
+                    icon.source: "qrc:/images/icons/stop-light.png"
+                    icon.width: 32
+                    icon.height: 32
+                    display: AbstractButton.TextBesideIcon
+                    icon.color: stopButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                }
+                ToolButton {
+                    id: pauseButton
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Pause")
+
+                    icon.source: "qrc:/images/icons/pause-light.png"
+                    icon.width: 32
+                    icon.height: 32
+                    display: AbstractButton.TextBesideIcon
+                    icon.color: pauseButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                }
+
+                ToolSeparator { Layout.fillHeight: true }
+
+                ToolButton {
+                    id: packedButton
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Packed data")
+
+                    icon.source: "qrc:/images/icons/package-light.png"
+                    icon.width: 32
+                    icon.height: 32
+                    display: AbstractButton.TextBesideIcon
+                    icon.color: packedButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                }
+
+                ToolSeparator { Layout.fillHeight: true }
+
+                ToolButton {
+                    id: settingsButton
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Settings")
+
+                    icon.source: "qrc:/images/icons/settings-light.png"
+                    icon.width: 32
+                    icon.height: 32
+                    display: AbstractButton.TextBesideIcon
+                    icon.color: settingsButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                }
+
+                Item { Layout.fillWidth: true }
+            }
+
+            // Горизонтальный разделитель между тулбаром и главным окном
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                //color: "#bcbcbc"
+            }
+
+            TabBar {
+                id: tabBar
+                Layout.fillWidth: true
+                background: Rectangle { color: window.palette.window }
+
+                Component.onCompleted: {
+                        tabBar.palette.windowText = window.palette.windowText
+                        tabBar.palette.text = window.palette.text
+                    }
+
+                TabButton {
+                        id: tabImages
+                        text: qsTr("Images")
+                        icon.source: "qrc:/images/icons/disk-light.png"
+
+                        //icon.color: tabImages.checked ? tabBar.palette.highlight : tabBar.palette.windowText
+
+                        palette.text: tabImages.checked ? window.palette.highlight : window.palette.windowText
+                        palette.windowText: tabImages.checked ? window.palette.highlight : window.palette.windowText
+                }
+
+                    TabButton {
+                        id: tabLog
+                        text: qsTr("Log")
+                        icon.source: "qrc:/images/icons/log-light.png"
+                        icon.color: tabLog.checked ? tabBar.palette.highlight : tabBar.palette.windowText
+
+                        contentItem: Text {
+                            text: tabLog.text
+                            font: tabLog.font
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: tabLog.checked ? tabBar.palette.highlight : tabBar.palette.windowText
+                        }
+                    }
+
+                    TabButton {
+                        id: tabSettings
+                        text: qsTr("Settings")
+                        icon.source: "qrc:/images/icons/settings-light.png"
+                        icon.color: tabSettings.checked ? tabBar.palette.highlight : tabBar.palette.windowText
+
+                        contentItem: Text {
+                            text: tabSettings.text
+                            font: tabSettings.font
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: tabSettings.checked ? tabBar.palette.highlight : tabBar.palette.windowText
+                        }
+                    }
+                }
+        }
     }
 
     ButtonGroup {
         id: interfaceGroup
+
         onCheckedButtonChanged: {
             if (checkedButton) {
                 console.log("Radio:", checkedButton.text)
@@ -26,14 +170,12 @@ ApplicationWindow {
             }
         }
     }
-
     StackLayout {
         anchors.fill: parent
-        currentIndex: tabBar.currentIndex
+        currentIndex: tabBar.currentIndex        
 
         Item {
             id: imagesPage
-
 
             ColumnLayout {
                 anchors.fill: parent
@@ -111,7 +253,7 @@ ApplicationWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: "#dbdbdb"
+                    //color: "#dbdbdb"
                 }
                 Item {
                          Layout.preferredHeight: 1
@@ -130,7 +272,10 @@ ApplicationWindow {
                     header: Rectangle {
                         width: fileList.width
                         height: 30
-                        color: "#e0e0e0"
+                        //color: "#e0e0e0"
+                        color: window.palette.window
+                        border.color: window.palette.mid
+
                         z: 2
 
                         RowLayout {
@@ -162,10 +307,9 @@ ApplicationWindow {
                             implicitWidth: control.width
                             implicitHeight: control.height
 
-                            //color: (index % 2 === 0 ? "#ffffff" : "#f5f5f5")
                             color: control.isSelected
                                                ? control.palette.highlight
-                                               : (index % 2 === 0 ? "#ffffff" : "#f5f5f5")
+                                               : (index % 2 === 0 ? control.palette.window : Qt.darker(control.palette.window, 1.05))
 
                             // Легкая линия-разделитель снизу
                             Rectangle {
@@ -173,7 +317,7 @@ ApplicationWindow {
                                 anchors.right: parent.right
                                 anchors.bottom: parent.bottom
                                 height: 1
-                                color: "#e8e8e8"
+                                color: control.palette.midlight
                             }
                         }
 
@@ -206,7 +350,8 @@ ApplicationWindow {
                                 verticalAlignment: Text.AlignVCenter
                                 color: control.isSelected
                                     ? control.palette.highlightedText
-                                    : (model.fileName ? control.palette.text : "gray")
+                                    : (model.fileName ? control.palette.text
+                                                      : (control.palette.placeholderText !== undefined ? control.palette.placeholderText : "#888888"))
                             }
 
                             ToolButton {
@@ -297,5 +442,48 @@ ApplicationWindow {
             TextField { placeholderText: "Test"; text: Settings.getSetting("savfile") }
             Button { text: qsTr("Save"); onClicked: Settings.save() }
         }
+    }
+    footer: ToolBar {
+            id: bottomStatusBar
+            height: 35
+
+            background: Rectangle {
+                color: window.palette.window
+                border.color: window.palette.mid
+                border.width: 1
+            }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 15
+
+                RowLayout {
+                    spacing: 6
+                    Rectangle {
+                        width: 10; height: 10; radius: 5
+                        color: "red"
+                    }
+                    Text {
+                        text: qsTr("Port: ")
+                        font.pointSize: 10
+                    }
+                }
+
+                ToolSeparator { Layout.fillHeight: true; topPadding: 4; bottomPadding: 4 }
+
+                Text {
+                    text: qsTr("State: Ready")
+                    font.pointSize: 10
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: "v1.0.0"
+                    font.pointSize: 9
+                    color: "gray"
+                }
+            }
     }
 }

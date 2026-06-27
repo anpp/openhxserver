@@ -3,6 +3,7 @@
 
 #ifdef HX_QML_INTERFACE
     #include <QGuiApplication>
+    //#include <QQuickStyle>
     #include <QQmlApplicationEngine>
     #include <QQmlContext>
     #include "settings_dialog/images_model.h"
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.1");
 
 #ifdef HX_QML_INTERFACE
+    //QQuickStyle::setStyle("Material");
     QGuiApplication app(argc, argv);
 
     Settings::instance(nullptr, "OpenHXServer", "OpenHXServer"); //для создания синглтона Settings
