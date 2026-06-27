@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.1
+import QtQuick.Controls.Material 2.0
 
 ApplicationWindow {
     id: window
@@ -111,52 +112,22 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 background: Rectangle { color: window.palette.window }
 
-                Component.onCompleted: {
-                        tabBar.palette.windowText = window.palette.windowText
-                        tabBar.palette.text = window.palette.text
-                    }
 
                 TabButton {
-                        id: tabImages
-                        text: qsTr("Images")
-                        icon.source: "qrc:/images/icons/disk-light.png"
-
-                        //icon.color: tabImages.checked ? tabBar.palette.highlight : tabBar.palette.windowText
-
-                        palette.text: tabImages.checked ? window.palette.highlight : window.palette.windowText
-                        palette.windowText: tabImages.checked ? window.palette.highlight : window.palette.windowText
+                    text: qsTr("Images"); icon.source: "qrc:/images/icons/disk-light.png"
+                    Material.foreground: checked ? palette.highlight : window.palette.text
                 }
 
-                    TabButton {
-                        id: tabLog
-                        text: qsTr("Log")
-                        icon.source: "qrc:/images/icons/log-light.png"
-                        icon.color: tabLog.checked ? tabBar.palette.highlight : tabBar.palette.windowText
-
-                        contentItem: Text {
-                            text: tabLog.text
-                            font: tabLog.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            color: tabLog.checked ? tabBar.palette.highlight : tabBar.palette.windowText
-                        }
-                    }
-
-                    TabButton {
-                        id: tabSettings
-                        text: qsTr("Settings")
-                        icon.source: "qrc:/images/icons/settings-light.png"
-                        icon.color: tabSettings.checked ? tabBar.palette.highlight : tabBar.palette.windowText
-
-                        contentItem: Text {
-                            text: tabSettings.text
-                            font: tabSettings.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            color: tabSettings.checked ? tabBar.palette.highlight : tabBar.palette.windowText
-                        }
-                    }
+                TabButton {
+                    text: qsTr("Log"); icon.source: "qrc:/images/icons/log-light.png"
+                    Material.foreground: checked ? palette.highlight : window.palette.text
                 }
+
+                TabButton {
+                    text: qsTr("Settings"); icon.source: "qrc:/images/icons/settings-light.png"
+                    Material.foreground: checked ? palette.highlight : window.palette.text
+                }
+            }
         }
     }
 
