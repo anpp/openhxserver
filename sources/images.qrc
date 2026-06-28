@@ -15,5 +15,6 @@
         <file>images/icons/package-light.png</file>
         <file>images/icons/list_icon_light.png</file>
         <file>images/icons/options_icon_light.png</file>
+        <file>images/icons/arrow_left.png</file>
     </qresource>
 </RCC>

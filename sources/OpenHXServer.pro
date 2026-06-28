@@ -112,4 +112,8 @@ RESOURCES += \
     bin.qrc \
     images.qrc
 
+DISTFILES += \
+    qml/MainScreen.qml \
+    qml/PageSettings.qml
+
 
