@@ -13,6 +13,7 @@ ApplicationWindow {
     Material.accent: Material.Blue
     background: Rectangle { color: window.palette.window }
 
+
     StackView {
         id: rootStack
         anchors.fill: parent

@@ -9,6 +9,17 @@ import OpenHX.SettingsTypes 1.0
 Page {
     id: mainScreen
 
+    Timer {
+        id: initTimer
+        interval: 50
+        running: true
+        repeat: false
+
+        onTriggered: {
+            mainScreen.updateHXServer()
+        }
+    }
+
     function updateHXServer() {
 
         HXServer.setPortName(Settings.getSetting("name", SettingsTypes.KindSet.ComPort))
@@ -22,9 +33,9 @@ Page {
             HXServer.setServerMode(ServerTypes.ServerMode.SAVMode)
     }
 
-    Component.onCompleted: {
-        mainScreen.updateHXServer()
-    }
+    //Component.onCompleted: {
+    //    mainScreen.updateHXServer()
+    //}
 
     background: Rectangle { color: window.palette.window }
 
@@ -455,11 +466,89 @@ Page {
 
         }
         // Экран 2: Лог
-        TextArea {
-            readOnly: true
-            text: "Лог будет здесь..."
-        }
+        Item {
+            id: logPageWrapper
+            Connections {
+                target: HXServer
 
+                function onLog(value, color, b_state, b_clear_last) {
+                    let message = "";
+                    let date_color = "#0000ff";
+
+                    if (!b_state) {
+                        message = value;
+                    } else {
+                        message = HXServer.nameState + " " + value;
+                    }
+
+                    message = "<font color=\"" + color + "\">" + message + "</font>";
+
+                    if (b_clear_last && teLog.text !== "") {
+                        let lastBreak = teLog.text.lastIndexOf("<br>");
+                        if (lastBreak !== -1) {
+                            teLog.text = teLog.text.substring(0, lastBreak);
+                        }
+                    }
+
+                    let currentDateTime = Qt.formatDateTime(new Date(), "[dd.MM.yyyy hh:mm:ss]");
+                    let datePart = "<font color=\"" + date_color + "\">" + currentDateTime + "</font> ";
+
+                    if (teLog.text === "") {
+                        teLog.text = datePart + message;
+                    } else {
+                        teLog.text += "<br>" + datePart + message;
+                    }
+                }
+            }
+/*
+            Flickable {
+            //ScrollView {
+                id: logFlickable
+                anchors.fill: parent
+                contentWidth: width
+                contentHeight: teLog.implicitHeight
+                clip: true
+
+                TextArea.flickable: TextArea {
+                    id: teLog
+                    readOnly: true
+                    textFormat: TextEdit.RichText
+                    wrapMode: TextEdit.Wrap
+                    text: ""
+
+                    onLengthChanged: {
+                        teLog.cursorPosition = teLog.length
+                    }
+                }
+
+                ScrollBar.vertical: ScrollBar {
+                    policy: ScrollBar.AsNeeded
+                }
+            }
+        }
+        */
+            //ScrollView {
+            //    id: logScrollView
+            //    anchors.fill: parent
+            //    clip: true
+
+                //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+
+                TextArea {
+                    id: teLog
+                    anchors.fill: parent
+                    Layout.margins: 5
+                    clip: true
+                    readOnly: true
+                    textFormat: TextEdit.RichText
+                    wrapMode: TextEdit.Wrap
+                    text: ""
+
+                    onLengthChanged: { teLog.cursorPosition = teLog.length }
+                }
+
+            }
+        //}
         // Экран 3: Дамп
         ColumnLayout {
             TextField { placeholderText: "Test"; text: Settings.getSetting("savfile") }

@@ -39,6 +39,7 @@ public:
     const QString& getErrorMessage() const {return m_ErrorMessage; };
     ServerStates state() const;
     const QString& nameState() const;
+    Q_PROPERTY(QString nameState READ nameState CONSTANT)
     Q_INVOKABLE void setLoader(const QString& value);
     Q_INVOKABLE void setSAVFile(const QString& value);
     Q_INVOKABLE void setServerMode(ServerMode value);
