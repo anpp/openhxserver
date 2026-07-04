@@ -46,30 +46,40 @@ Page {
     }
 
     ScrollView {
-            anchors.fill: parent
-            contentWidth: parent.width
-            clip: true
+        anchors.fill: parent
+        contentWidth: parent.width
+        clip: true
 
-            ColumnLayout {
-                width: parent.width
-                anchors.margins: 16
-                spacing: 20
+        ColumnLayout {
+            width: parent.width
+            anchors.margins: 16
+            spacing: 20
 
-                Label {
-                    text: qsTr("Port")
-                    font.bold: true
+            Label {
+                text: qsTr("Serial port")
+                font.bold: true
+            }
+
+            ComboBox {
+                id: portComboBox
+                Layout.fillWidth: true
+
+                model: Settings.portsList
+
+                Component.onCompleted: {
+                    var savedPort = Settings.getSetting("serial_port");
+                    var idx = find(savedPort);
+                    if (idx !== -1) {
+                        currentIndex = idx;
+                    }
                 }
 
-                ComboBox {
-                    id: modeComboBox
-                    Layout.fillWidth: true
-                    model: [""]
-                    currentIndex: 0
-                }
-
-
+                onActivated: (index) => {
+                                 Settings.setSetting("serial_port", textAt(index));
+                             }
 
                 Item { Layout.preferredHeight: 20 }
             }
         }
+    }
 }
