@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls.Material 2.0
+import OpenHX.SettingsTypes 1.0
 
 Page {
     id: settingsPage
@@ -67,16 +68,16 @@ Page {
                 model: Settings.portsList
 
                 Component.onCompleted: {
-                    var savedPort = Settings.getSetting("serial_port");
+                    var savedPort = Settings.getSetting("name", SettingsTypes.KindSet.ComPort);
                     var idx = find(savedPort);
                     if (idx !== -1) {
                         currentIndex = idx;
                     }
                 }
 
-                onActivated: (index) => {
-                                 Settings.setSetting("serial_port", textAt(index));
-                             }
+                //onActivated: (index) => {
+                //                 Settings.setSetting("serial_port", textAt(index));
+                //             }
 
                 Item { Layout.preferredHeight: 20 }
             }

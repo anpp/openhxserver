@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    qmlRegisterUncreatableType<HXServer>("OpenHX.ServerTypes", 1, 0, "ServerTypes", "Cannot create ServerTypes in QML");
     qmlRegisterUncreatableType<SettingsWrapper>("OpenHX.SettingsTypes", 1, 0, "SettingsTypes", "Cannot create SettingsTypes in QML");
 
     engine.rootContext()->setContextProperty("Settings", &Settings);

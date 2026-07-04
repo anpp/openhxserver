@@ -3,10 +3,29 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.1
 import QtQuick.Controls.Material 2.0
+import OpenHX.ServerTypes 1.0
 import OpenHX.SettingsTypes 1.0
 
 Page {
     id: mainScreen
+
+    function updateHXServer() {
+
+        HXServer.setPortName(Settings.getSetting("name", SettingsTypes.KindSet.ComPort))
+        HXServer.setPortSettings()
+        HXServer.setLoader(Settings.getSetting("loader", SettingsTypes.KindSet.Misc))
+        HXServer.setSAVFile(Settings.getSetting("savfile", SettingsTypes.KindSet.Misc))
+
+        if (Settings.getBoolSetting("HXMode", SettingsTypes.KindSet.Misc))
+            HXServer.setServerMode(ServerTypes.ServerMode.HXMode)
+        else
+            HXServer.setServerMode(ServerTypes.ServerMode.SAVMode)
+    }
+
+    Component.onCompleted: {
+        mainScreen.updateHXServer()
+    }
+
     background: Rectangle { color: window.palette.window }
 
     property int currentRowIndex: -1
@@ -134,12 +153,13 @@ Page {
     ButtonGroup {
         id: interfaceGroup
 
-        onCheckedButtonChanged: {
-            if (checkedButton) {
-                console.log("Radio:", checkedButton.text)
-                console.log("ID:", checkedButton.id)
-            }
-        }
+        onClicked: (button) => {
+
+                       var isHX = (button === rbLoader)
+                       Settings.setSetting("HXMode", isHX, SettingsTypes.KindSet.Misc)
+                       Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
+                       mainScreen.updateHXServer()
+                   }
     }
 
     SwipeView {
@@ -173,9 +193,9 @@ Page {
                         RadioButton {
                             id: rbLoader
                             ButtonGroup.group: interfaceGroup
-                            checked: true
                             text: qsTr("Loader")
                             Layout.preferredWidth: 90
+                            checked: Settings.getBoolSetting("HXMode", SettingsTypes.KindSet.Misc)
                         }
 
                         RowLayout {
@@ -183,13 +203,13 @@ Page {
                             enabled: rbLoader.checked
 
                             TextField {
-                                id: pathField1
+                                id: pathLoader
                                 Layout.fillWidth: true
                                 readOnly: true
                                 placeholderText: qsTr("Select loader file...")
 
                                 Component.onCompleted: {
-                                    var loader = Settings.getSetting("loader", SettingsTypes.Misc);
+                                    var loader = Settings.getSetting("loader", SettingsTypes.KindSet.Misc);
                                     var loader_view = decodeURIComponent(loader)
                                     loader_view = loader_view.split('/').pop()
                                     text = loader_view
@@ -215,6 +235,7 @@ Page {
                             ButtonGroup.group: interfaceGroup
                             text: qsTr(".SAV")
                             Layout.preferredWidth: 90
+                            checked: !Settings.getBoolSetting("HXMode", SettingsTypes.KindSet.Misc)
                         }
 
                         RowLayout {
@@ -222,13 +243,13 @@ Page {
                             enabled: rbSav.checked
 
                             TextField {
-                                id: pathField2
+                                id: pathSAV
                                 Layout.fillWidth: true
                                 readOnly: true
                                 placeholderText: qsTr("Select .SAV file...")
 
                                 Component.onCompleted: {
-                                    var SAV = Settings.getSetting("savfile", SettingsTypes.Misc);
+                                    var SAV = Settings.getSetting("savfile", SettingsTypes.KindSet.Misc);
                                     var SAV_view = decodeURIComponent(SAV)
                                     SAV_view = SAV_view.split('/').pop()
                                     text = SAV_view
@@ -401,9 +422,9 @@ Page {
                 onAccepted: {
                     var localPath = file.toLocaleString()
                     var cleanPath = localPath.replace("file:///", "")
-                    Settings.setSetting("loader", cleanPath, SettingsTypes.Misc)
+                    Settings.setSetting("loader", cleanPath, SettingsTypes.KindSet.Misc)
                     Settings.save()
-                    pathField1.text = cleanPath.split('/').pop()
+                    pathLoader.text = decodeURIComponent(cleanPath).split('/').pop()
                 }
             }
             FileDialog {
@@ -411,10 +432,11 @@ Page {
                 //nameFilters: ["SAV files (*.sav)"];
                 onAccepted: {
                     var localPath = file.toLocaleString()
+                    let localPath = decodeURIComponent(localPath)
                     var cleanPath = localPath.replace("file:///", "")
-                    Settings.setSetting("savfile", cleanPath, SettingsTypes.Misc)
+                    Settings.setSetting("savfile", cleanPath, SettingsTypes.KindSet.Misc)
                     Settings.save()
-                    pathField2.text = cleanPath.split('/').pop()
+                    pathSAV.text = decodeURIComponent(cleanPath).split('/').pop()
                 }
             }
             FileDialog {

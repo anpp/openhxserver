@@ -26,20 +26,22 @@ class HXServer : public QObject
 
 public:
     enum ServerStates: int {Unk = -1, Closed = 0, Opened = 1, Ready = 2, Waiting = 3, Processing = 4, Paused = 5, Error = 6};
-    enum ServerMode: int {HXMode = 0, SAVMode = 1};
+    enum class ServerMode: int {HXMode = 0, SAVMode = 1};
+
+    Q_ENUM(ServerMode)
 
     explicit HXServer(QObject *parent = nullptr);
     ~HXServer();
 
-    void setPortName(const QString &PortName);
-    void setPortSettings();
+    Q_INVOKABLE void setPortName(const QString &PortName);
+    Q_INVOKABLE void setPortSettings();
     const QString& portName() const { return m_PortName; }
     const QString& getErrorMessage() const {return m_ErrorMessage; };
     ServerStates state() const;
     const QString& nameState() const;
-    void setLoader(const QString& value);
-    void setSAVFile(const QString& value);
-    void setServerMode(ServerMode value);
+    Q_INVOKABLE void setLoader(const QString& value);
+    Q_INVOKABLE void setSAVFile(const QString& value);
+    Q_INVOKABLE void setServerMode(ServerMode value);
     Images& images() const {return *m_images; };
 
 protected:
