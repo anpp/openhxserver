@@ -3,8 +3,8 @@
 #include <QElapsedTimer>
 
 #ifdef Q_OS_ANDROID
-#include <QJniObject>
-#include <qnativeinterface.h>
+    #include <QJniObject>
+    #include <qnativeinterface.h>
 #endif
 
 #include "../settings.h"

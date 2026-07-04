@@ -60,8 +60,9 @@ contains(DEFINES, HX_QML_INTERFACE) {
     RESOURCES += qml.qrc
 
     DISTFILES += \
-        qml/main.qml
-
+        qml/main.qml \
+        qml/MainScreen.qml \
+        qml/PageSettings.qml
 }
 
 # Если сборка с widget интерфейсом (дефайн HX_QML_INTERFACE НЕ задан)
@@ -112,8 +113,5 @@ RESOURCES += \
     bin.qrc \
     images.qrc
 
-DISTFILES += \
-    qml/MainScreen.qml \
-    qml/PageSettings.qml
 
 

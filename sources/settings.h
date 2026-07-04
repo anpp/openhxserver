@@ -106,6 +106,7 @@ public:
     const COM_settings& COMSettings() const;
     void setCOMSettings(const COM_settings& com_settings_struct);
     const QSettings& qSettings() const {return qsettings; }
+    QStringList getPortsList() const;
 };
 
 #endif // SETTINGS

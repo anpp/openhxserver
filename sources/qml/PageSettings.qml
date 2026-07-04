@@ -46,12 +46,30 @@ Page {
     }
 
     ScrollView {
-        anchors.fill: parent
-        contentWidth: parent.width
+            anchors.fill: parent
+            contentWidth: parent.width
+            clip: true
 
-        ColumnLayout {
-            width: parent.width
-            spacing: 20
+            ColumnLayout {
+                width: parent.width
+                anchors.margins: 16
+                spacing: 20
+
+                Label {
+                    text: qsTr("Port")
+                    font.bold: true
+                }
+
+                ComboBox {
+                    id: modeComboBox
+                    Layout.fillWidth: true
+                    model: [""]
+                    currentIndex: 0
+                }
+
+
+
+                Item { Layout.preferredHeight: 20 }
+            }
         }
-    }
 }

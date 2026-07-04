@@ -123,7 +123,7 @@ Page {
             }
 
             TabButton {
-                text: qsTr("Settings"); icon.source: "qrc:/images/icons/settings-light.png"
+                text: qsTr("Port dump"); icon.source: "qrc:/images/icons/dump-light.png"
                 Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
             }
         }

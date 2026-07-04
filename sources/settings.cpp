@@ -2,8 +2,15 @@
 #ifndef HX_QML_INTERFACE
     #include <QMainWindow>
 #endif
-#include <QDir>
 
+#include <QDir>
+#include <QSerialPortInfo>
+
+#ifdef Q_OS_ANDROID
+    #include <QCoreApplication>
+    #include <QJniObject>
+    #include <qnativeinterface.h>
+#endif
 
 const static QString sSettingKind[] = {"", "misc", "screen", "com_port", "environment"};
 
@@ -266,6 +273,39 @@ void Settings::setCOMSettings(const COM_settings &com_settings_struct)
     setSetting("parity", com_settings_struct.parity, kindset::com_port);
     setSetting("stopBits", com_settings_struct.stopBits, kindset::com_port);
     setSetting("flowControl", com_settings_struct.flowControl, kindset::com_port);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+QStringList Settings::getPortsList() const
+{
+    QStringList portsList;
+
+#ifdef Q_OS_ANDROID
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    QJniObject jPortArray = QJniObject::callStaticMethod<jobjectArray>(
+        "hx/openhx/helper/SerialHelper",
+        "getAvailablePorts",
+        "(Landroid/content/Context;)[Ljava/lang/String;",
+        context.object()
+        );
+
+    if (jPortArray.isValid())
+    {
+        QJniEnvironment env;
+        jobjectArray array = jPortArray.object<jobjectArray>();
+        jsize count = env->GetArrayLength(array);
+
+        for (int i = 0; i < count; ++i) {
+            QJniObject jStr = QJniObject::fromLocalRef(env->GetObjectArrayElement(array, i));
+            portsList.append(jStr.toString());
+        }
+    }
+#else
+    auto availablePorts = QSerialPortInfo::availablePorts();
+    for(const auto &port: availablePorts)
+        portsList.append(port.portName());
+#endif
+    return portsList;
 }
 
 
