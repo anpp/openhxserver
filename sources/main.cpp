@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    qmlRegisterUncreatableType<SettingsWrapper>("OpenHX.SettingsTypes", 1, 0, "SettingsTypes", "Cannot create SettingsTypes in QML");
+
     engine.rootContext()->setContextProperty("Settings", &Settings);
     engine.rootContext()->setContextProperty("HXServer", &hxserver);
     engine.rootContext()->setContextProperty("DiskImagesModel", DiskImagesModel.get());

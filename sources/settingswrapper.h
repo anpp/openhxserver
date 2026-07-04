@@ -15,6 +15,14 @@ class SettingsWrapper : public QObject
     Q_PROPERTY(QStringList portsList READ getPortsList NOTIFY portsChanged)
 
 public:
+    enum class KindSet {
+        All = 0,
+        Misc,
+        ComPort,
+        Environment
+    };
+    Q_ENUM(KindSet)
+
     explicit SettingsWrapper(QObject *parent = nullptr) : QObject(parent) {}
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -31,35 +39,35 @@ public:
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-    Q_INVOKABLE QVariant getSetting(const QString& title, kindset ks = kindset::all) const
+    Q_INVOKABLE QVariant getSetting(const QString& title, KindSet ks = KindSet::All) const
     {
         auto s = Settings::instance();
         if (!s) return QVariant();
-        return s->getSetting(title, ks);
+        return s->getSetting(title, castKindSet(ks));
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-    Q_INVOKABLE void setSetting(const QString& title, const QVariant& value, kindset ks = kindset::all)
+    Q_INVOKABLE void setSetting(const QString& title, const QVariant& value, KindSet ks = KindSet::All)
     {
         auto s = Settings::instance();
         if (s) {
-            s->setSetting(title, value, ks);
+            s->setSetting(title, value, castKindSet(ks));
             emit settingChanged(title);
         }
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-    Q_INVOKABLE bool isChanged(const QString& title, kindset ks = kindset::all) const
+    Q_INVOKABLE bool isChanged(const QString& title, KindSet ks = KindSet::All) const
     {
         auto s = Settings::instance();
-        return s ? s->isChanged(title, ks) : false;
+        return s ? s->isChanged(title, castKindSet(ks)) : false;
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-    Q_INVOKABLE void clear(kindset ks)
+    Q_INVOKABLE void clear(KindSet ks)
     {
         auto s = Settings::instance();
-        if (s) s->clear(ks);
+        if (s) s->clear(castKindSet(ks));
     }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -80,7 +88,18 @@ signals:
     void settingChanged(const QString& title);
     void portsChanged();
 
+
 private:
+//----------------------------------------------------------------------------------------------------------------------
+    static kindset castKindSet(KindSet ks) {
+        switch (ks) {
+        case KindSet::Misc:        return kindset::misc;
+        case KindSet::ComPort:     return kindset::com_port;
+        case KindSet::Environment: return kindset::environment;
+        default:                   return kindset::all;
+        }
+    }
+
 };
 
 #endif // SETTINGSWRAPPER_H

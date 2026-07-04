@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.1
 import QtQuick.Controls.Material 2.0
+import OpenHX.SettingsTypes 1.0
 
 Page {
     id: mainScreen
@@ -147,9 +148,9 @@ Page {
         currentIndex: tabBar.currentIndex
 
         Binding {
-                target: tabBar
-                property: "currentIndex"
-                value: swipeView.currentIndex
+            target: tabBar
+            property: "currentIndex"
+            value: swipeView.currentIndex
         }
 
         Item {
@@ -178,22 +179,30 @@ Page {
                         }
 
                         RowLayout {
-                                    Layout.fillWidth: true
-                                    enabled: rbLoader.checked
+                            Layout.fillWidth: true
+                            enabled: rbLoader.checked
 
-                                    TextField {
-                                        id: pathField1
-                                        Layout.fillWidth: true
-                                        readOnly: true
-                                        placeholderText: qsTr("Select loader file...")
-                                    }
-                                    Button {
-                                        icon.source: "qrc:/images/icons/folder-open-light.png"
-                                        icon.width: 24
-                                        icon.height: 24
-                                        onClicked: fileDialogLoader.open()
-                                    }
+                            TextField {
+                                id: pathField1
+                                Layout.fillWidth: true
+                                readOnly: true
+                                placeholderText: qsTr("Select loader file...")
+
+                                Component.onCompleted: {
+                                    var loader = Settings.getSetting("loader", SettingsTypes.Misc);
+                                    var loader_view = decodeURIComponent(loader)
+                                    loader_view = loader_view.split('/').pop()
+                                    text = loader_view
                                 }
+
+                            }
+                            Button {
+                                icon.source: "qrc:/images/icons/folder-open-light.png"
+                                icon.width: 24
+                                icon.height: 24
+                                onClicked: fileDialogLoader.open()
+                            }
+                        }
                     }
 
                     // .SAV
@@ -213,10 +222,18 @@ Page {
                             enabled: rbSav.checked
 
                             TextField {
-                            id: pathField2
-                            Layout.fillWidth: true
-                            readOnly: true
-                            placeholderText: qsTr("Select .SAV file...")
+                                id: pathField2
+                                Layout.fillWidth: true
+                                readOnly: true
+                                placeholderText: qsTr("Select .SAV file...")
+
+                                Component.onCompleted: {
+                                    var SAV = Settings.getSetting("savfile", SettingsTypes.Misc);
+                                    var SAV_view = decodeURIComponent(SAV)
+                                    SAV_view = SAV_view.split('/').pop()
+                                    text = SAV_view
+                                }
+
                             }
                             Button {
                                 icon.source: "qrc:/images/icons/folder-open-light.png"
@@ -286,8 +303,8 @@ Page {
                             implicitHeight: control.height
 
                             color: control.isSelected
-                                               ? control.palette.highlight
-                                               : (index % 2 === 0 ? control.palette.window : Qt.darker(control.palette.window, 1.05))
+                                   ? control.palette.highlight
+                                   : (index % 2 === 0 ? control.palette.window : Qt.darker(control.palette.window, 1.05))
 
                             // Легкая линия-разделитель снизу
                             Rectangle {
@@ -327,9 +344,9 @@ Page {
                                 elide: Text.ElideMiddle
                                 verticalAlignment: Text.AlignVCenter
                                 color: control.isSelected
-                                    ? control.palette.highlightedText
-                                    : (model.fileName ? control.palette.text
-                                                      : (control.palette.placeholderText !== undefined ? control.palette.placeholderText : "#888888"))
+                                       ? control.palette.highlightedText
+                                       : (model.fileName ? control.palette.text
+                                                         : (control.palette.placeholderText !== undefined ? control.palette.placeholderText : "#888888"))
                             }
 
                             ToolButton {
@@ -382,16 +399,22 @@ Page {
                 id: fileDialogLoader;
                 nameFilters: ["Binary files (*.bin)"];
                 onAccepted: {
-                    let pathStr = decodeURIComponent(fileDialogLoader.file.toString())
-                    pathField1.text = pathStr.split('/').pop()
-                    }
+                    var localPath = file.toLocaleString()
+                    var cleanPath = localPath.replace("file:///", "")
+                    Settings.setSetting("loader", cleanPath, SettingsTypes.Misc)
+                    Settings.save()
+                    pathField1.text = cleanPath.split('/').pop()
+                }
             }
             FileDialog {
                 id: fileDialogSAV;
                 //nameFilters: ["SAV files (*.sav)"];
                 onAccepted: {
-                    let pathStr = decodeURIComponent(fileDialogSAV.file.toString())
-                    pathField2.text = pathStr.split('/').pop()
+                    var localPath = file.toLocaleString()
+                    var cleanPath = localPath.replace("file:///", "")
+                    Settings.setSetting("savfile", cleanPath, SettingsTypes.Misc)
+                    Settings.save()
+                    pathField2.text = cleanPath.split('/').pop()
                 }
             }
             FileDialog {
