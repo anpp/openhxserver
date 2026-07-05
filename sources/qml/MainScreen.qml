@@ -42,6 +42,16 @@ Page {
 
     property int currentRowIndex: -1
 
+    //обработка сигнала из settingsPage
+    Connections {
+        id: settingsConnection
+        target: null
+
+        function onSettingsChanged() {
+            mainScreen.updateHXServer();
+        }
+    }
+
     header: ColumnLayout {
         spacing: 0
 
@@ -126,7 +136,12 @@ Page {
                     display: AbstractButton.TextBesideIcon
                     icon.color: settingsButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
 
-                    onClicked: rootStack.push(rectSettings)
+                    onClicked: {
+                        let settingsPage = rootStack.push(rectSettings);
+
+                        if (settingsPage)
+                            settingsConnection.target = settingsPage;
+                    }
                 }
 
                 Item { Layout.fillWidth: true }
@@ -432,8 +447,8 @@ Page {
                 id: fileDialogLoader;
                 nameFilters: ["Binary files (*.bin)"];
                 onAccepted: {
-                    var localPath = file.toLocaleString()
-                    var cleanPath = localPath.replace("file:///", "")
+                    let localPath = file.toLocaleString()
+                    let cleanPath = localPath.replace("file:///", "")
                     Settings.setSetting("loader", cleanPath, SettingsTypes.KindSet.Misc)
                     Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
                     pathLoader.text = decodeURIComponent(cleanPath).split('/').pop()
@@ -455,8 +470,8 @@ Page {
                 nameFilters: ["Dsk files (*.dsk)"];
                 onAccepted: {
                     if (currentRowIndex >= 0) {
-                        var localPath = fileDialogDSK.file.toLocaleString()
-                        var cleanPath = localPath.replace("file:///", "")
+                        let localPath = fileDialogDSK.file.toLocaleString()
+                        let cleanPath = localPath.replace("file:///", "")
                         DiskImagesModel.setFileNameAt(currentRowIndex, cleanPath)
                         DiskImagesModel.save();
                     }

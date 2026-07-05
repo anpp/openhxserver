@@ -14,8 +14,6 @@ ApplicationWindow {
     background: Rectangle { color: mainWindow.palette.window }
 
 
-    property Item actualMainScreen: null
-
     StackView {
         id: rootStack
         anchors.fill: parent
@@ -25,22 +23,12 @@ ApplicationWindow {
 
     Component {
         id: mainScreenComponent
-        MainScreen {
-            id: mainScreenInstance
-            Component.onCompleted: mainWindow.actualMainScreen = mainScreenInstance
-        }
+        MainScreen {}
     }
 
     Component {
         id: rectSettings
-        PageSettings {
-            id: settingsPage
-
-            onSettingsChanged: {
-                if (mainWindow.actualMainScreen !== null) {
-                    mainWindow.actualMainScreen.updateHXServer()
-                }            }
-        }
+        PageSettings {}
     }
 
     footer: ToolBar {
