@@ -21,7 +21,7 @@ Page {
     }
 
     function updateHXServer() {
-        console.log("updateHX")
+        //console.log("updateHX")
 
         HXServer.setPortName(Settings.getSetting("name", SettingsTypes.KindSet.ComPort))
         HXServer.setPortSettings()
@@ -68,21 +68,13 @@ Page {
 
             message = "<font color=\"" + color + "\">" + message + "</font>";
 
-            if (b_clear_last && teLog.text !== "") {
-                let lastBreak = teLog.text.lastIndexOf("<br>");
-                if (lastBreak !== -1) {
-                    teLog.text = teLog.text.substring(0, lastBreak);
-                }
-            }
+            if (b_clear_last)
+                teLog.undo()
 
             let currentDateTime = Qt.formatDateTime(new Date(), "[dd.MM.yyyy hh:mm:ss]");
             let datePart = "<font color=\"" + date_color + "\">" + currentDateTime + "</font> ";
 
-            if (teLog.text === "") {
-                teLog.text = datePart + message;
-            } else {
-                teLog.text += "<br>" + datePart + message;
-            }
+            teLog.append(datePart + message)
         }
 
         function onStateChanged(ServerState) {
@@ -170,6 +162,7 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: startButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    opacity: enabled ? 1.0 : 0.3
 
                     onClicked: { HXServer.start() }
                 }
@@ -185,6 +178,7 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: stopButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    opacity: enabled ? 1.0 : 0.3
 
                     onClicked: { HXServer.stop() }
                 }
@@ -198,6 +192,7 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: pauseButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    opacity: enabled ? 1.0 : 0.3
 
                     onClicked: { HXServer.pause() }
                 }
@@ -214,6 +209,7 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: packedButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    opacity: enabled ? 1.0 : 0.3
                 }
 
                 ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
@@ -228,6 +224,7 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: settingsButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    opacity: enabled ? 1.0 : 0.3
 
                     onClicked: {
                         let settingsPage = rootStack.push(rectSettings);

@@ -79,7 +79,7 @@ ApplicationWindow {
                 }
             }
 
-            ToolSeparator { Layout.fillHeight: true; topPadding: 4; bottomPadding: 4 }
+            ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
 
             Text {
                 id: teState
