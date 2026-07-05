@@ -109,7 +109,7 @@ Page {
                     icon.color: pauseButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
                 }
 
-                ToolSeparator { Layout.fillHeight: true }
+                ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
 
                 ToolButton {
                     id: packedButton
@@ -123,7 +123,7 @@ Page {
                     icon.color: packedButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
                 }
 
-                ToolSeparator { Layout.fillHeight: true }
+                ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
 
                 ToolButton {
                     id: settingsButton
@@ -315,7 +315,6 @@ Page {
                     header: Rectangle {
                         width: fileList.width
                         height: 30
-                        //color: "#e0e0e0"
                         color: mainWindow.palette.window
                         border.color: mainWindow.palette.mid
 

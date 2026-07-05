@@ -31,6 +31,20 @@ ApplicationWindow {
         PageSettings {}
     }
 
+    //Сигналы от HXServer для заполнения строки состояния
+    Connections {
+        id: hxserverConnection
+        target: HXServer
+
+        function onPort_opened(m_PortName) {
+            tePort.text = qsTr("Port: ") + m_PortName
+            if(m_PortName === "")
+                rectStatusPort.color = "red"
+            else
+                rectStatusPort.color = "green"
+        }
+    }
+
     footer: ToolBar {
         id: bottomStatusBar
         height: 35
@@ -50,10 +64,12 @@ ApplicationWindow {
             RowLayout {
                 spacing: 6
                 Rectangle {
+                    id: rectStatusPort
                     width: 10; height: 10; radius: 5
                     color: "red"
                 }
                 Text {
+                    id: tePort
                     text: qsTr("Port: ")
                     font.pointSize: 10
                 }
