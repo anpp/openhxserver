@@ -541,28 +541,52 @@ Page {
             }
         }
         */
-            //ScrollView {
-            //    id: logScrollView
-            //    anchors.fill: parent
-            //    clip: true
+            ScrollView {
+                id: logScrollView
+                anchors.fill: parent
+                contentWidth: children.implicitWidth
+                contentHeight: children.implicitHeight
+                clip: true
 
-                //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-                TextArea {
+                TextEdit {
                     id: teLog
-                    anchors.fill: parent
-                    Layout.margins: 5
-                    clip: true
-                    readOnly: true
-                    textFormat: TextEdit.RichText
-                    wrapMode: TextEdit.Wrap
+                    width: logScrollView.width
+
+                    leftPadding: 5
+                    rightPadding: 5
+                    topPadding: 5
+                    bottomPadding: 5
+
+                    readOnly: true;
+                    textFormat: Text.RichText
+                    wrapMode: Text.Wrap
                     text: ""
 
-                    onLengthChanged: { teLog.cursorPosition = teLog.length }
-                }
+                    selectByMouse: true
+                    selectByKeyboard: true;
 
+                    selectionColor: palette.highlight
+                    selectedTextColor: palette.highlightedText
+
+                    onTextChanged: { logScrollView.ScrollBar.vertical.position = 1.0 - logScrollView.ScrollBar.vertical.size }
+
+                    //чтоб работали "ушки" выделения текста
+                    onSelectionStartChanged: {
+                        let isSelected = teLog.selectionStart !== teLog.selectionEnd
+                        // Ищем Flickable среди child ScrollView (он там первый)
+                        for (let i = 0; i < logScrollView.children.length; i++) {
+                            if (logScrollView.children[i].boundsBehavior !== undefined) {
+                                logScrollView.children[i].interactive = !isSelected
+                                break
+                            }
+                        }
+                    }
+                }
             }
-        //}
+        }
         // Экран 3: Дамп
         ColumnLayout {
             TextField { placeholderText: "Test"; text: Settings.getSetting("savfile") }
