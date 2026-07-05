@@ -8,6 +8,16 @@ Page {
     id: settingsPage
     signal settingsChanged()
 
+    focus: true
+
+    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_Back) {
+                            event.accepted = true
+
+                            rootStack.pop()
+                        }
+                    }
+
     background: Rectangle { color: mainWindow.palette.window }
 
     header: ToolBar {
@@ -77,25 +87,21 @@ Page {
                     }
                 }
 
-                //onActivated: (index) => {
-                //                 Settings.setSetting("serial_port", textAt(index));
-                //             }
-
                 Item { Layout.preferredHeight: 20 }
             }
         }
     }
 
     footer: Button {
-            text: qsTr("Save")
-            onClicked: {
-                Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
-                Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
-                settingsPage.settingsChanged()
+        text: qsTr("Save")
+        onClicked: {
+            Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
+            Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
+            settingsPage.settingsChanged()
 
-                Qt.callLater(() => {
-                        rootStack.pop()
-                    })
-            }
+            Qt.callLater(() => {
+                             rootStack.pop()
+                         })
         }
+    }
 }
