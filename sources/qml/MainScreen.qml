@@ -77,6 +77,23 @@ Page {
             teLog.append(datePart + message)
         }
 
+        function onDump(byteArray, input) {
+            let view = new DataView(byteArray)
+            let hexParts = []
+
+            for (let i = 0; i < view.byteLength; i++) {
+                let hex = view.getUint8(i).toString(16).toUpperCase()
+                hexParts.push(hex.length < 2 ? "0" + hex : hex)
+            }
+
+            let hexString = hexParts.join(" ")
+            if (hexString.length === 0) return;
+            let color = input ? "#006400" : "#00008B"
+            let formattedLine = "<font color='" + color + "'>" + hexString + "</font><br>"
+
+            teDump.append(formattedLine)
+        }
+
         function onStateChanged(ServerState) {
             switch(ServerState)
             {
@@ -606,25 +623,58 @@ Page {
                     selectedTextColor: palette.highlightedText
 
                     onTextChanged: { logScrollView.ScrollBar.vertical.position = 1.0 - logScrollView.ScrollBar.vertical.size }
+                }
+            }
+        }
+        // Экран 3: Дамп
+        Item {
+            id: dumpPageWrapper
+
+            ScrollView {
+                id: dumpScrollView
+                anchors.fill: parent
+                contentWidth: children.implicitWidth
+                contentHeight: children.implicitHeight
+                clip: true
+
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                TextEdit {
+                    id: teDump
+                    width: dumpScrollView.width
+
+                    leftPadding: 5
+                    rightPadding: 5
+                    topPadding: 5
+                    bottomPadding: 5
+
+                    readOnly: true;
+                    textFormat: Text.RichText
+                    wrapMode: Text.Wrap
+                    text: ""
+
+                    selectByMouse: true
+                    selectByKeyboard: true;
+
+                    selectionColor: palette.highlight
+                    selectedTextColor: palette.highlightedText
+
+                    onTextChanged: { dumpScrollView.ScrollBar.vertical.position = 1.0 - dumpScrollView.ScrollBar.vertical.size }
 
                     //чтоб работали "ушки" выделения текста
                     onSelectionStartChanged: {
-                        let isSelected = teLog.selectionStart !== teLog.selectionEnd
+                        let isSelected = teDump.selectionStart !== teDump.selectionEnd
                         // Ищем Flickable среди child ScrollView (он там первый)
-                        for (let i = 0; i < logScrollView.children.length; i++) {
-                            if (logScrollView.children[i].boundsBehavior !== undefined) {
-                                logScrollView.children[i].interactive = !isSelected
+                        for (let i = 0; i < dumpScrollView.children.length; i++) {
+                            if (dumpScrollView.children[i].boundsBehavior !== undefined) {
+                                dumpScrollView.children[i].interactive = !isSelected
                                 break
                             }
                         }
                     }
                 }
             }
-        }
-        // Экран 3: Дамп
-        ColumnLayout {
-            TextField { placeholderText: "Test"; text: Settings.getSetting("savfile") }
-            Button { text: qsTr("Save"); onClicked: Settings.save() }
         }
     }
 }

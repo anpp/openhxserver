@@ -115,7 +115,7 @@ signals:
     void error(const QString&);
     void log(const QString& value, const QColor& color = Qt::black, bool b_state = false, bool b_clear_last = false) const;
     void port_opened(const QString&);
-    void dump(const QByteArray&, bool in = true) const;
+    void dump(const QByteArray& bytea, bool in = true) const;
     void ttyOut(const QByteArray&);
 
     void close();
