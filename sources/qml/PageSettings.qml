@@ -6,7 +6,9 @@ import OpenHX.SettingsTypes 1.0
 
 Page {
     id: settingsPage
-    background: Rectangle { color: window.palette.window }
+    signal settingsChanged()
+
+    background: Rectangle { color: mainWindow.palette.window }
 
     header: ToolBar {
         id: settingsBar
@@ -14,8 +16,8 @@ Page {
         spacing: 0
 
         background: Rectangle {
-            color: window.palette.window
-            border.color: window.palette.mid
+            color: mainWindow.palette.window
+            border.color: mainWindow.palette.mid
             border.width: 1
         }
 
@@ -41,7 +43,7 @@ Page {
                 text: qsTr("Settings")
                 font.bold: true
                 Layout.leftMargin: 10
-                Material.foreground: window.palette.text
+                Material.foreground: mainWindow.palette.text
             }
         }
     }
@@ -83,4 +85,17 @@ Page {
             }
         }
     }
+
+    footer: Button {
+            text: qsTr("Save")
+            onClicked: {
+                Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
+                Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
+                settingsPage.settingsChanged()
+
+                Qt.callLater(() => {
+                        rootStack.pop()
+                    })
+            }
+        }
 }

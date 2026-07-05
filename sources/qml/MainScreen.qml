@@ -21,6 +21,7 @@ Page {
     }
 
     function updateHXServer() {
+        console.log("updateHX")
 
         HXServer.setPortName(Settings.getSetting("name", SettingsTypes.KindSet.ComPort))
         HXServer.setPortSettings()
@@ -37,7 +38,7 @@ Page {
     //    mainScreen.updateHXServer()
     //}
 
-    background: Rectangle { color: window.palette.window }
+    background: Rectangle { color: mainWindow.palette.window }
 
     property int currentRowIndex: -1
 
@@ -50,8 +51,8 @@ Page {
             spacing: 0
 
             background: Rectangle {
-                color: window.palette.window
-                border.color: window.palette.mid
+                color: mainWindow.palette.window
+                border.color: mainWindow.palette.mid
                 border.width: 1
             }
 
@@ -140,22 +141,22 @@ Page {
         TabBar {
             id: tabBar
             Layout.fillWidth: true
-            background: Rectangle { color: window.palette.window }
+            background: Rectangle { color: mainWindow.palette.window }
             Layout.margins: 5
 
             TabButton {
                 text: qsTr("Images"); icon.source: "qrc:/images/icons/disk-light.png"
-                Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
+                Material.foreground: checked ? tabBar.palette.highlight : mainWindow.palette.text
             }
 
             TabButton {
                 text: qsTr("Log"); icon.source: "qrc:/images/icons/log-light.png"
-                Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
+                Material.foreground: checked ? tabBar.palette.highlight : mainWindow.palette.text
             }
 
             TabButton {
                 text: qsTr("Port dump"); icon.source: "qrc:/images/icons/dump-light.png"
-                Material.foreground: checked ? tabBar.palette.highlight : window.palette.text
+                Material.foreground: checked ? tabBar.palette.highlight : mainWindow.palette.text
             }
         }
     }
@@ -300,8 +301,8 @@ Page {
                         width: fileList.width
                         height: 30
                         //color: "#e0e0e0"
-                        color: window.palette.window
-                        border.color: window.palette.mid
+                        color: mainWindow.palette.window
+                        border.color: mainWindow.palette.mid
 
                         z: 2
 
@@ -434,7 +435,7 @@ Page {
                     var localPath = file.toLocaleString()
                     var cleanPath = localPath.replace("file:///", "")
                     Settings.setSetting("loader", cleanPath, SettingsTypes.KindSet.Misc)
-                    Settings.save()
+                    Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
                     pathLoader.text = decodeURIComponent(cleanPath).split('/').pop()
                 }
             }
@@ -443,10 +444,9 @@ Page {
                 //nameFilters: ["SAV files (*.sav)"];
                 onAccepted: {
                     var localPath = file.toLocaleString()
-                    let localPath = decodeURIComponent(localPath)
                     var cleanPath = localPath.replace("file:///", "")
                     Settings.setSetting("savfile", cleanPath, SettingsTypes.KindSet.Misc)
-                    Settings.save()
+                    Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
                     pathSAV.text = decodeURIComponent(cleanPath).split('/').pop()
                 }
             }

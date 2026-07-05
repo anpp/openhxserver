@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
     Settings::instance(nullptr, "OpenHXServer", "OpenHXServer"); //для создания синглтона Settings
     Settings::instance()->load();
 
-
     HXServer hxserver;
     SettingsWrapper Settings;
     std::unique_ptr<ImagesModel> DiskImagesModel = std::make_unique<ImagesModel>(hxserver.images());

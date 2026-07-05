@@ -5,14 +5,16 @@ import Qt.labs.platform 1.1
 import QtQuick.Controls.Material 2.0
 
 ApplicationWindow {
-    id: window
+    id: mainWindow
     visible: true
     width: 800; height: 600
     title: qsTr("OpenHX")
 
     Material.accent: Material.Blue
-    background: Rectangle { color: window.palette.window }
+    background: Rectangle { color: mainWindow.palette.window }
 
+
+    property Item actualMainScreen: null
 
     StackView {
         id: rootStack
@@ -23,12 +25,22 @@ ApplicationWindow {
 
     Component {
         id: mainScreenComponent
-        MainScreen {}
+        MainScreen {
+            id: mainScreenInstance
+            Component.onCompleted: mainWindow.actualMainScreen = mainScreenInstance
+        }
     }
 
     Component {
         id: rectSettings
-        PageSettings {}
+        PageSettings {
+            id: settingsPage
+
+            onSettingsChanged: {
+                if (mainWindow.actualMainScreen !== null) {
+                    mainWindow.actualMainScreen.updateHXServer()
+                }            }
+        }
     }
 
     footer: ToolBar {
@@ -36,8 +48,8 @@ ApplicationWindow {
         height: 35
 
         background: Rectangle {
-            color: window.palette.window
-            border.color: window.palette.mid
+            color: mainWindow.palette.window
+            border.color: mainWindow.palette.mid
             border.width: 1
         }
 
