@@ -25,9 +25,10 @@ class HXServer : public QObject
     enum class ReadWritePhases: int {None = -1, BlockNumber, Bytes, CheckSum, GetBytes};
 
 public:
-    enum ServerStates: int {Unk = -1, Closed = 0, Opened = 1, Ready = 2, Waiting = 3, Processing = 4, Paused = 5, Error = 6};
+    enum class ServerStates: int {Unk = -1, Closed = 0, Opened = 1, Ready = 2, Waiting = 3, Processing = 4, Paused = 5, Error = 6};
     enum class ServerMode: int {HXMode = 0, SAVMode = 1};
 
+    Q_ENUM(ServerStates)
     Q_ENUM(ServerMode)
 
     explicit HXServer(QObject *parent = nullptr);

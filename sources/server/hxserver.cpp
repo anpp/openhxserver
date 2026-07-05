@@ -124,7 +124,7 @@ HXServer::ServerStates HXServer::state() const
 //------------------------------------------------------------------------------------------------
 const QString &HXServer::nameState() const
 {
-    return StateNames[state()];
+    return StateNames[static_cast<int>(state())];
 }
 
 //------------------------------------------------------------------------------------------------
@@ -220,13 +220,13 @@ void HXServer::initSM()
     connect(pausedState.get(), &QState::entered, this, &HXServer::isPaused);
     connect(errorState.get(), &QState::entered, this, &HXServer::isError);
 
-    closedState->assignProperty(sm.get(), "state", ServerStates::Closed);
-    openedState->assignProperty(sm.get(), "state", ServerStates::Opened);
-    readyState->assignProperty(sm.get(), "state", ServerStates::Ready);
-    waitingState->assignProperty(sm.get(), "state", ServerStates::Waiting);
-    processingState->assignProperty(sm.get(), "state", ServerStates::Processing);
-    pausedState->assignProperty(sm.get(), "state", ServerStates::Paused);
-    errorState->assignProperty(sm.get(), "state", ServerStates::Error);
+    closedState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Closed));
+    openedState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Opened));
+    readyState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Ready));
+    waitingState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Waiting));
+    processingState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Processing));
+    pausedState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Paused));
+    errorState->assignProperty(sm.get(), "state", static_cast<int>(ServerStates::Error));
 }
 
 //------------------------------------------------------------------------------------------------

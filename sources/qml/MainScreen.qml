@@ -42,7 +42,7 @@ Page {
 
     property int currentRowIndex: -1
 
-    //обработка сигнала из settingsPage
+    //Обработка сигнала из settingsPage
     Connections {
         id: settingsConnection
         target: null
@@ -50,6 +50,93 @@ Page {
         function onSettingsChanged() {
             mainScreen.updateHXServer();
         }
+    }
+
+    //Обработка сигналов от HXServer
+    Connections {
+        target: HXServer
+
+        function onLog(value, color, b_state, b_clear_last) {
+            let message = "";
+            let date_color = "#0000ff";
+
+            if (!b_state) {
+                message = value;
+            } else {
+                message = HXServer.nameState + " " + value;
+            }
+
+            message = "<font color=\"" + color + "\">" + message + "</font>";
+
+            if (b_clear_last && teLog.text !== "") {
+                let lastBreak = teLog.text.lastIndexOf("<br>");
+                if (lastBreak !== -1) {
+                    teLog.text = teLog.text.substring(0, lastBreak);
+                }
+            }
+
+            let currentDateTime = Qt.formatDateTime(new Date(), "[dd.MM.yyyy hh:mm:ss]");
+            let datePart = "<font color=\"" + date_color + "\">" + currentDateTime + "</font> ";
+
+            if (teLog.text === "") {
+                teLog.text = datePart + message;
+            } else {
+                teLog.text += "<br>" + datePart + message;
+            }
+        }
+
+        function onStateChanged(ServerState) {
+            switch(ServerState)
+            {
+            case ServerTypes.ServerStates.Closed:
+                startButton.enabled = false;
+                stopButton.enabled = false;
+                pauseButton.enabled = false;
+                settingsButton.enabled = true;
+                break;
+            case ServerTypes.ServerStates.Opened:
+                startButton.enabled = false;
+                stopButton.enabled = false;
+                pauseButton.enabled = false;
+                settingsButton.enabled = true;
+                break;
+            case ServerTypes.ServerStates.Ready:
+                startButton.enabled = true;
+                stopButton.enabled = false;
+                pauseButton.enabled = false;
+                settingsButton.enabled = true;
+                break;
+            case ServerTypes.ServerStates.Waiting:
+                startButton.enabled = false;
+                stopButton.enabled = true;
+                pauseButton.enabled = false;
+                settingsButton.enabled = false;
+                break;
+            case ServerTypes.ServerStates.Processing:
+                startButton.enabled = false;
+                stopButton.enabled = true
+                pauseButton.enabled = true;
+                settingsButton.enabled = false;
+                break;
+            case ServerTypes.ServerStates.Paused:
+                startButton.enabled = true;
+                stopButton.enabled = true;
+                pauseButton.enabled = false;
+                settingsButton.enabled = false;
+                break;
+            case ServerTypes.ServerStates.Error:
+                startButton.enabled = false;
+                stopButton.enabled = false;
+                pauseButton.enabled = false;
+                settingsButton.enabled = true;
+
+                break;
+            default:
+                break;
+            }
+            fileList.enabled = settingsButton.enabled || (ServerState === ServerTypes.ServerStates.Paused)
+        }
+
     }
 
     header: ColumnLayout {
@@ -83,6 +170,8 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: startButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+
+                    onClicked: { HXServer.start() }
                 }
 
                 ToolButton {
@@ -96,6 +185,8 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: stopButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+
+                    onClicked: { HXServer.stop() }
                 }
                 ToolButton {
                     id: pauseButton
@@ -107,6 +198,8 @@ Page {
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
                     icon.color: pauseButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+
+                    onClicked: { HXServer.pause() }
                 }
 
                 ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
@@ -451,17 +544,19 @@ Page {
                     Settings.setSetting("loader", cleanPath, SettingsTypes.KindSet.Misc)
                     Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
                     pathLoader.text = decodeURIComponent(cleanPath).split('/').pop()
+                    mainScreen.updateHXServer()
                 }
             }
             FileDialog {
                 id: fileDialogSAV;
                 //nameFilters: ["SAV files (*.sav)"];
                 onAccepted: {
-                    var localPath = file.toLocaleString()
-                    var cleanPath = localPath.replace("file:///", "")
+                    let localPath = file.toLocaleString()
+                    let cleanPath = localPath.replace("file:///", "")
                     Settings.setSetting("savfile", cleanPath, SettingsTypes.KindSet.Misc)
                     Settings.saveSettingsByKind(SettingsTypes.KindSet.Misc)
                     pathSAV.text = decodeURIComponent(cleanPath).split('/').pop()
+                    mainScreen.updateHXServer()
                 }
             }
             FileDialog {
@@ -482,65 +577,7 @@ Page {
         // Экран 2: Лог
         Item {
             id: logPageWrapper
-            Connections {
-                target: HXServer
 
-                function onLog(value, color, b_state, b_clear_last) {
-                    let message = "";
-                    let date_color = "#0000ff";
-
-                    if (!b_state) {
-                        message = value;
-                    } else {
-                        message = HXServer.nameState + " " + value;
-                    }
-
-                    message = "<font color=\"" + color + "\">" + message + "</font>";
-
-                    if (b_clear_last && teLog.text !== "") {
-                        let lastBreak = teLog.text.lastIndexOf("<br>");
-                        if (lastBreak !== -1) {
-                            teLog.text = teLog.text.substring(0, lastBreak);
-                        }
-                    }
-
-                    let currentDateTime = Qt.formatDateTime(new Date(), "[dd.MM.yyyy hh:mm:ss]");
-                    let datePart = "<font color=\"" + date_color + "\">" + currentDateTime + "</font> ";
-
-                    if (teLog.text === "") {
-                        teLog.text = datePart + message;
-                    } else {
-                        teLog.text += "<br>" + datePart + message;
-                    }
-                }
-            }
-/*
-            Flickable {
-            //ScrollView {
-                id: logFlickable
-                anchors.fill: parent
-                contentWidth: width
-                contentHeight: teLog.implicitHeight
-                clip: true
-
-                TextArea.flickable: TextArea {
-                    id: teLog
-                    readOnly: true
-                    textFormat: TextEdit.RichText
-                    wrapMode: TextEdit.Wrap
-                    text: ""
-
-                    onLengthChanged: {
-                        teLog.cursorPosition = teLog.length
-                    }
-                }
-
-                ScrollBar.vertical: ScrollBar {
-                    policy: ScrollBar.AsNeeded
-                }
-            }
-        }
-        */
             ScrollView {
                 id: logScrollView
                 anchors.fill: parent

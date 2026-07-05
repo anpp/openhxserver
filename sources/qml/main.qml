@@ -43,6 +43,10 @@ ApplicationWindow {
             else
                 rectStatusPort.color = "green"
         }
+
+        function onStateChanged(ServerState) {
+            teState.text = qsTr("State: ") + HXServer.nameState
+        }
     }
 
     footer: ToolBar {
@@ -78,7 +82,8 @@ ApplicationWindow {
             ToolSeparator { Layout.fillHeight: true; topPadding: 4; bottomPadding: 4 }
 
             Text {
-                text: qsTr("State: Ready")
+                id: teState
+                text: qsTr("State: ")
                 font.pointSize: 10
                 Layout.fillWidth: true
             }
