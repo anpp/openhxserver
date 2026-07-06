@@ -225,8 +225,12 @@ Page {
                     icon.width: 32
                     icon.height: 32
                     display: AbstractButton.TextBesideIcon
-                    icon.color: packedButton.hovered ? topToolBar.palette.highlight : topToolBar.palette.windowText
+                    icon.color: (packedButton.hovered || packedButton.checked) ? topToolBar.palette.highlight : topToolBar.palette.windowText
                     opacity: enabled ? 1.0 : 0.3
+
+                    checkable: true
+
+                    onClicked: { HXServer.setPackedData(checked) }
                 }
 
                 ToolSeparator { Layout.fillHeight: true; leftPadding: 0; rightPadding: 0 }
@@ -595,8 +599,8 @@ Page {
             ScrollView {
                 id: logScrollView
                 anchors.fill: parent
-                contentWidth: children.implicitWidth
-                contentHeight: children.implicitHeight
+                contentWidth: width
+                contentHeight: teLog.implicitHeight
                 clip: true
 
                 ScrollBar.vertical.policy: ScrollBar.AlwaysOn
@@ -616,12 +620,6 @@ Page {
                     wrapMode: Text.Wrap
                     text: ""
 
-                    selectByMouse: true
-                    selectByKeyboard: true;
-
-                    selectionColor: palette.highlight
-                    selectedTextColor: palette.highlightedText
-
                     onTextChanged: { logScrollView.ScrollBar.vertical.position = 1.0 - logScrollView.ScrollBar.vertical.size }
                 }
             }
@@ -633,8 +631,8 @@ Page {
             ScrollView {
                 id: dumpScrollView
                 anchors.fill: parent
-                contentWidth: children.implicitWidth
-                contentHeight: children.implicitHeight
+                contentWidth: width
+                contentHeight: teDump.implicitHeight
                 clip: true
 
                 ScrollBar.vertical.policy: ScrollBar.AlwaysOn
@@ -654,25 +652,7 @@ Page {
                     wrapMode: Text.Wrap
                     text: ""
 
-                    selectByMouse: true
-                    selectByKeyboard: true;
-
-                    selectionColor: palette.highlight
-                    selectedTextColor: palette.highlightedText
-
                     onTextChanged: { dumpScrollView.ScrollBar.vertical.position = 1.0 - dumpScrollView.ScrollBar.vertical.size }
-
-                    //чтоб работали "ушки" выделения текста
-                    onSelectionStartChanged: {
-                        let isSelected = teDump.selectionStart !== teDump.selectionEnd
-                        // Ищем Flickable среди child ScrollView (он там первый)
-                        for (let i = 0; i < dumpScrollView.children.length; i++) {
-                            if (dumpScrollView.children[i].boundsBehavior !== undefined) {
-                                dumpScrollView.children[i].interactive = !isSelected
-                                break
-                            }
-                        }
-                    }
                 }
             }
         }
