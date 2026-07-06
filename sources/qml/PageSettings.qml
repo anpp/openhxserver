@@ -81,7 +81,7 @@ Page {
 
                 Component.onCompleted: {
                     var savedPort = Settings.getSetting("name", SettingsTypes.KindSet.ComPort);
-                    var idx = find(savedPort);
+                    let idx = find(savedPort);
                     if (idx !== -1) {
                         currentIndex = idx;
                     }
@@ -89,6 +89,58 @@ Page {
 
                 Item { Layout.preferredHeight: 20 }
             }
+
+            Label {
+                text: qsTr("Baud rate")
+                font.bold: true
+            }
+
+            ComboBox {
+                id: baudRateComboBox
+                Layout.fillWidth: true
+
+                model: [9600, 19200, 38400, 57600, 115200]
+
+                Component.onCompleted: {
+                    var savedBaudRate = Settings.getSetting("baudRate", SettingsTypes.KindSet.ComPort);
+                    let idx = find(savedBaudRate);
+                    if (idx !== -1) {
+                        currentIndex = idx;
+                    }
+                }
+
+                Item { Layout.preferredHeight: 20 }
+            }
+
+            Label {
+                text: qsTr("Flow control")
+                font.bold: true
+            }
+
+            ComboBox {
+                id: flowControlComboBox
+                Layout.fillWidth: true
+
+                textRole: "text"
+                valueRole: "value"
+
+                model: ListModel {
+                    ListElement { text: "None";       value: 0 }
+                    ListElement { text: "RTS/CTS";    value: 1 }
+                    ListElement { text: "XON/XOFF";   value: 2 }
+                }
+
+                Component.onCompleted: {
+                    var savedFlowControl = Settings.getSetting("flowControl", SettingsTypes.KindSet.ComPort);
+                    let idx = indexOfValue(savedFlowControl);
+                    if (idx !== -1) {
+                        currentIndex = idx;
+                    }
+                }
+
+                Item { Layout.preferredHeight: 20 }
+            }
+
         }
     }
 
@@ -96,6 +148,9 @@ Page {
         text: qsTr("Save")
         onClicked: {
             Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
+            Settings.setSetting("baudRate", Number(baudRateComboBox.currentText), SettingsTypes.KindSet.ComPort);
+            Settings.setSetting("flowControl", flowControlComboBox.model.get(flowControlComboBox.currentIndex).value, SettingsTypes.KindSet.ComPort);
+
             Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
             settingsPage.settingsChanged()
 
