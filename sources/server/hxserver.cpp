@@ -305,6 +305,8 @@ void HXServer::sendLoader()
             emit sendPacket(loader);
 
             emit dump("", false);
+            dumpHTMLData("", false);
+
             emit log(tr("Sent file: ") + m_loader, Qt::black);
         }
         else
@@ -361,6 +363,7 @@ void HXServer::sendSAVFile()
             emit stop();
 
             emit dump("", false);
+            dumpHTMLData("", false);
         }
         else
             emit error(tr("File is too small: ") + m_SAVFile);
@@ -865,6 +868,7 @@ void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type, byte si
 
     emit sendPacket(buffer_to_com);
     emit dump("", false);
+    dumpHTMLData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -927,6 +931,7 @@ void HXServer::readDataExecute()
 
     emit sendPacket(buffer_to_com);
     emit dump("", false);
+    dumpHTMLData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1126,6 +1131,7 @@ void HXServer::readPackedDataExecute()
 
     emit log(mes, Qt::darkMagenta);
     emit dump("", false);
+    dumpHTMLData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1158,6 +1164,7 @@ void HXServer::writeDataExecute()
         return sendShortPacket(ServerPCTypes::PCEof);
     }
     emit dump("", false);
+    dumpHTMLData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1230,6 +1237,19 @@ void HXServer::releaseAllImages()
 {
     for(const auto& image: m_images->data())
         image->release();
+}
+
+//------------------------------------------------------------------------------------------------
+void HXServer::dumpHTMLData(const QByteArray &byteArray, bool in) const
+{
+#ifdef HX_QML_INTERFACE
+    QString hexString = byteArray.toHex(' ').toUpper();
+
+    QColor color = in ? Qt::darkGreen : Qt::darkBlue;
+    QString formattedLine = QString("<font color='%1'>%2</font>").arg(color.name(QColor::HexRgb), hexString);
+
+    emit htmlDump(formattedLine);
+#endif
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1316,6 +1336,7 @@ void HXServer::processData(const QByteArray& data)
     if(data.size() == 0) return;
 
     emit dump(data);
+    dumpHTMLData(data);
 
     if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
@@ -1349,6 +1370,9 @@ void HXServer::sendPacketDump(const QByteArray &packet, uint delayms) const
     Q_UNUSED(delayms);
     emit dump(packet, false);
     emit dump("", false);
+
+    dumpHTMLData(packet, false);
+    dumpHTMLData("", false);
 }
 
 //------------------------------------------------------------------------------------------------

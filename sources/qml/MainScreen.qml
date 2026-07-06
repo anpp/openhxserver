@@ -68,30 +68,23 @@ Page {
 
             message = "<font color=\"" + color + "\">" + message + "</font>";
 
-            if (b_clear_last)
-                teLog.undo()
-
             let currentDateTime = Qt.formatDateTime(new Date(), "[dd.MM.yyyy hh:mm:ss]");
             let datePart = "<font color=\"" + date_color + "\">" + currentDateTime + "</font> ";
 
-            teLog.append(datePart + message)
+            let logText = datePart + message
+
+            if (b_clear_last && logModel.count > 0)
+                logModel.setProperty(logModel.count - 1, "logline", logText)
+            else
+                logModel.append({ "logline": logText })
         }
 
-        function onDump(byteArray, input) {
-            let view = new DataView(byteArray)
-            let hexParts = []
+        function onHtmlDump(formattedLine) {
+            dumpModel.append({ "hexline": formattedLine })
 
-            for (let i = 0; i < view.byteLength; i++) {
-                let hex = view.getUint8(i).toString(16).toUpperCase()
-                hexParts.push(hex.length < 2 ? "0" + hex : hex)
+            if (dumpModel.count > 2000) {
+                dumpModel.remove(0)
             }
-
-            let hexString = hexParts.join(" ")
-            if (hexString.length === 0) return;
-            let color = input ? "#006400" : "#00008B"
-            let formattedLine = "<font color='" + color + "'>" + hexString + "</font><br>"
-
-            teDump.append(formattedLine)
         }
 
         function onStateChanged(ServerState) {
@@ -596,65 +589,57 @@ Page {
         Item {
             id: logPageWrapper
 
-            ScrollView {
-                id: logScrollView
+            ListView {
+                id: logListView
                 anchors.fill: parent
-                contentWidth: width
-                contentHeight: teLog.implicitHeight
                 clip: true
 
-                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
 
-                TextEdit {
-                    id: teLog
-                    width: logScrollView.width
+                model: ListModel { id: logModel }
 
-                    leftPadding: 5
+                delegate: Label {
+                    width: logListView.width - 20
+                    leftPadding: 5;
                     rightPadding: 5
-                    topPadding: 5
-                    bottomPadding: 5
 
-                    readOnly: true;
+
                     textFormat: Text.RichText
                     wrapMode: Text.Wrap
-                    text: ""
-
-                    onTextChanged: { logScrollView.ScrollBar.vertical.position = 1.0 - logScrollView.ScrollBar.vertical.size }
+                    text: model.logline
                 }
+
+                onCountChanged: { logListView.positionViewAtEnd() }
             }
+
         }
         // Экран 3: Дамп
         Item {
             id: dumpPageWrapper
 
-            ScrollView {
-                id: dumpScrollView
+            ListView {
+                id: dumpListView
                 anchors.fill: parent
-                contentWidth: width
-                contentHeight: teDump.implicitHeight
                 clip: true
 
-                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
 
-                TextEdit {
-                    id: teDump
-                    width: dumpScrollView.width
+                model: ListModel { id: dumpModel }
 
-                    leftPadding: 5
+                delegate: Label {
+                    width: dumpListView.width - 20
+                    leftPadding: 5;
                     rightPadding: 5
-                    topPadding: 5
-                    bottomPadding: 5
 
-                    readOnly: true;
+
                     textFormat: Text.RichText
                     wrapMode: Text.Wrap
-                    text: ""
-
-                    onTextChanged: { dumpScrollView.ScrollBar.vertical.position = 1.0 - dumpScrollView.ScrollBar.vertical.size }
+                    text: model.hexline
                 }
+
+                onCountChanged: { dumpListView.positionViewAtEnd() }
             }
+
         }
     }
 }

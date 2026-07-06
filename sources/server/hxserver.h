@@ -109,6 +109,7 @@ private:
     void logWrite();
     void loadImage(byte index);
     void releaseAllImages();
+    void dumpHTMLData(const QByteArray& byteArray, bool in = true) const;
 
 signals:
     void sendPacket(const QByteArray& packet, uint delayms = 0) const;
@@ -116,6 +117,7 @@ signals:
     void log(const QString& value, const QColor& color = Qt::black, bool b_state = false, bool b_clear_last = false) const;
     void port_opened(const QString&);
     void dump(const QByteArray& bytea, bool in = true) const;
+    void htmlDump(const QString& formattedLine) const;
     void ttyOut(const QByteArray&);
 
     void close();
