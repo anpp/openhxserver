@@ -1,6 +1,4 @@
 
-//#define HX_QML_INTERFACE
-
 #ifdef HX_QML_INTERFACE
     #include <QGuiApplication>
     //#include <QQuickStyle>

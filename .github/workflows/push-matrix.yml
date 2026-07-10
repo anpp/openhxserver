@@ -24,7 +24,7 @@ jobs:
           cxx: "clang++"
           qmakespec: "linux-clang"
         - name: "macOS latest"
-          os: macos-latest
+          os: macos-14
           cc: "clang"
           cxx: "clang++"
           qmakespec: "macx-clang"

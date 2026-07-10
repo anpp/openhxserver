@@ -109,7 +109,7 @@ private:
     void logWrite();
     void loadImage(byte index);
     void releaseAllImages();
-    void dumpHTMLData(const QByteArray& byteArray, bool in = true) const;
+    void prepareDumpData(const QByteArray& byteArray, bool in = true) const;
 
 signals:
     void sendPacket(const QByteArray& packet, uint delayms = 0) const;

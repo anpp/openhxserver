@@ -89,7 +89,13 @@ HXServer::~HXServer()
 void HXServer::setPortName(const QString &PortName)
 {
     if(port)
-        if(PortName == m_PortName && port->isOpen()) return;
+        if(PortName == m_PortName && port->isOpen())
+        {
+            port->close();
+            QCoreApplication::processEvents();
+            port->open(m_PortName);
+            return;
+        }
 
     if(!sm->isRunning()) return;
 
@@ -304,8 +310,7 @@ void HXServer::sendLoader()
 
             emit sendPacket(loader);
 
-            emit dump("", false);
-            dumpHTMLData("", false);
+            prepareDumpData("", false);
 
             emit log(tr("Sent file: ") + m_loader, Qt::black);
         }
@@ -362,8 +367,7 @@ void HXServer::sendSAVFile()
             }            
             emit stop();
 
-            emit dump("", false);
-            dumpHTMLData("", false);
+            prepareDumpData("", false);
         }
         else
             emit error(tr("File is too small: ") + m_SAVFile);
@@ -867,8 +871,7 @@ void HXServer::sendShortPacket(ServerPCTypes result, ServerPCTypes type, byte si
     buffer_to_com.push_back(static_cast<char>(check_sum >> 8));
 
     emit sendPacket(buffer_to_com);
-    emit dump("", false);
-    dumpHTMLData("", false);
+    prepareDumpData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -930,8 +933,7 @@ void HXServer::readDataExecute()
     buffer_to_com.push_back(ch);
 
     emit sendPacket(buffer_to_com);
-    emit dump("", false);
-    dumpHTMLData("", false);
+    prepareDumpData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1130,8 +1132,7 @@ void HXServer::readPackedDataExecute()
         mes = QString(tr("Bytes saved: %1 ").arg(QString::number(nBytesSaved - nHeaderBytesSent + 4)));
 
     emit log(mes, Qt::darkMagenta);
-    emit dump("", false);
-    dumpHTMLData("", false);
+    prepareDumpData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1163,8 +1164,7 @@ void HXServer::writeDataExecute()
         emit log(tr("Error write to file!"), Qt::red);
         return sendShortPacket(ServerPCTypes::PCEof);
     }
-    emit dump("", false);
-    dumpHTMLData("", false);
+    prepareDumpData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1240,7 +1240,7 @@ void HXServer::releaseAllImages()
 }
 
 //------------------------------------------------------------------------------------------------
-void HXServer::dumpHTMLData(const QByteArray &byteArray, bool in) const
+void HXServer::prepareDumpData(const QByteArray &byteArray, bool in) const
 {
 #ifdef HX_QML_INTERFACE
     QString hexString = byteArray.toHex(' ').toUpper();
@@ -1250,6 +1250,7 @@ void HXServer::dumpHTMLData(const QByteArray &byteArray, bool in) const
 
     emit htmlDump(formattedLine);
 #endif
+    emit dump(byteArray, in);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1335,8 +1336,7 @@ void HXServer::processData(const QByteArray& data)
 {
     if(data.size() == 0) return;
 
-    emit dump(data);
-    dumpHTMLData(data);
+    prepareDumpData(data);
 
     if(state() == ServerStates::Waiting && data[0] == '@' && data.size() == 1)
     {
@@ -1368,11 +1368,9 @@ void HXServer::processData(const QByteArray& data)
 void HXServer::sendPacketDump(const QByteArray &packet, uint delayms) const
 {
     Q_UNUSED(delayms);
-    emit dump(packet, false);
-    emit dump("", false);
 
-    dumpHTMLData(packet, false);
-    dumpHTMLData("", false);
+    prepareDumpData(packet, false);
+    prepareDumpData("", false);
 }
 
 //------------------------------------------------------------------------------------------------
