@@ -15,7 +15,8 @@ Page {
         running: true
         repeat: false
 
-        onTriggered: {
+        onTriggered:
+        {
             mainScreen.updateHXServer()
         }
     }
