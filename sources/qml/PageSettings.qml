@@ -4,159 +4,236 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls.Material 2.0
 import OpenHX.SettingsTypes 1.0
 
-Page {
+Page
+{
     id: settingsPage
     signal settingsChanged()
 
     focus: true
 
-    Keys.onPressed: (event) => {
-                        if (event.key === Qt.Key_Back) {
-                            event.accepted = true
+    Keys.onPressed: (event) =>
+    {
+        if (event.key === Qt.Key_Back)
+        {
+            event.accepted = true
+            rootStack.pop()
+        }
+    }
 
-                            rootStack.pop()
-                        }
-                    }
+    background: Rectangle
+    {
+        color: mainWindow.palette.window
+    }
 
-    background: Rectangle { color: mainWindow.palette.window }
-
-    header: ToolBar {
+    header: ToolBar
+    {
         id: settingsBar
-        Layout.fillWidth: true
-        spacing: 0
+        Material.elevation: 2
 
-        background: Rectangle {
+        background: Rectangle
+        {
             color: mainWindow.palette.window
             border.color: mainWindow.palette.mid
             border.width: 1
         }
 
-        RowLayout {
+        RowLayout
+        {
             anchors.fill: parent
+            anchors.leftMargin: 8
+            anchors.rightMargin: 8
 
-            ToolButton {
+            ToolButton
+            {
                 id: backButton
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Back")
-
                 icon.source: "qrc:/images/icons/arrow_left.png"
-
-                icon.width: 32
-                icon.height: 32
-                display: AbstractButton.TextBesideIcon
+                icon.width: 24
+                icon.height: 24
                 icon.color: backButton.hovered ? settingsBar.palette.highlight : settingsBar.palette.windowText
-
                 onClicked: rootStack.pop()
             }
 
-            Label {
+            Label
+            {
                 text: qsTr("Settings")
+                font.pixelSize: 18
                 font.bold: true
-                Layout.leftMargin: 10
+                Layout.fillWidth: true
+                verticalAlignment: Text.AlignVCenter
                 Material.foreground: mainWindow.palette.text
             }
         }
     }
 
-    ScrollView {
+    ScrollView
+    {
         anchors.fill: parent
         contentWidth: parent.width
         clip: true
 
-        ColumnLayout {
-            width: parent.width
-            anchors.margins: 16
+        ColumnLayout
+        {
+            width: Math.min(parent.width, 600)
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.margins: 20
             spacing: 20
 
-            Label {
-                text: qsTr("Serial port")
-                font.bold: true
-            }
-
-            ComboBox {
-                id: portComboBox
+            Pane
+            {
                 Layout.fillWidth: true
+                Material.elevation: 1
+                padding: 16
 
-                model: Settings.portsList
+                ColumnLayout
+                {
+                    anchors.fill: parent
+                    spacing: 16
 
-                Component.onCompleted: {
-                    var savedPort = Settings.getSetting("name", SettingsTypes.KindSet.ComPort);
-                    let idx = find(savedPort);
-                    if (idx !== -1) {
-                        currentIndex = idx;
+                    Label
+                    {
+                        text: qsTr("Serial Port Configuration")
+                        font.pixelSize: 16
+                        font.bold: true
+                        Material.foreground: settingsPage.Material.accent
+                    }
+
+                    Rectangle
+                    {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: mainWindow.palette.mid
+                    }
+
+                    GridLayout
+                    {
+                        columns: 2
+                        columnSpacing: 20
+                        rowSpacing: 12
+                        Layout.fillWidth: true
+
+                        Label
+                        {
+                            text: qsTr("Serial port:")
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        }
+
+                        ComboBox
+                        {
+                            id: portComboBox
+                            Layout.fillWidth: true
+                            model: Settings.portsList
+
+                            Component.onCompleted:
+                            {
+                                var savedPort = Settings.getSetting("name", SettingsTypes.KindSet.ComPort);
+                                let idx = find(savedPort);
+                                if (idx !== -1)
+                                {
+                                    currentIndex = idx;
+                                }
+                            }
+                        }
+
+                        Label
+                        {
+                            text: qsTr("Baud rate:")
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        }
+
+                        ComboBox
+                        {
+                            id: baudRateComboBox
+                            Layout.fillWidth: true
+                            model: [9600, 19200, 38400, 57600, 115200]
+
+                            Component.onCompleted:
+                            {
+                                var savedBaudRate = Settings.getSetting("baudRate", SettingsTypes.KindSet.ComPort);
+                                let idx = find(savedBaudRate);
+                                if (idx !== -1)
+                                {
+                                    currentIndex = idx;
+                                }
+                            }
+                        }
+
+                        Label
+                        {
+                            text: qsTr("Flow control:")
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        }
+
+                        ComboBox
+                        {
+                            id: flowControlComboBox
+                            Layout.fillWidth: true
+                            textRole: "text"
+                            valueRole: "value"
+
+                            model: ListModel
+                            {
+                                ListElement { text: "None";       value: 0 }
+                                ListElement { text: "RTS/CTS";    value: 1 }
+                                ListElement { text: "XON/XOFF";   value: 2 }
+                            }
+
+                            Component.onCompleted:
+                            {
+                                var savedFlowControl = Settings.getSetting("flowControl", SettingsTypes.KindSet.ComPort);
+                                let idx = indexOfValue(savedFlowControl);
+                                if (idx !== -1)
+                                {
+                                    currentIndex = idx;
+                                }
+                            }
+                        }
                     }
                 }
-
-                Item { Layout.preferredHeight: 20 }
             }
-
-            Label {
-                text: qsTr("Baud rate")
-                font.bold: true
-            }
-
-            ComboBox {
-                id: baudRateComboBox
-                Layout.fillWidth: true
-
-                model: [9600, 19200, 38400, 57600, 115200]
-
-                Component.onCompleted: {
-                    var savedBaudRate = Settings.getSetting("baudRate", SettingsTypes.KindSet.ComPort);
-                    let idx = find(savedBaudRate);
-                    if (idx !== -1) {
-                        currentIndex = idx;
-                    }
-                }
-
-                Item { Layout.preferredHeight: 20 }
-            }
-
-            Label {
-                text: qsTr("Flow control")
-                font.bold: true
-            }
-
-            ComboBox {
-                id: flowControlComboBox
-                Layout.fillWidth: true
-
-                textRole: "text"
-                valueRole: "value"
-
-                model: ListModel {
-                    ListElement { text: "None";       value: 0 }
-                    ListElement { text: "RTS/CTS";    value: 1 }
-                    ListElement { text: "XON/XOFF";   value: 2 }
-                }
-
-                Component.onCompleted: {
-                    var savedFlowControl = Settings.getSetting("flowControl", SettingsTypes.KindSet.ComPort);
-                    let idx = indexOfValue(savedFlowControl);
-                    if (idx !== -1) {
-                        currentIndex = idx;
-                    }
-                }
-
-                Item { Layout.preferredHeight: 20 }
-            }
-
         }
     }
 
-    footer: Button {
-        text: qsTr("Save")
-        onClicked: {
-            Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
-            Settings.setSetting("baudRate", Number(baudRateComboBox.currentText), SettingsTypes.KindSet.ComPort);
-            Settings.setSetting("flowControl", flowControlComboBox.model.get(flowControlComboBox.currentIndex).value, SettingsTypes.KindSet.ComPort);
+    footer: ToolBar
+    {
+        background: Rectangle
+        {
+            color: "transparent"
+        }
 
-            Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
-            settingsPage.settingsChanged()
+        RowLayout
+        {
+            anchors.fill: parent
+            anchors.rightMargin: 20
+            anchors.bottomMargin: 10
 
-            Qt.callLater(() => {
-                             rootStack.pop()
-                         })
+            Item
+            {
+                Layout.fillWidth: true
+            }
+
+            Button
+            {
+                text: qsTr("Save")
+                highlighted: true
+                Layout.preferredWidth: 120
+
+                onClicked:
+                {
+                    Settings.setSetting("name", portComboBox.currentText, SettingsTypes.KindSet.ComPort);
+                    Settings.setSetting("baudRate", Number(baudRateComboBox.currentText), SettingsTypes.KindSet.ComPort);
+                    Settings.setSetting("flowControl", flowControlComboBox.model.get(flowControlComboBox.currentIndex).value, SettingsTypes.KindSet.ComPort);
+
+                    Settings.saveSettingsByKind(SettingsTypes.KindSet.ComPort)
+                    settingsPage.settingsChanged()
+
+                    Qt.callLater(() =>
+                    {
+                        rootStack.pop()
+                    })
+                }
+            }
         }
     }
 }
