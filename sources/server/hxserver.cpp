@@ -89,11 +89,18 @@ HXServer::~HXServer()
 void HXServer::setPortName(const QString &PortName)
 {
     if(port)
-        if(PortName == m_PortName && port->isOpen())
+        if(PortName == m_PortName && port->isOpen()) //переоткрытие порта с (возможно) новыми настройками
         {
+            disconnect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
+            disconnect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
+
             port->close();
             QCoreApplication::processEvents();
             port->open(m_PortName);
+
+            connect(port.get(), &SerialPortThread::opened, this, &HXServer::open);
+            connect(port.get(), &SerialPortThread::closed, this, &HXServer::close);
+
             return;
         }
 

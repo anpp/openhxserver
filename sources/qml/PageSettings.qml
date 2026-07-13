@@ -20,10 +20,7 @@ Page
         }
     }
 
-    background: Rectangle
-    {
-        color: mainWindow.palette.window
-    }
+    background: Rectangle { color: mainWindow.palette.window }
 
     header: ToolBar
     {
@@ -73,9 +70,11 @@ Page
         contentWidth: parent.width
         clip: true
 
+        background: Rectangle { color: mainWindow.palette.window }
+
         ColumnLayout
         {
-            width: Math.min(parent.width, 600)
+            width: parent.width
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.margins: 20
             spacing: 20
@@ -85,6 +84,8 @@ Page
                 Layout.fillWidth: true
                 Material.elevation: 1
                 padding: 16
+
+                background: Rectangle { color: mainWindow.palette.window }
 
                 ColumnLayout
                 {
