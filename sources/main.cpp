@@ -20,6 +20,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("OpenHXServer");
     QCoreApplication::setApplicationVersion("0.1");
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
 #ifdef HX_QML_INTERFACE
     //QQuickStyle::setStyle("Material");
     QGuiApplication app(argc, argv);
@@ -56,7 +60,6 @@ int main(int argc, char *argv[])
     engine.load(url);
     return app.exec();
 #else
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QApplication app(argc, argv);
