@@ -6,8 +6,13 @@
     	<solid android:color="?android:attr/colorBackground"/>
 	</shape>    
     </item>
-
+    <!--
     <item>
         <bitmap android:src="@drawable/logo" android:gravity="center"/>
     </item>
+    !-->
+    <item
+        android:drawable="@drawable/openhx"
+        android:gravity="center_horizontal|center_vertical"/>
+
 </layer-list>

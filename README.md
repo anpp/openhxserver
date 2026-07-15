@@ -23,6 +23,8 @@ OpenHXServer или просто OpenHX - открытая реализация 
 
 [Сборка для Linux (.deb)](https://disk.yandex.ru/d/Gig7HQGHeMXBCw)
 
+[Версия для Android](https://disk.yandex.ru/d/VY5VUrlPmxRMcw)
+
 
 ![alt text](screenshots/dsk_switching.png "Загрузка RT-11.")
 

@@ -3,7 +3,6 @@
     <style name="splashScreenTheme" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowBackground">@drawable/splashscreen</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActivityTransitions">true</item>
-        
+        <item name="android:windowActivityTransitions">true</item>        
     </style>
 </resources>
