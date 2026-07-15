@@ -1,2 +1,4 @@
-sources/OpenHXServer.pro.user
+OpenHXServer.pro.user
 sources/build/*
+build/*
+
