@@ -10,6 +10,10 @@ QT += core gui serialport
 }
 
 android {
+# На Qt6 пока только под Андроид с дин. сборкой
+greaterThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -stdlib=libc++
+greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
+
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 DISTFILES += \
@@ -27,10 +31,6 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += statemachine
 CONFIG += c++17
 #QMAKE_CXXFLAGS += -pie
 #QMAKE_LFLAGS += -pie
-
-# На Qt6 пока только под Андроид с дин. сборкой
-greaterThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -stdlib=libc++
-greaterThan(QT_MAJOR_VERSION, 5): LIBS += -lc++_shared
 
 
 SOURCES += \
