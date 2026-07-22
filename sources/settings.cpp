@@ -14,7 +14,7 @@
 
 const static QString sSettingKind[] = {"", "misc", "screen", "com_port", "environment"};
 
-std::shared_ptr<Settings> Settings::m_self = nullptr;
+std::unique_ptr<Settings> Settings::m_self = nullptr;
 
 //----------------------------------------------------------------------------------------------------------------------
 Settings::Settings(QMainWindow* widget_owner, const QString& organization, const QString& application) :
@@ -43,18 +43,18 @@ Settings::Settings(QMainWindow* widget_owner, const QString& organization, const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Settings> Settings::instance(QMainWindow *widget_owner, const QString &organization, const QString &application)
+Settings& Settings::instance(QMainWindow *widget_owner, const QString &organization, const QString &application)
 {
     if(!m_self)
-        m_self = std::shared_ptr<Settings>(new Settings(widget_owner, organization, application));
-    return m_self;
+        m_self = std::unique_ptr<Settings>(new Settings(widget_owner, organization, application));
+    return *m_self;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 Settings::~Settings()
 {
-    m_self = nullptr;
+    m_self.release();
 }
 
 

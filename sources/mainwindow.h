@@ -49,7 +49,7 @@ private:
     QString m_flowControl_label = tr("Flow control: ");
     QString m_state_label = tr("State: ");
 
-    std::shared_ptr<Settings> settings;
+    Settings& settings;
     std::unique_ptr<SettingsImages> images_widget;
     std::unique_ptr<PortDump> dump_widget;
     std::unique_ptr<PortState> portState_widget;

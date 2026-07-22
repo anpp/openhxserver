@@ -55,7 +55,7 @@ typedef std::map<QString, Setting*> mset;
 
 //============================================================================================================================
 class Settings {
-    static std::shared_ptr<Settings> m_self;
+    static std::unique_ptr<Settings> m_self;
     QMainWindow* owner;
     mutable QSettings qsettings;
     mutable mset mapset_by_kind;
@@ -69,8 +69,8 @@ class Settings {
 protected:
     Settings(QMainWindow* widget_owner, const QString &organization, const QString &application);
 public:
-    static std::shared_ptr<Settings> instance(QMainWindow* widget_owner, const QString &organization, const QString &application);
-    static std::shared_ptr<Settings> instance() {return m_self; }
+    static Settings& instance(QMainWindow* widget_owner, const QString &organization, const QString &application);
+    static Settings& instance() {return *m_self; }
     ~Settings();
 
     void loadSettingsByKind(kindset ks);

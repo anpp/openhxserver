@@ -28,8 +28,7 @@ public:
     //----------------------------------------------------------------------------------------------------------------------
     QStringList getPortsList() const
     {
-        auto s = Settings::instance();
-        return s ? s->getPortsList() : QStringList();
+        return Settings::instance().getPortsList();
     }
 
     //----------------------------------------------------------------------------------------------------------------------
@@ -41,62 +40,50 @@ public:
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE QVariant getSetting(const QString& title, KindSet ks = KindSet::All) const
     {
-        auto s = Settings::instance();
-        if (!s) return QVariant();
-        return s->getSetting(title, castKindSet(ks));
+        return Settings::instance().getSetting(title, castKindSet(ks));
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE bool getBoolSetting(const QString& title, KindSet ks = KindSet::All) const
     {
-        auto s = Settings::instance();
-        if (!s) return false;
-        return s->getSetting(title, castKindSet(ks)).toBool();
+        return Settings::instance().getSetting(title, castKindSet(ks)).toBool();
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE void setSetting(const QString& title, const QVariant& value, KindSet ks = KindSet::All)
     {
-        auto s = Settings::instance();
-        if (s) {
-            s->setSetting(title, value, castKindSet(ks));
-            emit settingChanged(title);
-        }
+        Settings::instance().setSetting(title, value, castKindSet(ks));
+        emit settingChanged(title);
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE bool isChanged(const QString& title, KindSet ks = KindSet::All) const
     {
-        auto s = Settings::instance();
-        return s ? s->isChanged(title, castKindSet(ks)) : false;
+        return Settings::instance().isChanged(title, castKindSet(ks));
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE void clear(KindSet ks)
     {
-        auto s = Settings::instance();
-        if (s) s->clear(castKindSet(ks));
+        Settings::instance().clear(castKindSet(ks));
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE void load()
     {
-        auto s = Settings::instance();
-        if (s) s->load();
+        Settings::instance().load();
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE void saveSettingsByKind(KindSet ks)
     {
-        auto s = Settings::instance();
-        if (s) s->saveSettingsByKind(castKindSet(ks));
+        Settings::instance().saveSettingsByKind(castKindSet(ks));
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     Q_INVOKABLE void save()
     {
-        auto s = Settings::instance();
-        if (s) s->save();
+        Settings::instance().save();
     }
 
 signals:

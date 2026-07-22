@@ -60,13 +60,12 @@ MainWindow* MainWindow::m_self = nullptr;
 
 //----------------------------------------------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), settings(Settings::instance(this, "OpenHXServer", "OpenHXServer"))
 {    
     setupUi(this);
     setWindowIcon(QIcon(":/images/icons/cpu-light.png"));
     //QApplication::setStyle("fusion");    
-    settings = Settings::instance(this, "OpenHXServer", "OpenHXServer");
-    settings->load();
+    settings.load();
 
     hxserver = std::make_unique<HXServer>(this);
     connect(hxserver.get(), &HXServer::port_opened, this, &MainWindow::port_opened);
@@ -100,14 +99,14 @@ MainWindow::MainWindow(QWidget *parent)
     if(m_sav_from_cl)
     {
         hxserver->start();
-        QTimer::singleShot(0, this, [&]() {launchAndFocus(settings->getSetting("path_to_emulator", kindset::misc).toString()); });
+        QTimer::singleShot(0, this, [&]() {launchAndFocus(settings.getSetting("path_to_emulator", kindset::misc).toString()); });
     }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 MainWindow::~MainWindow()
 {
-    settings->save(); 
+    settings.save();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -115,8 +114,8 @@ void MainWindow::setSAVFileFromCL(const QString &fileName)
 {
     if(!fileName.isEmpty() && QFile(fileName).exists())
     {
-        settings->setSetting("savfile", QFileInfo(fileName).absoluteFilePath(), kindset::misc);
-        settings->setSetting("HXMode", false, kindset::misc);
+        settings.setSetting("savfile", QFileInfo(fileName).absoluteFilePath(), kindset::misc);
+        settings.setSetting("HXMode", false, kindset::misc);
         m_sav_from_cl = true;
     }
 }
@@ -190,12 +189,12 @@ void MainWindow::initActions()
 //----------------------------------------------------------------------------------------------------------------------
 void MainWindow::updateHXServer()
 {
-    hxserver->setPortName(settings->COMSettings().name);
+    hxserver->setPortName(settings.COMSettings().name);
     hxserver->setPortSettings();
-    hxserver->setLoader(settings->getSetting("loader", kindset::misc).toString());
-    hxserver->setSAVFile(settings->getSetting("savfile", kindset::misc).toString());
+    hxserver->setLoader(settings.getSetting("loader", kindset::misc).toString());
+    hxserver->setSAVFile(settings.getSetting("savfile", kindset::misc).toString());
 
-    bool HXMode = settings->getSetting("HXMode", kindset::misc).toBool();
+    bool HXMode = settings.getSetting("HXMode", kindset::misc).toBool();
     if(HXMode)
         hxserver->setServerMode(HXServer::ServerMode::HXMode);
     else

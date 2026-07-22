@@ -11,8 +11,8 @@
 Images::Images(QObject *parent)
     : QObject{parent}
 {
-    qsettings = std::make_unique<QSettings>(Settings::instance()->qSettings().organizationName(),
-                                            Settings::instance()->qSettings().applicationName());
+    qsettings = std::make_unique<QSettings>(Settings::instance().qSettings().organizationName(),
+                                            Settings::instance().qSettings().applicationName());
 
     default_image = std::make_unique<ImageDsk>();
     m_watcher = std::make_unique<QFileSystemWatcher>();

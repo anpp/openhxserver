@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     Settings::instance(nullptr, "OpenHXServer", "OpenHXServer"); //для создания синглтона Settings
-    Settings::instance()->load();
+    Settings::instance().load();
 
     HXServer hxserver;
     SettingsWrapper Settings;

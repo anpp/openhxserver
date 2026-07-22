@@ -117,7 +117,7 @@ void ImagesDelegate::openFile()
         filters << defaultFilter << tr("All files (*.*)");
 #endif
 
-        QFileDialog fd(nullptr, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_dsk").toString(), filters.join(";;"));
+        QFileDialog fd(nullptr, QObject::tr("Open file..."), Settings::instance().getSetting("directory_dsk").toString(), filters.join(";;"));
         fd.selectNameFilter(defaultFilter);
 
         connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });

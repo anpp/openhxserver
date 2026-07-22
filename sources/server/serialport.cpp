@@ -3,8 +3,8 @@
 #include <QElapsedTimer>
 
 #ifdef Q_OS_ANDROID
-    #include <QJniObject>
-    #include <qnativeinterface.h>
+#include <QJniObject>
+#include <qnativeinterface.h>
 #endif
 
 #include "../settings.h"
@@ -104,15 +104,12 @@ void SerialPortThread::setPortSettings()
     ps.stopBits = QSerialPort::TwoStop;
     ps.flowControl = QSerialPort::NoFlowControl;
 
-    if(Settings::instance())
-    {
-        const COM_settings &com_settings = Settings::instance()->COMSettings();
-        ps.baudRate = com_settings.baudRate;
-        ps.dataBits = com_settings.dataBits;
-        ps.parity = com_settings.parity;
-        ps.stopBits = com_settings.stopBits;
-        ps.flowControl = com_settings.flowControl;
-    }
+    const COM_settings &com_settings = Settings::instance().COMSettings();
+    ps.baudRate = com_settings.baudRate;
+    ps.dataBits = com_settings.dataBits;
+    ps.parity = com_settings.parity;
+    ps.stopBits = com_settings.stopBits;
+    ps.flowControl = com_settings.flowControl;
 
 #ifdef Q_OS_ANDROID
     javaSetPortSettings(ps.baudRate, ps.dataBits, ps.stopBits, ps.flowControl);
@@ -270,10 +267,10 @@ void SerialPortThread::open(const QString& com_port)
         return;
     }
 
-  #if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
+#if QT_VERSION > QT_VERSION_CHECK(5, 6, 3)
     disconnect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
     connect(serial_port.get(), &QSerialPort::errorOccurred, this, &SerialPortThread::portError);
-  #endif
+#endif
     connectionChanged(true);
     emit portBaudRateChanged(serial_port->baudRate());
     flowControlChanged(serial_port->flowControl());

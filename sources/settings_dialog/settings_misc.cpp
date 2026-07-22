@@ -40,14 +40,13 @@ void SettingsMisc::setPathToEmulator(const QString &value)
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsMisc::load()
 {
-    if(Settings::instance())
-        setPathToEmulator(Settings::instance()->getSetting("path_to_emulator", kindset::misc).toString());
+    setPathToEmulator(Settings::instance().getSetting("path_to_emulator", kindset::misc).toString());
 }
 
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsMisc::save()
 {
-    Settings::instance()->setSetting("path_to_emulator", pathToEmulator(), kindset::misc);
+    Settings::instance().setSetting("path_to_emulator", pathToEmulator(), kindset::misc);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -59,7 +58,7 @@ void SettingsMisc::openPathToEm()
 
     filters << defaultFilter << tr("All files (*.*)");
 
-    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("path_to_emulator").toString(), filters.join(";;"));
+    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance().getSetting("path_to_emulator").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);
 
     connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });

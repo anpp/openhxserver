@@ -82,14 +82,11 @@ void SettingsImages::setSaveImmediate(bool a_save_immediate)
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::update()
 {
-    if(Settings::instance())
-    {
-        setLoader(Settings::instance()->getSetting("loader", kindset::misc).toString());
-        setSAVFile(Settings::instance()->getSetting("savfile", kindset::misc).toString());
+    setLoader(Settings::instance().getSetting("loader", kindset::misc).toString());
+    setSAVFile(Settings::instance().getSetting("savfile", kindset::misc).toString());
 
-        ui->rbLoaderHX->setChecked(Settings::instance()->getSetting("HXMode", kindset::misc).toBool());
-        ui->rbLoaderSAV->setChecked(!Settings::instance()->getSetting("HXMode", kindset::misc).toBool());
-    }
+    ui->rbLoaderHX->setChecked(Settings::instance().getSetting("HXMode", kindset::misc).toBool());
+    ui->rbLoaderSAV->setChecked(!Settings::instance().getSetting("HXMode", kindset::misc).toBool());
 
     updateWidget();
 }
@@ -105,16 +102,13 @@ void SettingsImages::save()
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::saveLoaders() const
 {
-    if(Settings::instance())
-    {
-        Settings::instance()->setSetting("loader", loader(), kindset::misc);
-        Settings::instance()->setSetting("directory_bin", QFileInfo(loader()).path(), kindset::environment);        
-        Settings::instance()->setSetting("savfile", SAV(), kindset::misc);
-        Settings::instance()->setSetting("directory_sav", QFileInfo(SAV()).path(), kindset::environment);
+    Settings::instance().setSetting("loader", loader(), kindset::misc);
+    Settings::instance().setSetting("directory_bin", QFileInfo(loader()).path(), kindset::environment);
+    Settings::instance().setSetting("savfile", SAV(), kindset::misc);
+    Settings::instance().setSetting("directory_sav", QFileInfo(SAV()).path(), kindset::environment);
 
-        Settings::instance()->saveSettingsByKind(kindset::misc);
-        Settings::instance()->saveSettingsByKind(kindset::environment);
-    }
+    Settings::instance().saveSettingsByKind(kindset::misc);
+    Settings::instance().saveSettingsByKind(kindset::environment);
     emit updateHX();
 }
 
@@ -122,13 +116,10 @@ void SettingsImages::saveLoaders() const
 void SettingsImages::saveImages() const
 {
     m_model->save();
-    if(Settings::instance())
+    if(!last_image_file.isEmpty() && last_image_file != "" && QFile(last_image_file).exists())
     {
-        if(!last_image_file.isEmpty() && last_image_file != "" && QFile(last_image_file).exists())
-        {            
-            Settings::instance()->setSetting("directory_dsk", QFileInfo(last_image_file).path(), kindset::environment);
-            Settings::instance()->saveSettingsByKind(kindset::environment);
-        }
+        Settings::instance().setSetting("directory_dsk", QFileInfo(last_image_file).path(), kindset::environment);
+        Settings::instance().saveSettingsByKind(kindset::environment);
     }
     emit updateHX();
 }
@@ -136,10 +127,9 @@ void SettingsImages::saveImages() const
 //-----------------------------------------------------------------------------------------------------------------
 void SettingsImages::saveHXMode(bool value) const
 {
-    if(Settings::instance())
-        Settings::instance()->setSetting("HXMode", value, kindset::misc);
+    Settings::instance().setSetting("HXMode", value, kindset::misc);
 
-    Settings::instance()->saveSettingsByKind(kindset::misc);
+    Settings::instance().saveSettingsByKind(kindset::misc);
 
     emit updateHX();
 }
@@ -159,7 +149,7 @@ void SettingsImages::openFileBin()
     filters << defaultFilter << tr("All files (*.*)");
 #endif
 
-    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_bin").toString(), filters.join(";;"));
+    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance().getSetting("directory_bin").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);
 
     connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });
@@ -189,7 +179,7 @@ void SettingsImages::openFileSAV()
     filters << defaultFilter << tr("All files (*.*)");
 #endif
 
-    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance()->getSetting("directory_sav").toString(), filters.join(";;"));
+    QFileDialog fd(this, QObject::tr("Open file..."), Settings::instance().getSetting("directory_sav").toString(), filters.join(";;"));
     fd.selectNameFilter(defaultFilter);
     connect(&fd, &QFileDialog::filterSelected, this, [&defaultFilter](const QString &filter) {defaultFilter = filter; });
     fd.setFileMode(QFileDialog::ExistingFile);

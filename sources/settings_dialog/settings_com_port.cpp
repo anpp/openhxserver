@@ -57,7 +57,7 @@ struct QOverload : QConstOverload<Args...>, QNonConstOverload<Args...>
 
 //--------------------------------------------------------------------------------------------------------------------------------
 SettingsCOMPort::SettingsCOMPort(QWidget *parent) : QWidget(parent),
-                                                    m_intValidator(new QIntValidator(0, 4000000, this))
+    m_intValidator(new QIntValidator(0, 4000000, this))
 {
     setupUi(this);        
 
@@ -93,18 +93,14 @@ const COM_settings &SettingsCOMPort::actualSettings()
 //--------------------------------------------------------------------------------------------------------------------------------
 void SettingsCOMPort::load()
 {
-    if(Settings::instance())
-        setCurrentSettings(Settings::instance()->COMSettings());
+    setCurrentSettings(Settings::instance().COMSettings());
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 void SettingsCOMPort::save()
 {
-    if(Settings::instance())
-    {
-        Settings::instance()->setCOMSettings(actualSettings());
-        Settings::instance()->saveSettingsByKind(kindset::com_port);
-    }
+    Settings::instance().setCOMSettings(actualSettings());
+    Settings::instance().saveSettingsByKind(kindset::com_port);
 }
 
 
@@ -117,24 +113,24 @@ void SettingsCOMPort::updateSettings()
         m_com_settings->baudRate = baudRateBox->currentText().toInt();
     } else {
         m_com_settings->baudRate = static_cast<QSerialPort::BaudRate>(
-                    baudRateBox->itemData(baudRateBox->currentIndex()).toInt());
+            baudRateBox->itemData(baudRateBox->currentIndex()).toInt());
     }
     m_com_settings->stringBaudRate = QString::number(m_com_settings->baudRate);
 
     m_com_settings->dataBits = static_cast<QSerialPort::DataBits>(
-                dataBitsBox->itemData(dataBitsBox->currentIndex()).toInt());
+        dataBitsBox->itemData(dataBitsBox->currentIndex()).toInt());
     m_com_settings->stringDataBits = dataBitsBox->currentText();
 
     m_com_settings->parity = static_cast<QSerialPort::Parity>(
-                parityBox->itemData(parityBox->currentIndex()).toInt());
+        parityBox->itemData(parityBox->currentIndex()).toInt());
     m_com_settings->stringParity = parityBox->currentText();
 
     m_com_settings->stopBits = static_cast<QSerialPort::StopBits>(
-                stopBitsBox->itemData(stopBitsBox->currentIndex()).toInt());
+        stopBitsBox->itemData(stopBitsBox->currentIndex()).toInt());
     m_com_settings->stringStopBits = stopBitsBox->currentText();
 
     m_com_settings->flowControl = static_cast<QSerialPort::FlowControl>(
-                flowControlBox->itemData(flowControlBox->currentIndex()).toInt());
+        flowControlBox->itemData(flowControlBox->currentIndex()).toInt());
     m_com_settings->stringFlowControl = flowControlBox->currentText();
 }
 
@@ -156,7 +152,7 @@ void SettingsCOMPort::checkCustomBaudRatePolicy(int idx)
 //--------------------------------------------------------------------------------------------------------------------------------
 void SettingsCOMPort::fillPortsParameters()
 {
-    comPortNameBox->addItems(Settings::instance()->getPortsList());
+    comPortNameBox->addItems(Settings::instance().getPortsList());
 
     baudRateBox->addItem(QStringLiteral("9600"), QSerialPort::Baud9600);
     baudRateBox->addItem(QStringLiteral("19200"), QSerialPort::Baud19200);
