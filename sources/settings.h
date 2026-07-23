@@ -73,6 +73,10 @@ public:
     static Settings& instance() {return *m_self; }
     ~Settings();
 
+    //запрещение копирования
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
+
     void loadSettingsByKind(kindset ks);
     void saveSettingsByKind(kindset ks) const;
 

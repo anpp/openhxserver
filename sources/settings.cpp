@@ -54,7 +54,6 @@ Settings& Settings::instance(QMainWindow *widget_owner, const QString &organizat
 //----------------------------------------------------------------------------------------------------------------------
 Settings::~Settings()
 {
-    m_self.release();
 }
 
 
